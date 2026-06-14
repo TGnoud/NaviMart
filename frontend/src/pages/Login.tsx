@@ -135,26 +135,6 @@ export default function Login() {
           </Button>
         </form>
 
-        {/* Divider */}
-        <div className="mt-8 mb-6 relative">
-          <div aria-hidden="true" className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-outline-variant"></div>
-          </div>
-          <div className="relative flex justify-center text-sm">
-            <span className="px-4 bg-surface-container-lowest font-label-sm text-label-sm text-outline">Hoặc tiếp tục với</span>
-          </div>
-        </div>
-
-        {/* Social Login */}
-        <div className="grid grid-cols-2 gap-4">
-          <button className="flex items-center justify-center px-4 py-3 border border-outline-variant rounded-lg bg-surface-container-lowest hover:bg-surface-container-low transition-colors font-body-md text-body-md text-on-surface gap-2" type="button">
-            <span>Google</span>
-          </button>
-          <button className="flex items-center justify-center px-4 py-3 border border-outline-variant rounded-lg bg-surface-container-lowest hover:bg-surface-container-low transition-colors font-body-md text-body-md text-on-surface gap-2" type="button">
-            <span>Facebook</span>
-          </button>
-        </div>
-
         {/* Register Link */}
         <p className="mt-8 text-center font-body-md text-body-md text-on-surface-variant">
           Chưa có tài khoản? 

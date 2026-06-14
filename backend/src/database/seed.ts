@@ -554,10 +554,51 @@ const extraFoods: SeedFood[] = [
 
 foods.push(...extraFoods);
 
+const commonsImage = (fileName: string) =>
+  `https://commons.wikimedia.org/wiki/Special:FilePath/${fileName}?width=900`;
+
+const recipeImageMap: Record<string, string> = {
+  'beef vegetable stir fry': 'Vietnamese_cuisine_-_table_serving.jpg',
+  'tomato egg soup': 'Tomato_and_egg_soup.jpg',
+  'ginger chicken': 'Vietnamese_cuisine_-_table_serving.jpg',
+  'salmon rice': 'C%C6%A1m_Chi%C3%AAn%2C_Da_Nang%2C_Vietnam.jpg',
+  'fruit salad': 'Vietnamese_cuisine_-_table_serving.jpg',
+  'vietnamese chicken pho': 'Pho_Ha_Noi.jpg',
+  'bun thit nuong vietnamese': 'Bun_thit_nuong.jpg',
+  'vietnamese spring rolls shrimp pork': 'Spring_rolls_with_peanut_sauce.jpg',
+  'com tam vietnamese pork rice': 'C%C6%A1m_t%E1%BA%A5m_s%C6%B0%E1%BB%9Dn_b%C3%AC_ch%E1%BA%A3.jpg',
+  'garlic shrimp vietnamese': 'Vietnamese_cuisine_-_table_serving.jpg',
+  'spicy squid lemongrass': 'Vietnamese_cuisine_-_table_serving.jpg',
+  'vietnamese braised fish tomato': 'Vietnamese_cuisine_-_table_serving.jpg',
+  'tofu tomato sauce': 'Vietnamese_cuisine_-_table_serving.jpg',
+  'stir fried water spinach garlic': 'Tumis_kangkung_Makassar.JPG',
+  'cabbage pork soup': 'Vietnamese_cuisine_-_table_serving.jpg',
+  'mashed potato egg breakfast': 'Tomato_and_egg_soup.jpg',
+  'roasted sweet potato yogurt': 'Vietnamese_cuisine_-_table_serving.jpg',
+  'spaghetti beef tomato sauce': 'Vietnamese_cuisine_-_table_serving.jpg',
+  'banh mi egg breakfast': 'B%C3%A1nh_m%C3%AC_th%E1%BB%8Bt_n%C6%B0%E1%BB%9Bng.png',
+  'chicken yogurt salad': 'Vietnamese_cuisine_-_table_serving.jpg',
+  'vietnamese sour soup shrimp': 'Canh_chua.jpg',
+  'fried rice vegetables egg': 'C%C6%A1m_Chi%C3%AAn%2C_Da_Nang%2C_Vietnam.jpg',
+  'corn green beans stir fry': 'Tumis_kangkung_Makassar.JPG',
+  'beef mushroom stir fry': 'Vietnamese_cuisine_-_table_serving.jpg',
+  'apple orange yogurt bowl': 'Vietnamese_cuisine_-_table_serving.jpg',
+  'watermelon milk smoothie': 'Vietnamese_cuisine_-_table_serving.jpg',
+  'lemongrass chili chicken': 'Vietnamese_cuisine_-_table_serving.jpg',
+  'vietnamese braised pork eggs': 'C%C6%A1m_t%E1%BA%A5m_s%C6%B0%E1%BB%9Dn_b%C3%AC_ch%E1%BA%A3.jpg',
+  'vietnamese fish noodle soup': 'Pho_Ha_Noi.jpg',
+  'instant noodles egg vegetables': 'Pho_Ha_Noi.jpg',
+  'cabbage rolls tofu mushroom': 'Spring_rolls_with_peanut_sauce.jpg',
+  'chicken corn soup': 'Tomato_and_egg_soup.jpg',
+};
+
+const recipeImage = (query: string) => commonsImage(recipeImageMap[query] ?? 'Vietnamese_cuisine_-_table_serving.jpg');
+
 const recipes: SeedRecipe[] = [
   {
     name: 'Thit bo xao rau cu',
     description: 'Mon xao nhanh voi thit bo, ca rot va bong cai xanh.',
+    imageUrl: recipeImage('beef vegetable stir fry'),
     cookTimeMinutes: 25,
     difficulty: 'easy',
     servings: 2,
@@ -580,6 +621,7 @@ const recipes: SeedRecipe[] = [
   {
     name: 'Canh ca chua trung',
     description: 'Canh don gian voi trung va ca chua cho bua an nhe.',
+    imageUrl: recipeImage('tomato egg soup'),
     cookTimeMinutes: 15,
     difficulty: 'easy',
     servings: 2,
@@ -600,6 +642,7 @@ const recipes: SeedRecipe[] = [
   {
     name: 'Ga kho gung',
     description: 'Thit ga kho dam vi voi gung va nuoc mam.',
+    imageUrl: recipeImage('ginger chicken'),
     cookTimeMinutes: 35,
     difficulty: 'medium',
     servings: 3,
@@ -621,6 +664,7 @@ const recipes: SeedRecipe[] = [
   {
     name: 'Com ca hoi ap chao',
     description: 'Ca hoi ap chao an cung com va rau cu.',
+    imageUrl: recipeImage('salmon rice'),
     cookTimeMinutes: 30,
     difficulty: 'medium',
     servings: 2,
@@ -642,6 +686,7 @@ const recipes: SeedRecipe[] = [
   {
     name: 'Salad trai cay sua tuoi',
     description: 'Mon nhe tu tao, chuoi va sua tuoi.',
+    imageUrl: recipeImage('fruit salad'),
     cookTimeMinutes: 10,
     difficulty: 'easy',
     servings: 2,
@@ -660,9 +705,6 @@ const recipes: SeedRecipe[] = [
     tags: ['fruit', 'snack', 'breakfast'],
   },
 ];
-
-const recipeImage = (query: string) =>
-  `https://source.unsplash.com/900x650/?${encodeURIComponent(query)}`;
 
 const extraRecipes: SeedRecipe[] = [
   {

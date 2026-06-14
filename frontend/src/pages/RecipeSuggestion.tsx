@@ -18,11 +18,14 @@ const SUGGESTION_LIMIT = 30;
 const RECIPE_PAGE_SIZE = 8;
 
 function RecipeImage({ recipe, className }: { recipe: RecipeSummary; className: string }) {
-  return recipe.imageUrl ? (
+  const [failed, setFailed] = useState(false);
+
+  return recipe.imageUrl && !failed ? (
     <img
       className={`${className} object-cover group-hover:scale-105 transition-transform duration-500`}
       src={recipe.imageUrl}
       alt={recipe.name}
+      onError={() => setFailed(true)}
     />
   ) : (
     <div className={`${className} flex items-center justify-center bg-surface-container`}>

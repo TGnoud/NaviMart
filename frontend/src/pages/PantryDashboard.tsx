@@ -1,7 +1,8 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import BottomNav from '../components/BottomNav';
 import NotificationDropdown from '../components/NotificationDropdown';
+import PaginationControls from '../components/PaginationControls';
 import SideNav from '../components/SideNav';
 import { CardGridSkeleton } from '../components/Skeleton';
 import { pantryApi } from '../api';
@@ -24,6 +25,8 @@ const LOCATION_LABELS: Record<StorageLocation, string> = {
   other: 'Khác',
 };
 
+const PANTRY_PAGE_SIZE = 12;
+
 function expiryBadge(item: PantryItem) {
   if (item.expiryStatus === 'expired') {
     return { status: 'Hết hạn', color: 'error', border: 'border-error/30', text: `Quá hạn ${daysOverdue(item.expiryDate)} ngày` };
@@ -40,6 +43,7 @@ export default function PantryDashboard() {
   const [search, setSearch] = useState('');
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const [pantryItems, setPantryItems] = useState<PantryItem[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
 
   const [editingItem, setEditingItem] = useState<PantryItem | null>(null);
@@ -72,6 +76,26 @@ export default function PantryDashboard() {
     const timer = setTimeout(loadItems, search ? 300 : 0);
     return () => clearTimeout(timer);
   }, [loadItems, search]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeFilter, search]);
+
+  useEffect(() => {
+    const totalPages = Math.max(1, Math.ceil(pantryItems.length / PANTRY_PAGE_SIZE));
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, pantryItems.length]);
+
+  const pagedPantryItems = useMemo(
+    () =>
+      pantryItems.slice(
+        (currentPage - 1) * PANTRY_PAGE_SIZE,
+        currentPage * PANTRY_PAGE_SIZE,
+      ),
+    [currentPage, pantryItems],
+  );
 
   const stats = {
     total: pantryItems.length,
@@ -117,6 +141,7 @@ export default function PantryDashboard() {
         expiryDate: deletedItem.expiryDate,
         location: deletedItem.location,
         note: deletedItem.note,
+        imageUrl: deletedItem.imageUrl,
       });
       setPantryItems((items) => [recreated, ...items]);
     } catch (err) {
@@ -241,12 +266,20 @@ export default function PantryDashboard() {
           {loading ? (
             <CardGridSkeleton count={8} />
           ) : pantryItems.length > 0 ? (
-            pantryItems.map(item => {
+            pagedPantryItems.map(item => {
               const badge = expiryBadge(item);
               return (
               <div key={item.id} className={`bg-surface-container-lowest rounded-lg shadow-sm border ${badge.border} overflow-visible flex flex-col relative`}>
                 <div className="relative h-32 md:h-40 bg-surface-container rounded-t-lg overflow-hidden flex items-center justify-center">
-                  <span className="material-symbols-outlined text-6xl text-outline">grocery</span>
+                  {item.imageUrl ? (
+                    <img
+                      src={item.imageUrl}
+                      alt={item.name}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <span className="material-symbols-outlined text-6xl text-outline">grocery</span>
+                  )}
                   <div className={`absolute top-2 right-2 bg-surface/90 backdrop-blur-sm px-2 py-1 rounded-full flex items-center gap-1 shadow-sm border border-${badge.color}/20`}>
                     <span className={`w-2 h-2 rounded-full bg-${badge.color}`}></span>
                     <span className={`font-label-sm text-label-sm text-${badge.color} font-semibold`}>{badge.status}</span>
@@ -295,6 +328,14 @@ export default function PantryDashboard() {
             </div>
           )}
         </div>
+        {!loading && pantryItems.length > 0 && (
+          <PaginationControls
+            page={currentPage}
+            pageSize={PANTRY_PAGE_SIZE}
+            totalItems={pantryItems.length}
+            onPageChange={setCurrentPage}
+          />
+        )}
         </div>
       </main>
 

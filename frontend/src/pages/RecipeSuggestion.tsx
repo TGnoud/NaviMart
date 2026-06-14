@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import BottomNav from '../components/BottomNav';
+import PaginationControls from '../components/PaginationControls';
 import SideNav from '../components/SideNav';
 import { CardGridSkeleton } from '../components/Skeleton';
 import { recipesApi } from '../api';
@@ -12,6 +13,9 @@ const DIFFICULTY_LABELS: Record<string, string> = {
   medium: 'Trung bình',
   hard: 'Khó',
 };
+
+const SUGGESTION_LIMIT = 30;
+const RECIPE_PAGE_SIZE = 8;
 
 function RecipeImage({ recipe, className }: { recipe: RecipeSummary; className: string }) {
   return recipe.imageUrl ? (
@@ -32,6 +36,8 @@ export default function RecipeSuggestion() {
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [searchResults, setSearchResults] = useState<RecipeSummary[] | null>(null);
   const [search, setSearch] = useState('');
+  const [suggestionPage, setSuggestionPage] = useState(1);
+  const [searchPage, setSearchPage] = useState(1);
   const [loading, setLoading] = useState(true);
 
   const handleError = useCallback(
@@ -44,7 +50,7 @@ export default function RecipeSuggestion() {
   useEffect(() => {
     let cancelled = false;
     recipesApi
-      .suggestions({ limit: 12, prioritizeExpiring: true })
+      .suggestions({ limit: SUGGESTION_LIMIT, prioritizeExpiring: true })
       .then((data) => {
         if (!cancelled) setSuggestions(data);
       })
@@ -61,12 +67,16 @@ export default function RecipeSuggestion() {
     const term = search.trim();
     if (!term) {
       setSearchResults(null);
+      setSearchPage(1);
       return;
     }
     const timer = setTimeout(() => {
       recipesApi
-        .list({ q: term, limit: 20 })
-        .then(setSearchResults)
+        .list({ q: term, limit: SUGGESTION_LIMIT })
+        .then((data) => {
+          setSearchResults(data);
+          setSearchPage(1);
+        })
         .catch((err) => handleError(err, 'Không tìm kiếm được món ăn.'));
     }, 300);
     return () => clearTimeout(timer);
@@ -75,6 +85,35 @@ export default function RecipeSuggestion() {
   const featured = suggestions[0];
   const secondFeatured = suggestions[1];
   const others = suggestions.slice(2);
+  const pagedOthers = useMemo(
+    () =>
+      others.slice(
+        (suggestionPage - 1) * RECIPE_PAGE_SIZE,
+        suggestionPage * RECIPE_PAGE_SIZE,
+      ),
+    [others, suggestionPage],
+  );
+  const pagedSearchResults = useMemo(
+    () =>
+      (searchResults ?? []).slice(
+        (searchPage - 1) * RECIPE_PAGE_SIZE,
+        searchPage * RECIPE_PAGE_SIZE,
+      ),
+    [searchResults, searchPage],
+  );
+
+  useEffect(() => {
+    const totalPages = Math.max(1, Math.ceil(others.length / RECIPE_PAGE_SIZE));
+    if (suggestionPage > totalPages) setSuggestionPage(totalPages);
+  }, [others.length, suggestionPage]);
+
+  useEffect(() => {
+    const totalPages = Math.max(
+      1,
+      Math.ceil((searchResults?.length ?? 0) / RECIPE_PAGE_SIZE),
+    );
+    if (searchPage > totalPages) setSearchPage(totalPages);
+  }, [searchResults?.length, searchPage]);
 
   return (
     <div className="bg-surface text-on-surface h-screen overflow-hidden flex flex-col md:flex-row">
@@ -117,8 +156,9 @@ export default function RecipeSuggestion() {
               {searchResults.length === 0 ? (
                 <p className="font-body-md text-on-surface-variant">Không tìm thấy món ăn phù hợp.</p>
               ) : (
+                <>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                  {searchResults.map((recipe) => (
+                  {pagedSearchResults.map((recipe) => (
                     <Link key={recipe.id} to={`/recipe-detail/${recipe.id}`} className="bg-surface-container-lowest rounded-lg border border-outline-variant shadow-sm overflow-hidden flex flex-col group cursor-pointer hover:shadow-md transition-all">
                       <div className="relative h-40 overflow-hidden">
                         <RecipeImage recipe={recipe} className="w-full h-full" />
@@ -133,6 +173,13 @@ export default function RecipeSuggestion() {
                     </Link>
                   ))}
                 </div>
+                <PaginationControls
+                  page={searchPage}
+                  pageSize={RECIPE_PAGE_SIZE}
+                  totalItems={searchResults.length}
+                  onPageChange={setSearchPage}
+                />
+                </>
               )}
             </section>
           ) : suggestions.length === 0 ? (
@@ -239,7 +286,7 @@ export default function RecipeSuggestion() {
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                      {others.map((suggestion) => (
+                      {pagedOthers.map((suggestion) => (
                         <Link key={suggestion.recipe.id} to={`/recipe-detail/${suggestion.recipe.id}`} className="bg-surface-container-lowest rounded-lg border border-outline-variant shadow-sm overflow-hidden flex flex-col group cursor-pointer hover:shadow-md transition-all">
                           <div className="relative h-40 overflow-hidden">
                             <RecipeImage recipe={suggestion.recipe} className="w-full h-full" />
@@ -263,6 +310,12 @@ export default function RecipeSuggestion() {
                         </Link>
                       ))}
                     </div>
+                    <PaginationControls
+                      page={suggestionPage}
+                      pageSize={RECIPE_PAGE_SIZE}
+                      totalItems={others.length}
+                      onPageChange={setSuggestionPage}
+                    />
                   </section>
                 </>
               )}

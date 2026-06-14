@@ -1,7 +1,8 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import BottomNav from '../components/BottomNav';
 import NotificationDropdown from '../components/NotificationDropdown';
+import PaginationControls from '../components/PaginationControls';
 import SideNav from '../components/SideNav';
 import { CardGridSkeleton } from '../components/Skeleton';
 import { shoppingListsApi } from '../api';
@@ -14,11 +15,15 @@ function formatDate(value?: string) {
   return new Date(value).toLocaleDateString('vi-VN');
 }
 
+const LISTS_PAGE_SIZE = 6;
+
 export default function MyLists() {
   const { showAlert } = useDialog();
   const [activeTab, setActiveTab] = useState<'Đang mua' | 'Đã mua'>('Đang mua');
   const [activeLists, setActiveLists] = useState<ShoppingList[]>([]);
   const [completedLists, setCompletedLists] = useState<ShoppingList[]>([]);
+  const [activePage, setActivePage] = useState(1);
+  const [completedPage, setCompletedPage] = useState(1);
   const [loading, setLoading] = useState(true);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -48,6 +53,16 @@ export default function MyLists() {
   useEffect(() => {
     loadLists();
   }, [loadLists]);
+
+  useEffect(() => {
+    const totalPages = Math.max(1, Math.ceil(activeLists.length / LISTS_PAGE_SIZE));
+    if (activePage > totalPages) setActivePage(totalPages);
+  }, [activeLists.length, activePage]);
+
+  useEffect(() => {
+    const totalPages = Math.max(1, Math.ceil(completedLists.length / LISTS_PAGE_SIZE));
+    if (completedPage > totalPages) setCompletedPage(totalPages);
+  }, [completedLists.length, completedPage]);
 
   // Live refresh when another family member changes any list.
   useEffect(() => {
@@ -116,6 +131,23 @@ export default function MyLists() {
     }
   };
 
+  const pagedActiveLists = useMemo(
+    () =>
+      activeLists.slice(
+        (activePage - 1) * LISTS_PAGE_SIZE,
+        activePage * LISTS_PAGE_SIZE,
+      ),
+    [activeLists, activePage],
+  );
+  const pagedCompletedLists = useMemo(
+    () =>
+      completedLists.slice(
+        (completedPage - 1) * LISTS_PAGE_SIZE,
+        completedPage * LISTS_PAGE_SIZE,
+      ),
+    [completedLists, completedPage],
+  );
+
   return (
     <div className="bg-background text-on-background h-screen overflow-hidden font-body-md antialiased selection:bg-primary-container selection:text-on-primary-container flex">
       <SideNav />
@@ -161,7 +193,7 @@ export default function MyLists() {
         ) : activeTab === 'Đang mua' ? (
           <div className="px-margin-mobile grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-stack-md">
             {activeLists.length > 0 ? (
-              activeLists.map(list => (
+              pagedActiveLists.map(list => (
                 <Link key={list.id} to={`/list-detail/${list.id}`} className="bg-surface-container-lowest rounded-xl shadow-sm border border-outline-variant p-4 flex flex-col relative overflow-hidden transition-shadow hover:shadow-md cursor-pointer group">
                   <div className="absolute top-0 left-0 w-full h-1 bg-primary-container group-hover:bg-primary transition-colors"></div>
                   <div className="flex justify-between items-start mt-1 mb-3">
@@ -208,10 +240,18 @@ export default function MyLists() {
               </div>
               <span className="font-headline-sm text-headline-sm text-primary">Tạo danh sách mới</span>
             </article>
+            <div className="md:col-span-2 lg:col-span-3">
+              <PaginationControls
+                page={activePage}
+                pageSize={LISTS_PAGE_SIZE}
+                totalItems={activeLists.length}
+                onPageChange={setActivePage}
+              />
+            </div>
           </div>
         ) : completedLists.length > 0 ? (
           <div className="px-margin-mobile grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-stack-md">
-            {completedLists.map(list => (
+            {pagedCompletedLists.map(list => (
               <Link key={list.id} to={`/list-detail/${list.id}`} className="bg-surface-container-lowest rounded-xl shadow-sm border border-outline-variant p-4 flex flex-col relative overflow-hidden transition-shadow hover:shadow-md cursor-pointer group opacity-90">
                 <div className="absolute top-0 left-0 w-full h-1 bg-tertiary-container group-hover:bg-tertiary transition-colors"></div>
                 <div className="flex justify-between items-start mt-1 mb-3">
@@ -236,6 +276,14 @@ export default function MyLists() {
                 </div>
               </Link>
             ))}
+            <div className="md:col-span-2 lg:col-span-3">
+              <PaginationControls
+                page={completedPage}
+                pageSize={LISTS_PAGE_SIZE}
+                totalItems={completedLists.length}
+                onPageChange={setCompletedPage}
+              />
+            </div>
           </div>
         ) : (
           <div className="px-margin-mobile flex flex-col items-center justify-center py-20 text-on-surface-variant">

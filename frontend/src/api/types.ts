@@ -88,8 +88,25 @@ export type MealPlan = {
   customName?: string;
   servings: number;
   isCompleted: boolean;
+  // True when completed but the auto-created shortfall shopping list is still
+  // active — the meal is "waiting" for those ingredients to be bought.
+  awaitingIngredients?: boolean;
   note?: string;
   createdBy: string;
+};
+
+export type MealShortageLine = {
+  name: string;
+  unit: string;
+  missingQuantity: number;
+};
+
+// Returned by PATCH /meals/:id when completing a meal left some ingredients
+// short: which lines were missing and the shopping list auto-created for them.
+export type MealCompletionResult = {
+  shortages: MealShortageLine[];
+  shoppingListId?: string;
+  shoppingListName?: string;
 };
 
 export type RecipeDifficulty = 'easy' | 'medium' | 'hard';

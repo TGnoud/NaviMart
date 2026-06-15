@@ -36,19 +36,40 @@ describe('MealsService', () => {
   let mealPlanModel: MockModel;
   let familyModel: MockModel;
   let recipeModel: MockModel;
-  let missingIngredientsService: { getRecipeMissingIngredients: jest.Mock };
-  let shoppingListGenerationService: { generateFromMeal: jest.Mock };
+  let pantryItemModel: MockModel;
+  let shoppingListModel: MockModel;
+  let missingIngredientsService: {
+    getRecipeMissingIngredients: jest.Mock;
+    findMatchingPantryItems: jest.Mock;
+  };
+  let shoppingListGenerationService: {
+    generateFromMeal: jest.Mock;
+    createFromMissingItems: jest.Mock;
+    removeGeneratedList: jest.Mock;
+  };
+  let inventoryEventsService: { create: jest.Mock; createMany: jest.Mock };
   let user: ReturnType<typeof makeUser>;
 
   beforeEach(() => {
     mealPlanModel = createMockModel();
     familyModel = createMockModel();
     recipeModel = createMockModel();
+    pantryItemModel = createMockModel();
+    shoppingListModel = createMockModel();
     missingIngredientsService = {
       getRecipeMissingIngredients: jest.fn().mockResolvedValue({ ok: true }),
+      findMatchingPantryItems: jest.fn().mockReturnValue([]),
     };
     shoppingListGenerationService = {
       generateFromMeal: jest.fn().mockResolvedValue({ ok: true }),
+      createFromMissingItems: jest
+        .fn()
+        .mockResolvedValue({ id: oid().toString(), name: 'Con thieu cho Test Recipe' }),
+      removeGeneratedList: jest.fn().mockResolvedValue(undefined),
+    };
+    inventoryEventsService = {
+      create: jest.fn().mockResolvedValue({}),
+      createMany: jest.fn().mockResolvedValue([]),
     };
     user = makeUser();
 
@@ -66,8 +87,11 @@ describe('MealsService', () => {
       mealPlanModel as never,
       familyModel as never,
       recipeModel as never,
+      pantryItemModel as never,
+      shoppingListModel as never,
       missingIngredientsService as never,
       shoppingListGenerationService as never,
+      inventoryEventsService as never,
     );
   });
 
@@ -208,6 +232,165 @@ describe('MealsService', () => {
       expect(meal.servings).toBe(5);
       expect(meal.isCompleted).toBe(true);
       expect(meal.save).toHaveBeenCalled();
+    });
+
+    it('deducts recipe ingredients from the pantry when a meal is completed', async () => {
+      const recipe = makeRecipe({
+        servings: 2,
+        ingredients: [
+          { name: 'Tao', quantity: 2, unit: 'qua', optional: false },
+        ],
+      });
+      const meal = makeMealDoc({
+        recipeId: recipe._id,
+        servings: 4, // 2x the recipe -> needs 4 qua
+        isCompleted: false,
+        ingredientsConsumed: false,
+        consumedItems: [],
+      });
+      mealPlanModel.findOne.mockReturnValue(mockQuery(meal));
+      recipeModel.findById.mockReturnValue(mockQuery(recipe));
+
+      const pantryItem = {
+        _id: oid(),
+        familyId: meal.familyId,
+        name: 'Tao',
+        quantity: 5,
+        unit: 'qua',
+        status: 'active',
+        expiryDate: new Date('2026-06-25'),
+        location: 'fridge',
+        save: jest.fn().mockResolvedValue(undefined),
+      };
+      pantryItemModel.find.mockReturnValue(mockQuery([pantryItem]));
+      missingIngredientsService.findMatchingPantryItems.mockReturnValue([
+        pantryItem,
+      ]);
+
+      await service.update(user, meal._id.toString(), {
+        isCompleted: true,
+      } as never);
+
+      // 4 of 5 consumed, item stays active with 1 left
+      expect(pantryItem.quantity).toBe(1);
+      expect(pantryItem.save).toHaveBeenCalled();
+      expect(inventoryEventsService.create).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'consumed', source: 'meal', quantityDelta: -4 }),
+      );
+      expect(meal.ingredientsConsumed).toBe(true);
+      expect(meal.consumedItems).toHaveLength(1);
+    });
+
+    it('builds a shopping list and returns shortages when the pantry is short', async () => {
+      const recipe = makeRecipe({
+        servings: 2,
+        ingredients: [
+          { name: 'Tao', quantity: 4, unit: 'qua', optional: false },
+        ],
+      });
+      const meal = makeMealDoc({
+        recipeId: recipe._id,
+        servings: 2, // needs 4 qua
+        isCompleted: false,
+        ingredientsConsumed: false,
+        consumedItems: [],
+      });
+      mealPlanModel.findOne.mockReturnValue(mockQuery(meal));
+      recipeModel.findById.mockReturnValue(mockQuery(recipe));
+
+      const pantryItem = {
+        _id: oid(),
+        familyId: meal.familyId,
+        name: 'Tao',
+        quantity: 1, // only 1 of 4 available
+        unit: 'qua',
+        status: 'active',
+        expiryDate: new Date('2026-06-25'),
+        location: 'fridge',
+        save: jest.fn().mockResolvedValue(undefined),
+      };
+      pantryItemModel.find.mockReturnValue(mockQuery([pantryItem]));
+      missingIngredientsService.findMatchingPantryItems.mockReturnValue([
+        pantryItem,
+      ]);
+      const listId = oid().toString();
+      shoppingListGenerationService.createFromMissingItems.mockResolvedValue({
+        id: listId,
+        name: 'Con thieu cho Test Recipe',
+      });
+      // The just-created shortfall list is still active -> meal is "waiting".
+      shoppingListModel.findById.mockReturnValue(mockQuery({ status: 'active' }));
+
+      const result = await service.update(user, meal._id.toString(), {
+        isCompleted: true,
+      } as never);
+
+      // The 1 in stock is used up, leaving a shortage of 3.
+      expect(pantryItem.quantity).toBe(0);
+      expect(shoppingListGenerationService.createFromMissingItems).toHaveBeenCalledWith(
+        user,
+        meal.familyId,
+        'Test Recipe',
+        expect.arrayContaining([
+          expect.objectContaining({ name: 'Tao', quantity: 3, unit: 'qua' }),
+        ]),
+        meal.date,
+      );
+      expect(result.completion?.shortages).toEqual([
+        { name: 'Tao', unit: 'qua', missingQuantity: 3 },
+      ]);
+      expect(result.completion?.shoppingListId).toBe(listId);
+      // The created list is remembered on the meal so re-completing won't duplicate it.
+      expect(meal.shortageListId?.toString()).toBe(listId);
+      // Completed but shortfall list still active -> waiting (yellow on client).
+      expect(result.awaitingIngredients).toBe(true);
+    });
+
+    it('restores ingredients and retires the shortfall list when un-completed', async () => {
+      const pantryId = oid();
+      const shortageListId = oid();
+      const meal = makeMealDoc({
+        recipeId: oid(),
+        isCompleted: true,
+        ingredientsConsumed: true,
+        shortageListId,
+        consumedItems: [
+          {
+            pantryItemId: pantryId,
+            name: 'Tao',
+            quantity: 4,
+            unit: 'qua',
+            expiryDate: new Date('2026-06-25'),
+            location: 'fridge',
+          },
+        ],
+      });
+      mealPlanModel.findOne.mockReturnValue(mockQuery(meal));
+
+      const existing = {
+        _id: pantryId,
+        familyId: meal.familyId,
+        name: 'Tao',
+        quantity: 1,
+        unit: 'qua',
+        status: 'active',
+        save: jest.fn().mockResolvedValue(undefined),
+      };
+      pantryItemModel.findById.mockReturnValue(mockQuery(existing));
+
+      await service.update(user, meal._id.toString(), {
+        isCompleted: false,
+      } as never);
+
+      expect(existing.quantity).toBe(5); // 1 + 4 restored
+      expect(existing.save).toHaveBeenCalled();
+      // The auto-created shortfall list is archived and forgotten.
+      expect(
+        shoppingListGenerationService.removeGeneratedList,
+      ).toHaveBeenCalledWith(meal.familyId, shortageListId);
+      expect(meal.shortageListId).toBeUndefined();
+      expect(meal.ingredientsConsumed).toBe(false);
+      expect(meal.consumedItems).toHaveLength(0);
     });
   });
 

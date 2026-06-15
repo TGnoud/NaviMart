@@ -6,6 +6,7 @@ import SideNav from '../components/SideNav';
 import { ListRowsSkeleton } from '../components/Skeleton';
 import { useDialog } from '../contexts/DialogContext';
 import { mealsApi, recipesApi } from '../api';
+import { onSocketEvent } from '../api/socket';
 import type { MealPlan, MealSession as MealSessionType, RecipeSuggestion } from '../api';
 
 interface SessionDef {
@@ -101,6 +102,13 @@ export default function MealPlanner() {
     loadMeals();
   }, [loadMeals]);
 
+  // A meal "waiting" on a shortfall list turns green once that list is bought,
+  // so refresh meals whenever any shopping list changes (e.g. gets completed).
+  useEffect(() => {
+    const off = onSocketEvent('shoppingList:updated', () => loadMeals());
+    return () => off();
+  }, [loadMeals]);
+
   const selectedDate = weekDays[activeDay];
   const dayMeals = meals.filter((meal) => sameDay(new Date(meal.date), selectedDate));
 
@@ -139,6 +147,17 @@ export default function MealPlanner() {
     try {
       const updated = await mealsApi.update(meal.id, { isCompleted: !meal.isCompleted });
       setMeals((items) => items.map((m) => (m.id === meal.id ? updated : m)));
+      // Completing a meal deducts ingredients from the pantry. If stock didn't
+      // cover everything, the backend creates a shopping list for the shortfall.
+      const completion = updated.completion;
+      if (completion && completion.shortages.length > 0) {
+        const lines = completion.shortages
+          .map((s) => `• ${s.name}: thiếu ${s.missingQuantity} ${s.unit}`)
+          .join('\n');
+        showAlert(
+          `Đã hoàn thành món và trừ nguyên liệu trong kho.\n\nMột số nguyên liệu không đủ:\n${lines}\n\nĐã tạo danh sách đi chợ "${completion.shoppingListName ?? 'Còn thiếu'}" cho phần còn thiếu.`,
+        );
+      }
     } catch (err) {
       handleError(err, 'Không cập nhật được món ăn.');
     }
@@ -331,14 +350,35 @@ export default function MealPlanner() {
                     </button>
                   )}
                 </p>
+                {meal.isCompleted && meal.awaitingIngredients && (
+                  <span className="inline-flex items-center gap-1 mt-1 font-label-sm text-label-sm text-on-secondary-container bg-secondary-container/30 px-2 py-0.5 rounded-full w-fit">
+                    <span className="material-symbols-outlined text-[14px]">hourglass_top</span>
+                    Chờ mua đủ nguyên liệu
+                  </span>
+                )}
               </div>
 
               <div className="flex items-center gap-1 shrink-0">
                 <button
                   onClick={() => toggleMeal(meal)}
-                  className={`w-8 h-8 rounded-full border-2 flex items-center justify-center transition-colors ${meal.isCompleted ? 'bg-primary border-primary text-on-primary' : 'border-outline text-primary hover:border-primary hover:bg-primary/5'}`}
+                  title={
+                    meal.isCompleted
+                      ? meal.awaitingIngredients
+                        ? 'Đang chờ mua đủ nguyên liệu'
+                        : 'Đã hoàn thành'
+                      : 'Đánh dấu hoàn thành'
+                  }
+                  className={`w-8 h-8 rounded-full border-2 flex items-center justify-center transition-colors ${
+                    meal.isCompleted
+                      ? meal.awaitingIngredients
+                        ? 'bg-secondary-container border-secondary-container text-on-secondary-container'
+                        : 'bg-primary border-primary text-on-primary'
+                      : 'border-outline text-primary hover:border-primary hover:bg-primary/5'
+                  }`}
                 >
-                  <span className={`material-symbols-outlined text-[18px] transition-all ${meal.isCompleted ? 'scale-100 opacity-100' : 'scale-50 opacity-0 group-hover:scale-100 group-hover:opacity-100'}`}>check</span>
+                  <span className={`material-symbols-outlined text-[18px] transition-all ${meal.isCompleted ? 'scale-100 opacity-100' : 'scale-50 opacity-0 group-hover:scale-100 group-hover:opacity-100'}`}>
+                    {meal.isCompleted && meal.awaitingIngredients ? 'hourglass_top' : 'check'}
+                  </span>
                 </button>
                 <button
                   onClick={() => openEditModal(meal, session)}

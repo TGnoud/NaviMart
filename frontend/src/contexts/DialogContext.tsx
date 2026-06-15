@@ -68,7 +68,7 @@ export const DialogProvider = ({ children }: { children: ReactNode }) => {
             <div className="mb-4 text-primary">
               <span className="material-symbols-outlined text-4xl">info</span>
             </div>
-            <p className="font-body-lg text-on-surface mb-6 font-medium">{alertMessage}</p>
+            <p className="font-body-lg text-on-surface mb-6 font-medium whitespace-pre-line">{alertMessage}</p>
             <button 
               onClick={handleCloseAlert}
               className="w-full bg-primary text-on-primary font-label-md py-3 rounded-xl hover:opacity-90 transition-opacity font-bold"

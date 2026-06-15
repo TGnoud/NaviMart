@@ -66,6 +66,71 @@ export class ShoppingListGenerationService {
     );
   }
 
+  // Create a shopping list from an explicit set of shortage lines (e.g. the
+  // amounts that couldn't be covered by the pantry when a meal was completed).
+  // Returns null when there is nothing missing.
+  async createFromMissingItems(
+    user: AuthenticatedUser,
+    familyId: Types.ObjectId,
+    recipeName: string,
+    items: Array<{
+      foodId?: Types.ObjectId;
+      categoryId?: Types.ObjectId;
+      name: string;
+      quantity: number;
+      unit: string;
+    }>,
+    plannedFor?: Date,
+  ) {
+    if (items.length === 0) {
+      return null;
+    }
+
+    const list = await this.shoppingListModel.create({
+      familyId,
+      name: `Con thieu cho ${recipeName}`,
+      type: 'custom',
+      plannedFor,
+      createdBy: new Types.ObjectId(user.userId),
+      items: items.map((item) => ({
+        foodId: item.foodId,
+        categoryId: item.categoryId,
+        name: item.name,
+        quantity: item.quantity,
+        unit: item.unit,
+        note: `Thieu khi nau: ${recipeName}`,
+      })) as ShoppingListItem[],
+    });
+
+    const shoppingList = this.toShoppingListResponse(list);
+    this.realtimeService.emitToFamily(
+      familyId.toString(),
+      'shoppingList:updated',
+      shoppingList,
+    );
+
+    return shoppingList;
+  }
+
+  // Archive a shopping list that was auto-created for a meal's shortfall, used
+  // when un-completing the meal so the stale list doesn't linger or duplicate.
+  // Only touches still-active lists (leaves ones the user already completed).
+  async removeGeneratedList(familyId: Types.ObjectId, listId: Types.ObjectId) {
+    const list = await this.shoppingListModel
+      .findOne({ _id: listId, familyId })
+      .exec();
+
+    if (!list || list.status !== 'active') {
+      return;
+    }
+
+    list.status = 'archived';
+    await list.save();
+    this.realtimeService.emitToFamily(familyId.toString(), 'shoppingList:removed', {
+      id: list._id.toString(),
+    });
+  }
+
   private async createShoppingListFromRecipe(
     user: AuthenticatedUser,
     familyId: Types.ObjectId,

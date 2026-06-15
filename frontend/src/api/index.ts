@@ -8,6 +8,7 @@ import type {
   Family,
   FamilyInvite,
   FamilyPermission,
+  MealCompletionResult,
   MealPlan,
   MealSession,
   MissingIngredientsReport,
@@ -325,7 +326,11 @@ export const mealsApi = {
       isCompleted: boolean;
       note: string;
     }>,
-  ) => apiRequest<MealPlan>(`/meals/${mealId}`, { method: 'PATCH', body: input }),
+  ) =>
+    apiRequest<MealPlan & { completion?: MealCompletionResult }>(
+      `/meals/${mealId}`,
+      { method: 'PATCH', body: input },
+    ),
 
   remove: (mealId: string) =>
     apiRequest<{ success: boolean }>(`/meals/${mealId}`, { method: 'DELETE' }),

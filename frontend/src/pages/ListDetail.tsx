@@ -81,6 +81,17 @@ export default function ListDetail() {
     }
   };
 
+  const setAmount = async (itemId: string, quantity: number, value: number) => {
+    if (!listId || isCompleted) return;
+    const newQuantity = Math.max(1, Math.floor(value));
+    if (!Number.isFinite(newQuantity) || newQuantity === quantity) return;
+    try {
+      setList(await shoppingListsApi.updateItem(listId, itemId, { quantity: newQuantity }));
+    } catch (err) {
+      handleError(err, 'Không cập nhật được số lượng.');
+    }
+  };
+
   const deleteItem = async (itemId: string) => {
     if (!listId || isCompleted) return;
     try {
@@ -265,7 +276,16 @@ export default function ListDetail() {
                               <button onClick={() => updateAmount(item.id, item.quantity, -1)} className="w-7 h-7 flex items-center justify-center rounded-full text-primary-container hover:bg-surface-container-high transition-colors">
                                 <span className="material-symbols-outlined text-[18px]">remove</span>
                               </button>
-                              <span className="font-body-md text-body-md text-on-surface w-6 text-center font-bold">{item.quantity}</span>
+                              <input
+                                type="number"
+                                min={1}
+                                defaultValue={item.quantity}
+                                key={item.quantity}
+                                onFocus={(e) => e.target.select()}
+                                onBlur={(e) => setAmount(item.id, item.quantity, Number(e.target.value))}
+                                onKeyDown={(e) => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); }}
+                                className="font-body-md text-body-md text-on-surface w-10 text-center font-bold bg-transparent outline-none focus:bg-surface-container-high rounded-md [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                              />
                               <button onClick={() => updateAmount(item.id, item.quantity, 1)} className="w-7 h-7 flex items-center justify-center rounded-full bg-primary-container text-on-primary-container shadow-sm hover:opacity-90 transition-opacity">
                                 <span className="material-symbols-outlined text-[18px]">add</span>
                               </button>

@@ -1,5 +1,6 @@
 import { Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import NaviChefWidget from './NaviChefWidget';
 
 export default function ProtectedRoute({ requireAdmin = false }: { requireAdmin?: boolean }) {
   const { isAuthenticated, user } = useAuth();
@@ -11,5 +12,10 @@ export default function ProtectedRoute({ requireAdmin = false }: { requireAdmin?
     return <Navigate to="/home" replace />;
   }
 
-  return <Outlet />;
+  return (
+    <>
+      <Outlet />
+      <NaviChefWidget />
+    </>
+  );
 }

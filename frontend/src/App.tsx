@@ -27,7 +27,6 @@ const EditProfile = lazy(() => import('./pages/EditProfile'));
 const Settings = lazy(() => import('./pages/Settings'));
 const Notifications = lazy(() => import('./pages/Notifications'));
 const Scanner = lazy(() => import('./pages/Scanner'));
-const AIChef = lazy(() => import('./pages/AIChef'));
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
 
 function App() {
@@ -59,7 +58,6 @@ function App() {
             <Route path="/settings" element={<Settings />} />
             <Route path="/notifications" element={<Notifications />} />
             <Route path="/scanner" element={<Scanner />} />
-            <Route path="/ai-chef" element={<AIChef />} />
           </Route>
           <Route element={<ProtectedRoute requireAdmin />}>
             <Route path="/admin" element={<AdminDashboard />} />

@@ -205,11 +205,6 @@ export default function Home() {
           </div>
           </div>
 
-          {/* AI Chef FAB */}
-          <Link to="/ai-chef" className="fixed bottom-[calc(69px+env(safe-area-inset-bottom)+16px)] right-4 md:right-8 md:bottom-8 w-14 h-14 bg-tertiary text-on-tertiary rounded-2xl shadow-[0_4px_16px_rgba(var(--color-tertiary-rgb),0.4)] flex items-center justify-center hover:scale-105 active:scale-95 transition-all z-40 animate-bounce" style={{ animationDuration: '3s' }}>
-            <span className="material-symbols-outlined text-[28px]" style={{ fontVariationSettings: "'FILL' 1" }}>robot_2</span>
-          </Link>
-
           {/* Footer */}
           <footer className="hidden md:block bg-surface-container-lowest dark:bg-inverse-surface border-t border-outline-variant w-full mt-8">
             <div className="flex flex-col md:flex-row justify-between items-center w-full py-8 px-margin-mobile max-w-7xl mx-auto gap-stack-md">

@@ -5,12 +5,25 @@ import { ListRowsSkeleton, Skeleton } from '../components/Skeleton';
 import { useDialog } from '../contexts/DialogContext';
 import { useAuth } from '../contexts/AuthContext';
 import { mealsApi, recipesApi } from '../api';
-import type { MissingIngredientsReport, RecipeDetail as Recipe } from '../api';
+import type { MealSession, MissingIngredientsReport, RecipeDetail as Recipe } from '../api';
 
 const DIFFICULTY_LABELS: Record<string, string> = {
   easy: 'Dễ',
   medium: 'Trung bình',
   hard: 'Khó',
+};
+
+const SESSION_OPTIONS: { value: MealSession; label: string }[] = [
+  { value: 'breakfast', label: 'Bữa sáng' },
+  { value: 'lunch', label: 'Bữa trưa' },
+  { value: 'dinner', label: 'Bữa tối' },
+  { value: 'snack', label: 'Bữa phụ' },
+];
+
+const todayInputValue = () => {
+  const now = new Date();
+  const offset = now.getTimezoneOffset() * 60000;
+  return new Date(now.getTime() - offset).toISOString().slice(0, 10);
 };
 
 export default function RecipeDetail() {
@@ -23,6 +36,10 @@ export default function RecipeDetail() {
   const [loading, setLoading] = useState(true);
   const [working, setWorking] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
+  const [showMealModal, setShowMealModal] = useState(false);
+  const [mealDate, setMealDate] = useState(todayInputValue);
+  const [mealSession, setMealSession] = useState<MealSession>('dinner');
+  const [mealServings, setMealServings] = useState(1);
 
   const handleError = useCallback(
     (err: unknown, fallback: string) => {
@@ -87,18 +104,27 @@ export default function RecipeDetail() {
     }
   };
 
+  const openMealModal = () => {
+    setMealDate(todayInputValue());
+    setMealSession('dinner');
+    setMealServings(recipe?.servings ?? 1);
+    setShowMealModal(true);
+  };
+
   const addToMealPlan = async () => {
     if (!recipe || working) return;
     setWorking(true);
     try {
       await mealsApi.create({
-        date: new Date().toISOString(),
-        session: 'dinner',
+        date: new Date(`${mealDate}T00:00:00`).toISOString(),
+        session: mealSession,
         recipeId: recipe.id,
         customName: recipe.name,
-        servings: recipe.servings,
+        servings: mealServings,
       });
-      showAlert('Đã thêm món ăn vào bữa tối hôm nay!');
+      const sessionLabel = SESSION_OPTIONS.find((s) => s.value === mealSession)?.label ?? 'bữa ăn';
+      setShowMealModal(false);
+      showAlert(`Đã thêm món ăn vào ${sessionLabel.toLowerCase()} ngày ${mealDate}!`);
       navigate('/meals');
     } catch (err) {
       handleError(err, 'Không thêm được vào lịch trình.');
@@ -254,7 +280,7 @@ export default function RecipeDetail() {
                         : 'Đã đủ nguyên liệu trong tủ lạnh'}
                     </button>
                     <button
-                      onClick={addToMealPlan}
+                      onClick={openMealModal}
                       disabled={working}
                       className="w-full mt-3 bg-secondary-container text-on-secondary-container py-3 px-4 rounded-lg font-body-md text-body-md flex items-center justify-center gap-2 hover:bg-secondary hover:text-on-secondary transition-colors disabled:opacity-50"
                     >
@@ -292,6 +318,86 @@ export default function RecipeDetail() {
           )}
         </main>
       </div>
+
+      {showMealModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-surface rounded-2xl p-6 w-full max-w-sm shadow-xl border border-outline-variant/30 animate-in zoom-in-95 duration-200">
+            <h3 className="font-headline-sm text-on-surface font-bold mb-1">Thêm vào lịch trình</h3>
+            <p className="font-body-md text-on-surface-variant mb-4">{recipe?.name}</p>
+
+            <label className="block font-label-md text-on-surface-variant mb-1">Ngày</label>
+            <input
+              type="date"
+              value={mealDate}
+              onChange={(e) => setMealDate(e.target.value)}
+              className="w-full mb-4 px-3 py-2.5 rounded-xl border border-outline-variant bg-surface-container-lowest text-on-surface outline-none focus:border-primary"
+            />
+
+            <label className="block font-label-md text-on-surface-variant mb-1">Bữa ăn</label>
+            <div className="grid grid-cols-2 gap-2 mb-6">
+              {SESSION_OPTIONS.map((opt) => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => setMealSession(opt.value)}
+                  className={`py-2.5 rounded-xl font-label-md font-bold border transition-colors ${
+                    mealSession === opt.value
+                      ? 'bg-primary text-on-primary border-primary'
+                      : 'bg-surface-container-lowest text-on-surface-variant border-outline-variant hover:bg-surface-container-low'
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+
+            <label className="block font-label-md text-on-surface-variant mb-1">Khẩu phần</label>
+            <div className="flex items-center gap-2 mb-6">
+              <button
+                type="button"
+                onClick={() => setMealServings((s) => Math.max(1, s - 1))}
+                className="w-9 h-9 flex items-center justify-center rounded-full border border-outline-variant text-on-surface-variant hover:bg-surface-container-low transition-colors shrink-0"
+              >
+                <span className="material-symbols-outlined text-[18px]">remove</span>
+              </button>
+              <div className="relative flex-1 min-w-0">
+                <input
+                  type="number"
+                  min={1}
+                  value={mealServings}
+                  onChange={(e) => setMealServings(Math.max(1, Math.floor(Number(e.target.value) || 1)))}
+                  className="w-full pl-3 pr-12 py-2.5 rounded-xl border border-outline-variant bg-surface-container-lowest text-on-surface text-center font-bold outline-none focus:border-primary [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                />
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 font-body-md text-on-surface-variant pointer-events-none">phần</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setMealServings((s) => s + 1)}
+                className="w-9 h-9 flex items-center justify-center rounded-full border border-outline-variant text-on-surface-variant hover:bg-surface-container-low transition-colors shrink-0"
+              >
+                <span className="material-symbols-outlined text-[18px]">add</span>
+              </button>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowMealModal(false)}
+                disabled={working}
+                className="flex-1 border border-outline-variant text-on-surface-variant font-label-md py-3 rounded-xl hover:bg-surface-container-low transition-colors font-bold disabled:opacity-50"
+              >
+                Hủy
+              </button>
+              <button
+                onClick={addToMealPlan}
+                disabled={working || !mealDate}
+                className="flex-1 bg-primary text-on-primary font-label-md py-3 rounded-xl hover:opacity-90 transition-opacity font-bold shadow-sm disabled:opacity-50"
+              >
+                Thêm
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

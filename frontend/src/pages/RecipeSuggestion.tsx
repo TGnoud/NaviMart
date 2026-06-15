@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import BottomNav from '../components/BottomNav';
+import NotificationDropdown from '../components/NotificationDropdown';
 import PaginationControls from '../components/PaginationControls';
 import SideNav from '../components/SideNav';
 import { CardGridSkeleton } from '../components/Skeleton';
@@ -37,10 +38,8 @@ function RecipeImage({ recipe, className }: { recipe: RecipeSummary; className: 
 export default function RecipeSuggestion() {
   const { showAlert } = useDialog();
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
-  const [searchResults, setSearchResults] = useState<RecipeSummary[] | null>(null);
   const [search, setSearch] = useState('');
   const [suggestionPage, setSuggestionPage] = useState(1);
-  const [searchPage, setSearchPage] = useState(1);
   const [loading, setLoading] = useState(true);
 
   const handleError = useCallback(
@@ -52,37 +51,38 @@ export default function RecipeSuggestion() {
 
   useEffect(() => {
     let cancelled = false;
-    recipesApi
-      .suggestions({ limit: SUGGESTION_LIMIT, prioritizeExpiring: true })
-      .then((data) => {
-        if (!cancelled) setSuggestions(data);
-      })
-      .catch((err) => handleError(err, 'Không tải được gợi ý món ăn.'))
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [handleError]);
-
-  useEffect(() => {
+    setLoading(true);
     const term = search.trim();
+
+    const fetchSuggestions = () => {
+      recipesApi
+        .suggestions({
+          limit: SUGGESTION_LIMIT,
+          prioritizeExpiring: true,
+          ...(term ? { q: term } : {}),
+        })
+        .then((data) => {
+          if (!cancelled) {
+            setSuggestions(data);
+            setSuggestionPage(1);
+          }
+        })
+        .catch((err) => handleError(err, 'Không tải được gợi ý món ăn.'))
+        .finally(() => {
+          if (!cancelled) setLoading(false);
+        });
+    };
+
     if (!term) {
-      setSearchResults(null);
-      setSearchPage(1);
+      fetchSuggestions();
       return;
     }
-    const timer = setTimeout(() => {
-      recipesApi
-        .list({ q: term, limit: SUGGESTION_LIMIT })
-        .then((data) => {
-          setSearchResults(data);
-          setSearchPage(1);
-        })
-        .catch((err) => handleError(err, 'Không tìm kiếm được món ăn.'));
-    }, 300);
-    return () => clearTimeout(timer);
+
+    const timer = setTimeout(fetchSuggestions, 300);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
   }, [search, handleError]);
 
   const featured = suggestions[0];
@@ -96,103 +96,79 @@ export default function RecipeSuggestion() {
       ),
     [others, suggestionPage],
   );
-  const pagedSearchResults = useMemo(
-    () =>
-      (searchResults ?? []).slice(
-        (searchPage - 1) * RECIPE_PAGE_SIZE,
-        searchPage * RECIPE_PAGE_SIZE,
-      ),
-    [searchResults, searchPage],
-  );
 
   useEffect(() => {
     const totalPages = Math.max(1, Math.ceil(others.length / RECIPE_PAGE_SIZE));
     if (suggestionPage > totalPages) setSuggestionPage(totalPages);
   }, [others.length, suggestionPage]);
 
-  useEffect(() => {
-    const totalPages = Math.max(
-      1,
-      Math.ceil((searchResults?.length ?? 0) / RECIPE_PAGE_SIZE),
-    );
-    if (searchPage > totalPages) setSearchPage(totalPages);
-  }, [searchResults?.length, searchPage]);
-
   return (
     <div className="bg-surface text-on-surface h-screen overflow-hidden flex flex-col md:flex-row">
       <SideNav />
-
-      <main className="flex-1 overflow-y-auto md:ml-64 w-full bg-surface relative">
-        <div className="absolute top-0 left-0 w-full h-48 bg-gradient-to-b from-surface-container-low to-transparent pointer-events-none -z-10"></div>
-        <div className="p-6 md:p-10 max-w-7xl mx-auto space-y-10 mt-4 md:mt-0 pb-[100px] md:pb-10">
-          <header className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-            <div>
-              <h1 className="font-headline-md text-headline-md text-primary mb-2">Gợi ý món ăn thông minh</h1>
-              <p className="font-body-md text-body-md text-on-surface-variant mb-2">Dựa trên nguyên liệu sẵn có trong tủ lạnh của bạn.</p>
-              <Link to="/recipe-editor" className="inline-flex items-center gap-1.5 text-primary font-label-md font-bold hover:underline mb-4">
-                <span className="material-symbols-outlined text-[20px]">add_circle</span>
-                Tạo công thức mới
+      <div className="flex-1 flex flex-col md:ml-64 w-full h-full relative">
+        <header className="hidden md:flex bg-surface dark:bg-surface-dim border-b border-outline-variant w-full shrink-0 z-30">
+          <div className="flex justify-between items-center w-full h-nav-height px-margin-mobile max-w-7xl mx-auto">
+            <div className="flex items-center gap-2 text-on-surface-variant">
+              <Link to="/home" className="hover:text-primary transition-colors flex items-center">
+                <span className="material-symbols-outlined text-[20px]">home</span>
+              </Link>
+              <span className="text-sm">/</span>
+              <span className="font-bold text-primary text-sm">Gợi ý món ăn</span>
+            </div>
+            <div className="flex gap-4">
+              <NotificationDropdown />
+              <Link to="/profile" className="text-on-surface-variant font-medium hover:bg-surface-container-high dark:hover:bg-surface-container transition-colors p-2 rounded-full flex items-center justify-center active:opacity-80 active:scale-95 duration-150">
+                <span className="material-symbols-outlined">account_circle</span>
               </Link>
             </div>
-            <div className="w-full md:w-[400px]">
-              <label className="font-body-md text-body-md text-on-surface mb-stack-sm block font-medium">Tìm kiếm món ăn</label>
-              <div className="relative group">
-                <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-primary transition-colors">search</span>
-                <input
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3 border border-[#C1C1C1] rounded-none bg-surface-container-lowest font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-shadow placeholder:text-outline"
-                  placeholder="Nhập tên món hoặc nguyên liệu..."
-                  type="text"
-                />
-              </div>
-            </div>
-          </header>
+          </div>
+        </header>
 
-          {loading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              <CardGridSkeleton count={8} />
-            </div>
-          ) : searchResults !== null ? (
-            <section>
-              <h3 className="font-headline-sm text-headline-sm text-on-surface mb-6">Kết quả tìm kiếm ({searchResults.length})</h3>
-              {searchResults.length === 0 ? (
-                <p className="font-body-md text-on-surface-variant">Không tìm thấy món ăn phù hợp.</p>
-              ) : (
-                <>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                  {pagedSearchResults.map((recipe) => (
-                    <Link key={recipe.id} to={`/recipe-detail/${recipe.id}`} className="bg-surface-container-lowest rounded-lg border border-outline-variant shadow-sm overflow-hidden flex flex-col group cursor-pointer hover:shadow-md transition-all">
-                      <div className="relative h-40 overflow-hidden">
-                        <RecipeImage recipe={recipe} className="w-full h-full" />
-                      </div>
-                      <div className="p-4 flex flex-col flex-1">
-                        <h4 className="font-headline-sm text-headline-sm text-on-surface mb-1">{recipe.name}</h4>
-                        <div className="flex items-center gap-3 text-on-surface-variant font-body-md text-body-md">
-                          <span className="flex items-center gap-1"><span className="material-symbols-outlined text-[16px]">schedule</span> {recipe.cookTimeMinutes} phút</span>
-                          <span className="flex items-center gap-1"><span className="material-symbols-outlined text-[16px]">signal_cellular_alt</span> {DIFFICULTY_LABELS[recipe.difficulty]}</span>
-                        </div>
-                      </div>
-                    </Link>
-                  ))}
+        <main className="flex-1 overflow-y-auto w-full bg-surface relative">
+          <div className="absolute top-0 left-0 w-full h-48 bg-gradient-to-b from-surface-container-low to-transparent pointer-events-none -z-10"></div>
+          <div className="p-6 md:p-10 max-w-7xl mx-auto space-y-10 mt-4 md:mt-0 pb-[100px] md:pb-10">
+            <header className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+              <div>
+                <h1 className="font-headline-md text-headline-md text-primary mb-2">Gợi ý món ăn thông minh</h1>
+                <p className="font-body-md text-body-md text-on-surface-variant mb-2">Dựa trên nguyên liệu sẵn có trong tủ lạnh của bạn.</p>
+                <Link to="/recipe-editor" className="inline-flex items-center gap-1.5 text-primary font-label-md font-bold hover:underline mb-4">
+                  <span className="material-symbols-outlined text-[20px]">add_circle</span>
+                  Tạo công thức mới
+                </Link>
+              </div>
+              <div className="w-full md:w-[400px]">
+                <label className="font-body-md text-body-md text-on-surface mb-stack-sm block font-medium">Tìm kiếm món ăn</label>
+                <div className="relative group">
+                  <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-primary transition-colors">search</span>
+                  <input
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="w-full pl-12 pr-4 py-3 border border-[#C1C1C1] rounded-none bg-surface-container-lowest font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-shadow placeholder:text-outline"
+                    placeholder="Nhập tên món ăn..."
+                    type="text"
+                  />
                 </div>
-                <PaginationControls
-                  page={searchPage}
-                  pageSize={RECIPE_PAGE_SIZE}
-                  totalItems={searchResults.length}
-                  onPageChange={setSearchPage}
-                />
-                </>
-              )}
-            </section>
-          ) : suggestions.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-16 text-on-surface-variant text-center">
-              <span className="material-symbols-outlined text-6xl mb-4 text-outline">skillet</span>
-              <h3 className="font-headline-sm text-headline-sm text-on-surface mb-2">Chưa có gợi ý nào</h3>
-              <p className="font-body-md text-body-md">Hãy thêm thực phẩm vào tủ lạnh để nhận gợi ý món ăn phù hợp.</p>
-            </div>
-          ) : (
-            <>
+              </div>
+            </header>
+
+            {loading ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <CardGridSkeleton count={8} />
+              </div>
+            ) : suggestions.length === 0 ? (
+              search.trim() ? (
+                <div className="py-16 text-on-surface-variant text-center">
+                  <p className="font-body-md">Không tìm thấy món ăn phù hợp.</p>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center py-16 text-on-surface-variant text-center">
+                  <span className="material-symbols-outlined text-6xl mb-4 text-outline">skillet</span>
+                  <h3 className="font-headline-sm text-headline-sm text-on-surface mb-2">Chưa có gợi ý nào</h3>
+                  <p className="font-body-md text-body-md">Hãy thêm thực phẩm vào tủ lạnh để nhận gợi ý món ăn phù hợp.</p>
+                </div>
+              )
+            ) : (
+              <>
               <section className="hidden">
                 <div className="flex items-center gap-3 mb-6">
                   <div className="w-8 h-8 rounded-full bg-error-container flex items-center justify-center text-error">
@@ -285,7 +261,9 @@ export default function RecipeSuggestion() {
 
                   <section>
                     <div className="flex items-center justify-between mb-6">
-                      <h3 className="font-headline-sm text-headline-sm text-on-surface">Tất cả công thức</h3>
+                      <h3 className="font-headline-sm text-headline-sm text-on-surface">
+                        {search.trim() ? `Kết quả tìm kiếm (${suggestions.length})` : 'Tất cả công thức'}
+                      </h3>
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -326,6 +304,7 @@ export default function RecipeSuggestion() {
           )}
         </div>
       </main>
+      </div>
 
       <BottomNav />
     </div>

@@ -5,6 +5,7 @@ import {
   IsInt,
   IsNumber,
   IsOptional,
+  IsString,
   Max,
   Min,
 } from 'class-validator';
@@ -40,4 +41,9 @@ export class RecipeSuggestionsQueryDto {
   )
   @IsBoolean()
   prioritizeExpiring?: boolean;
+
+  @ApiPropertyOptional({ example: 'chicken' })
+  @IsOptional()
+  @IsString()
+  q?: string;
 }

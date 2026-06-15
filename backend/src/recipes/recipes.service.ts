@@ -96,8 +96,18 @@ export class RecipesService {
       .lean()
       .exec();
 
+    const filter: Record<string, any> = { status: 'approved' };
+    if (query.q) {
+      const words = query.q.trim().split(/\s+/).filter(Boolean);
+      if (words.length > 0) {
+        filter.$and = words.map((word) => ({
+          name: { $regex: new RegExp(this.escapeRegExp(word), 'i') },
+        }));
+      }
+    }
+
     const recipes = await this.recipeModel
-      .find({ status: 'approved' })
+      .find(filter)
       .limit(SUGGESTION_RECIPE_SCAN_LIMIT)
       .exec();
 
@@ -415,12 +425,12 @@ export class RecipesService {
 
   private buildRecipeSort(
     query: ListRecipesQueryDto,
-  ): Record<string, 1 | -1 | { $meta: 'textScore' }> {
+  ): Record<string, 1 | -1> {
     if (query.sort === 'popular') {
       return { favoritesCount: -1, createdAt: -1 };
     }
 
-    return query.q ? { score: { $meta: 'textScore' } } : { createdAt: -1 };
+    return { createdAt: -1 };
   }
 
   private getActiveFamilyId(user: AuthenticatedUser) {
@@ -433,7 +443,12 @@ export class RecipesService {
     };
 
     if (query.q) {
-      filter.$text = { $search: query.q.trim() };
+      const words = query.q.trim().split(/\s+/).filter(Boolean);
+      if (words.length > 0) {
+        filter.$and = words.map((word) => ({
+          name: { $regex: new RegExp(this.escapeRegExp(word), 'i') },
+        }));
+      }
     }
     if (query.ingredient) {
       filter['ingredients.name'] = {
@@ -512,6 +527,10 @@ export class RecipesService {
 
   private normalizeName(name: string) {
     return name.trim().toLowerCase();
+  }
+
+  private escapeRegExp(string: string) {
+    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   }
 
   private toRecipeSummary(recipe: RecipeDocument | Recipe) {

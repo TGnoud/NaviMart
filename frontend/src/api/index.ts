@@ -361,7 +361,7 @@ export const recipesApi = {
 
   get: (recipeId: string) => apiRequest<RecipeDetail>(`/recipes/${recipeId}`),
 
-  suggestions: (query: { limit?: number; minMatch?: number; prioritizeExpiring?: boolean } = {}) =>
+  suggestions: (query: { limit?: number; minMatch?: number; prioritizeExpiring?: boolean; q?: string } = {}) =>
     apiRequest<RecipeSuggestion[]>('/recipes/suggestions', { query }),
 
   favorites: () => apiRequest<RecipeSummary[]>('/recipes/favorites'),

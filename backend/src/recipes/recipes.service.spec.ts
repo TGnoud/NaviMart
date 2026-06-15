@@ -163,6 +163,22 @@ describe('RecipesService', () => {
       expect(result[0].recipe.name).toBe('Use the milk');
       expect(result[0].expiringMatchedCount).toBe(1);
     });
+
+    it('filters recipes by query q matching only names and all words', async () => {
+      const user = withActiveFamily();
+      pantryItemModel.find.mockReturnValue(mockQuery([]));
+      recipeModel.find.mockReturnValue(mockQuery([]));
+
+      await service.getSuggestions(user, { q: 'gà rán' });
+
+      expect(recipeModel.find).toHaveBeenCalledWith({
+        status: 'approved',
+        $and: [
+          { name: { $regex: new RegExp('gà', 'i') } },
+          { name: { $regex: new RegExp('rán', 'i') } },
+        ],
+      });
+    });
   });
 
   describe('findAll', () => {
@@ -179,19 +195,21 @@ describe('RecipesService', () => {
       expect(query.limit).toHaveBeenCalledWith(30);
     });
 
-    it('uses text search filter and text-score sort when q is present', async () => {
+    it('uses name regex filter and createdAt sort when q is present', async () => {
       const user = makeUser();
       const query = mockQuery([]);
       recipeModel.find.mockReturnValue(query);
       recipeFavoriteModel.find.mockReturnValue(mockQuery([]));
 
-      await service.findAll(user, { q: '  pho  ', sort: 'relevant' });
+      await service.findAll(user, { q: '  pho  ' });
 
       expect(recipeModel.find).toHaveBeenCalledWith({
         status: 'approved',
-        $text: { $search: 'pho' },
+        $and: [
+          { name: { $regex: new RegExp('pho', 'i') } },
+        ],
       });
-      expect(query.sort).toHaveBeenCalledWith({ score: { $meta: 'textScore' } });
+      expect(query.sort).toHaveBeenCalledWith({ createdAt: -1 });
     });
 
     it('flags favorite recipes', async () => {

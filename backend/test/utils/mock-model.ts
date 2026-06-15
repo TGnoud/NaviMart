@@ -49,6 +49,7 @@ export type MockModel = {
   aggregate: jest.Mock;
   create: jest.Mock;
   insertMany: jest.Mock;
+  findOneAndUpdate: jest.Mock;
   updateOne: jest.Mock;
   updateMany: jest.Mock;
   deleteOne: jest.Mock;
@@ -69,6 +70,7 @@ export function createMockModel(): MockModel {
     aggregate: jest.fn(() => mockQuery([])),
     create: jest.fn(),
     insertMany: jest.fn(),
+    findOneAndUpdate: jest.fn(() => mockQuery(null)),
     updateOne: jest.fn(() => mockQuery({ upsertedCount: 0, modifiedCount: 0 })),
     updateMany: jest.fn(() => mockQuery({ modifiedCount: 0 })),
     deleteOne: jest.fn(() => mockQuery({ deletedCount: 0 })),

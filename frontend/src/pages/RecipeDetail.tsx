@@ -36,6 +36,7 @@ export default function RecipeDetail() {
   const [loading, setLoading] = useState(true);
   const [working, setWorking] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
+  const [servings, setServings] = useState(0);
   const [showMealModal, setShowMealModal] = useState(false);
   const [mealDate, setMealDate] = useState(todayInputValue);
   const [mealSession, setMealSession] = useState<MealSession>('dinner');
@@ -51,15 +52,13 @@ export default function RecipeDetail() {
   useEffect(() => {
     if (!recipeId) return;
     let cancelled = false;
-    Promise.all([
-      recipesApi.get(recipeId),
-      recipesApi.missingIngredients(recipeId).catch(() => null),
-    ])
-      .then(([recipeData, missingData]) => {
+    recipesApi
+      .get(recipeId)
+      .then((recipeData) => {
         if (cancelled) return;
         setRecipe(recipeData);
         setIsFavorite(recipeData.isFavorite ?? false);
-        setMissing(missingData);
+        setServings(recipeData.servings || 1);
       })
       .catch((err) => handleError(err, 'Không tải được công thức.'))
       .finally(() => {
@@ -69,6 +68,24 @@ export default function RecipeDetail() {
       cancelled = true;
     };
   }, [recipeId, handleError]);
+
+  // Recompute missing ingredients whenever the chosen servings change so the
+  // "to buy" quantities always reflect the portion the user wants to cook.
+  useEffect(() => {
+    if (!recipeId || servings <= 0) return;
+    let cancelled = false;
+    recipesApi
+      .missingIngredients(recipeId, servings)
+      .then((data) => {
+        if (!cancelled) setMissing(data);
+      })
+      .catch(() => {
+        if (!cancelled) setMissing(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [recipeId, servings]);
 
   const toggleFavorite = async () => {
     if (!recipeId) return;
@@ -94,7 +111,7 @@ export default function RecipeDetail() {
     }
     setWorking(true);
     try {
-      const { shoppingList } = await recipesApi.generateShoppingList(recipeId);
+      const { shoppingList } = await recipesApi.generateShoppingList(recipeId, { servings });
       showAlert(`Đã tạo danh sách "${shoppingList.name}" với ${shoppingList.items.length} nguyên liệu còn thiếu!`);
       navigate(`/list-detail/${shoppingList.id}`);
     } catch (err) {
@@ -107,8 +124,15 @@ export default function RecipeDetail() {
   const openMealModal = () => {
     setMealDate(todayInputValue());
     setMealSession('dinner');
-    setMealServings(recipe?.servings ?? 1);
+    setMealServings(servings || recipe?.servings || 1);
     setShowMealModal(true);
+  };
+
+  // Scale a base-recipe quantity to the currently selected servings.
+  const baseServings = recipe?.servings || 1;
+  const scaleQty = (quantity: number) => {
+    const scaled = (quantity * (servings || baseServings)) / baseServings;
+    return Number(scaled.toFixed(2));
   };
 
   const addToMealPlan = async () => {
@@ -133,12 +157,18 @@ export default function RecipeDetail() {
     }
   };
 
-  const availabilityOf = (name: string) => {
-    const line = missing?.ingredients.find(
+  const missingLineOf = (name: string) =>
+    missing?.ingredients.find(
       (item) => item.name.toLowerCase() === name.toLowerCase(),
     );
+
+  const availabilityOf = (name: string) => {
+    const line = missingLineOf(name);
     return line ? !line.isMissing : true;
   };
+
+  // Drop trailing zeros so "2.00 qua" reads as "2 qua".
+  const fmtQty = (value: number) => Number(value.toFixed(2)).toString();
 
   return (
     <div className="bg-background text-on-background h-screen overflow-hidden antialiased flex">
@@ -244,10 +274,40 @@ export default function RecipeDetail() {
                       <span className="material-symbols-outlined text-primary">kitchen</span>
                       Nguyên liệu
                     </h2>
-                    <p className="font-label-sm text-label-sm text-on-surface-variant mb-4">Khẩu phần: {recipe.servings} người</p>
+                    <div className="flex items-center justify-between mb-4">
+                      <span className="font-label-sm text-label-sm text-on-surface-variant">Khẩu phần</span>
+                      <div className="flex items-center gap-1">
+                        <button
+                          type="button"
+                          onClick={() => setServings((s) => Math.max(1, s - 1))}
+                          className="w-8 h-8 flex items-center justify-center rounded-full border border-outline-variant text-on-surface-variant hover:bg-surface-container-low transition-colors"
+                          aria-label="Giảm khẩu phần"
+                        >
+                          <span className="material-symbols-outlined text-[18px]">remove</span>
+                        </button>
+                        <input
+                          type="number"
+                          min={1}
+                          value={servings}
+                          onChange={(e) => setServings(Math.max(1, Math.floor(Number(e.target.value) || 1)))}
+                          className="w-12 text-center font-bold text-on-surface bg-transparent outline-none focus:bg-surface-container-high rounded-md py-1 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setServings((s) => s + 1)}
+                          className="w-8 h-8 flex items-center justify-center rounded-full border border-outline-variant text-on-surface-variant hover:bg-surface-container-low transition-colors"
+                          aria-label="Tăng khẩu phần"
+                        >
+                          <span className="material-symbols-outlined text-[18px]">add</span>
+                        </button>
+                        <span className="font-label-sm text-label-sm text-on-surface-variant ml-1">người</span>
+                      </div>
+                    </div>
                     <ul className="space-y-4 font-body-md text-body-md">
                       {recipe.ingredients.map((ingredient) => {
                         const available = availabilityOf(ingredient.name);
+                        const line = missingLineOf(ingredient.name);
+                        const requiredQty = line ? line.requiredQuantity : scaleQty(ingredient.quantity);
                         return (
                           <li
                             key={`${ingredient.name}-${ingredient.unit}`}
@@ -259,7 +319,15 @@ export default function RecipeDetail() {
                               </div>
                               <div>
                                 <p className="text-on-surface">{ingredient.name}{ingredient.optional ? ' (tùy chọn)' : ''}</p>
-                                <p className="font-label-sm text-label-sm text-on-surface-variant">{ingredient.quantity} {ingredient.unit}</p>
+                                <p className="font-label-sm text-label-sm text-on-surface-variant">
+                                  Cần {fmtQty(requiredQty)} {ingredient.unit}
+                                  {line ? ` • Trong kho ${fmtQty(line.availableQuantity)} ${ingredient.unit}` : ''}
+                                </p>
+                                {line && line.missingQuantity > 0 && (
+                                  <p className="font-label-sm text-label-sm text-error font-medium">
+                                    Còn thiếu {fmtQty(line.missingQuantity)} {ingredient.unit}
+                                  </p>
+                                )}
                               </div>
                             </div>
                             <span className={`material-symbols-outlined ${available ? 'text-primary' : 'text-secondary-container'}`}>

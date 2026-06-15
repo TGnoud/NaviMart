@@ -22,6 +22,7 @@ const MAIN_SESSIONS: SessionDef[] = [
   { id: 'breakfast', session: 'breakfast', title: 'Bữa sáng', icon: 'wb_twilight', colorClass: 'text-primary', isMain: true },
   { id: 'lunch', session: 'lunch', title: 'Bữa trưa', icon: 'light_mode', colorClass: 'text-secondary', isMain: true },
   { id: 'dinner', session: 'dinner', title: 'Bữa tối', icon: 'bedtime', colorClass: 'text-tertiary', isMain: true },
+  { id: 'snack', session: 'snack', title: 'Bữa phụ', icon: 'cookie', colorClass: 'text-on-surface-variant', isMain: true },
 ];
 
 function startOfWeek(date: Date) {

@@ -242,7 +242,7 @@ describe('ShoppingListsService', () => {
       ).rejects.toBeInstanceOf(BadRequestException);
     });
 
-    it('moves bought items into the pantry and completes the list', async () => {
+    it('creates a new pantry item when nothing matches, and completes the list', async () => {
       const boughtItem = makeListItem({
         name: 'Eggs',
         quantity: 12,
@@ -254,26 +254,26 @@ describe('ShoppingListsService', () => {
       shoppingListModel.findOne.mockReturnValue(mockQuery(list));
       foodModel.find.mockReturnValue(mockQuery([]));
 
-      const createdPantry = [
-        {
-          _id: oid(),
-          familyId: list.familyId,
-          name: 'Eggs',
-          quantity: 12,
-          unit: 'pcs',
-          expiryDate: new Date('2099-01-01'),
-          location: 'fridge',
-          status: 'active',
-          source: 'shopping',
-        },
-      ];
-      pantryItemModel.insertMany.mockResolvedValue(createdPantry);
+      // No existing active item matches -> findOneAndUpdate returns null.
+      pantryItemModel.findOneAndUpdate.mockReturnValue(mockQuery(null));
+      pantryItemModel.create.mockResolvedValue({
+        _id: oid(),
+        familyId: list.familyId,
+        name: 'Eggs',
+        quantity: 12,
+        unit: 'pcs',
+        expiryDate: new Date('2099-01-01'),
+        location: 'fridge',
+        status: 'active',
+        source: 'shopping',
+      });
 
       const result = await service.complete(user, list._id.toString(), {
         defaultExpiryDays: 7,
       } as never);
 
-      expect(pantryItemModel.insertMany).toHaveBeenCalled();
+      expect(pantryItemModel.findOneAndUpdate).toHaveBeenCalled();
+      expect(pantryItemModel.create).toHaveBeenCalled();
       expect(inventoryEventsService.createMany).toHaveBeenCalledWith(
         expect.arrayContaining([
           expect.objectContaining({ type: 'added', source: 'shopping' }),
@@ -283,6 +283,43 @@ describe('ShoppingListsService', () => {
       expect(list.completedAt).toBeInstanceOf(Date);
       expect(result.pantryItems).toHaveLength(1);
       expect(result.pantryItems[0].name).toBe('Eggs');
+    });
+
+    it('merges into an existing active item with the same food, unit and expiry day', async () => {
+      const boughtItem = makeListItem({
+        name: 'Eggs',
+        quantity: 6,
+        unit: 'pcs',
+        checked: true,
+        status: 'bought',
+      });
+      const list = makeListDoc({ items: [boughtItem] });
+      shoppingListModel.findOne.mockReturnValue(mockQuery(list));
+      foodModel.find.mockReturnValue(mockQuery([]));
+
+      // An existing active item matches -> findOneAndUpdate returns the merged doc.
+      const mergedDoc = {
+        _id: oid(),
+        familyId: list.familyId,
+        name: 'Eggs',
+        quantity: 18,
+        unit: 'pcs',
+        expiryDate: new Date('2099-01-01'),
+        location: 'fridge',
+        status: 'active',
+        source: 'shopping',
+      };
+      pantryItemModel.findOneAndUpdate.mockReturnValue(mockQuery(mergedDoc));
+
+      const result = await service.complete(user, list._id.toString(), {
+        defaultExpiryDays: 7,
+      } as never);
+
+      expect(pantryItemModel.findOneAndUpdate).toHaveBeenCalled();
+      // No new row is created when an existing item absorbs the purchase.
+      expect(pantryItemModel.create).not.toHaveBeenCalled();
+      expect(result.pantryItems).toHaveLength(1);
+      expect(result.pantryItems[0].quantity).toBe(18);
     });
   });
 });

@@ -12,7 +12,10 @@ import { Food, FOOD_STORAGE_LOCATIONS } from '../catalog/schemas/food.schema';
 import { Family } from '../families/schemas/family.schema';
 import { resolveActiveFamilyId } from '../families/family-access.util';
 import { InventoryEventsService } from '../inventory-events/inventory-events.service';
-import { PantryItem } from '../pantry/schemas/pantry-item.schema';
+import {
+  PantryItem,
+  PantryItemDocument,
+} from '../pantry/schemas/pantry-item.schema';
 import { RealtimeService } from '../realtime/realtime.service';
 import { CompleteShoppingListDto } from './dto/complete-shopping-list.dto';
 import { CreateShoppingListItemDto } from './dto/create-shopping-list-item.dto';
@@ -226,54 +229,102 @@ export class ShoppingListsService {
       .exec();
     const foodById = new Map(foods.map((food) => [food._id.toString(), food]));
 
-    const createdPantryItems = await this.pantryItemModel.insertMany(
-      boughtItems.map((item) => {
-        const metadata = pantryMetadataByItemId.get(item._id.toString());
-        const food = item.foodId
-          ? foodById.get(item.foodId.toString())
-          : undefined;
+    // Move each bought item into the pantry, merging into an existing active
+    // item that matches the same food/name + unit + location + expiry day so
+    // buying more of something you already stock just tops up the quantity
+    // instead of creating a duplicate row.
+    const createdPantryItems: PantryItemDocument[] = [];
+    const inventoryEvents: Parameters<
+      InventoryEventsService['createMany']
+    >[0] = [];
 
-        return {
+    for (const item of boughtItems) {
+      const metadata = pantryMetadataByItemId.get(item._id.toString());
+      const food = item.foodId
+        ? foodById.get(item.foodId.toString())
+        : undefined;
+
+      const expiryDate = this.startOfDay(
+        metadata?.expiryDate ??
+          this.getDefaultExpiryDate(
+            food?.defaultShelfLifeDays ?? dto.defaultExpiryDays ?? 7,
+          ),
+      );
+      const location =
+        metadata?.location ??
+        food?.defaultStorageLocation ??
+        dto.defaultLocation ??
+        'fridge';
+      const note = metadata?.note ?? item.note;
+
+      const match: Record<string, unknown> = {
+        familyId: list.familyId,
+        status: 'active',
+        unit: item.unit,
+        location,
+        expiryDate: { $gte: expiryDate, $lt: this.addDays(expiryDate, 1) },
+        ...(item.foodId
+          ? { foodId: item.foodId }
+          : {
+              foodId: { $exists: false },
+              name: {
+                $regex: `^${this.escapeRegExp(item.name)}$`,
+                $options: 'i',
+              },
+            }),
+      };
+
+      const merged = await this.pantryItemModel
+        .findOneAndUpdate(
+          match,
+          [
+            {
+              $set: {
+                quantity: {
+                  $round: [{ $add: ['$quantity', item.quantity] }, 3],
+                },
+              },
+            },
+          ],
+          { new: true, updatePipeline: true },
+        )
+        .exec();
+
+      const pantryItem =
+        merged ??
+        (await this.pantryItemModel.create({
           familyId: list.familyId,
           foodId: item.foodId,
           categoryId: item.categoryId,
           name: item.name,
           quantity: item.quantity,
           unit: item.unit,
-          expiryDate:
-            metadata?.expiryDate ??
-            this.getDefaultExpiryDate(
-              food?.defaultShelfLifeDays ?? dto.defaultExpiryDays ?? 7,
-            ),
-          location:
-            metadata?.location ??
-            food?.defaultStorageLocation ??
-            dto.defaultLocation ??
-            'fridge',
+          expiryDate,
+          location,
           status: 'active',
           source: 'shopping',
           createdBy: new Types.ObjectId(user.userId),
-          note: metadata?.note ?? item.note,
-        };
-      }),
-    );
+          note,
+        }));
 
-    await this.inventoryEventsService.createMany(
-      createdPantryItems.map((item) => ({
-        familyId: item.familyId,
-        pantryItemId: item._id,
-        foodId: item.foodId,
-        categoryId: item.categoryId,
-        name: item.name,
+      createdPantryItems.push(pantryItem);
+      inventoryEvents.push({
+        familyId: pantryItem.familyId,
+        pantryItemId: pantryItem._id,
+        foodId: pantryItem.foodId,
+        categoryId: pantryItem.categoryId,
+        name: pantryItem.name,
         quantityDelta: item.quantity,
-        quantityAfter: item.quantity,
-        unit: item.unit,
+        quantityAfter: pantryItem.quantity,
+        unit: pantryItem.unit,
         type: 'added',
         source: 'shopping',
         createdBy: new Types.ObjectId(user.userId),
-        note: item.note,
-      })),
-    );
+        note,
+      });
+    }
+
+    await this.inventoryEventsService.createMany(inventoryEvents);
 
     list.status = 'completed';
     list.completedAt = new Date();
@@ -386,6 +437,24 @@ export class ShoppingListsService {
     const expiryDate = new Date();
     expiryDate.setDate(expiryDate.getDate() + daysFromToday);
     return expiryDate;
+  }
+
+  // Normalize to midnight so items bought on the same day with the same shelf
+  // life share one expiry value and can be merged in the pantry.
+  private startOfDay(date: Date) {
+    const result = new Date(date);
+    result.setHours(0, 0, 0, 0);
+    return result;
+  }
+
+  private addDays(date: Date, days: number) {
+    const result = new Date(date);
+    result.setDate(result.getDate() + days);
+    return result;
+  }
+
+  private escapeRegExp(value: string) {
+    return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   }
 
   private findItemOrThrow(

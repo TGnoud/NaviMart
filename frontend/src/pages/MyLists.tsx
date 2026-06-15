@@ -106,7 +106,9 @@ export default function MyLists() {
     try {
       if (modalMode === 'create') {
         const created = await shoppingListsApi.create({ name: listNameInput.trim() });
-        setActiveLists((lists) => [created, ...lists]);
+        // The backend also broadcasts shoppingList:updated to our own socket, so
+        // dedupe by id to avoid the list showing up twice (local add + echo).
+        setActiveLists((lists) => [created, ...lists.filter((list) => list.id !== created.id)]);
       } else if (modalMode === 'edit' && editingId) {
         const updated = await shoppingListsApi.update(editingId, { name: listNameInput.trim() });
         setActiveLists((lists) => lists.map((list) => (list.id === editingId ? updated : list)));

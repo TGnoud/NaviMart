@@ -14,7 +14,7 @@ const DIFFICULTY_LABELS: Record<string, string> = {
   hard: 'Khó',
 };
 
-const SUGGESTION_LIMIT = 30;
+const SUGGESTION_LIMIT = 500;
 const RECIPE_PAGE_SIZE = 8;
 
 function RecipeImage({ recipe, className }: { recipe: RecipeSummary; className: string }) {
@@ -87,7 +87,7 @@ export default function RecipeSuggestion() {
 
   const featured = suggestions[0];
   const secondFeatured = suggestions[1];
-  const others = suggestions.slice(2);
+  const others = suggestions;
   const pagedOthers = useMemo(
     () =>
       others.slice(
@@ -193,7 +193,7 @@ export default function RecipeSuggestion() {
             </div>
           ) : (
             <>
-              <section>
+              <section className="hidden">
                 <div className="flex items-center gap-3 mb-6">
                   <div className="w-8 h-8 rounded-full bg-error-container flex items-center justify-center text-error">
                     <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>warning</span>
@@ -285,7 +285,7 @@ export default function RecipeSuggestion() {
 
                   <section>
                     <div className="flex items-center justify-between mb-6">
-                      <h3 className="font-headline-sm text-headline-sm text-on-surface">Đề xuất khác cho bạn</h3>
+                      <h3 className="font-headline-sm text-headline-sm text-on-surface">Tất cả công thức</h3>
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">

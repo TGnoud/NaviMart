@@ -1,4 +1,6 @@
 import 'dotenv/config';
+import { existsSync, readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { hash } from 'bcryptjs';
 import mongoose, { Model } from 'mongoose';
 import {
@@ -27,6 +29,10 @@ import {
   PantryItem,
   PantryItemSchema,
 } from '../pantry/schemas/pantry-item.schema';
+import {
+  RecipeFavorite,
+  RecipeFavoriteSchema,
+} from '../recipes/schemas/recipe-favorite.schema';
 import { Recipe, RecipeSchema } from '../recipes/schemas/recipe.schema';
 import {
   ShoppingList,
@@ -82,6 +88,16 @@ type SeedRecipe = {
     fat: number;
   };
   tags: string[];
+};
+
+type CookpadRecipeRecord = {
+  title?: string;
+  url?: string;
+  image_url?: string;
+  intro?: string;
+  ingredients?: string[];
+  steps?: string[];
+  tips?: string[];
 };
 
 type SeedUser = {
@@ -593,6 +609,159 @@ const recipeImageMap: Record<string, string> = {
 };
 
 const recipeImage = (query: string) => commonsImage(recipeImageMap[query] ?? 'Vietnamese_cuisine_-_table_serving.jpg');
+
+const cookpadJsonPath = resolve(process.cwd(), '..', 'cookpad_recipes_full.json');
+
+function normalizeForMatch(value: string) {
+  return value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase();
+}
+
+function cleanCookpadText(value?: string) {
+  return (value ?? '')
+    .replace(/&amp;/g, '&')
+    .replace(/#\S+/g, '')
+    .replace(/\s*Xem thêm\s*$/i, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function truncateText(value: string, maxLength: number) {
+  return value.length <= maxLength ? value : `${value.slice(0, maxLength - 3).trim()}...`;
+}
+
+function cookpadImageUrl(value?: string) {
+  const imageUrl = cleanCookpadText(value);
+  if (!imageUrl || imageUrl.includes('logo_ogp')) return undefined;
+  return imageUrl.startsWith('//') ? `https:${imageUrl}` : imageUrl;
+}
+
+function inferCookpadIngredients(recipe: CookpadRecipeRecord): SeedRecipeIngredient[] {
+  const text = normalizeForMatch(`${recipe.title ?? ''} ${recipe.intro ?? ''}`);
+  const ingredients: SeedRecipeIngredient[] = [];
+  const add = (ingredient: SeedRecipeIngredient) => {
+    if (!ingredients.some((item) => item.foodName === ingredient.foodName)) {
+      ingredients.push(ingredient);
+    }
+  };
+  const has = (...keywords: string[]) => keywords.some((keyword) => text.includes(keyword));
+
+  if (has('banh mi')) add({ foodName: 'Banh mi', quantity: 2, unit: 'cai' });
+  if (has('pho')) add({ foodName: 'Pho kho', quantity: 300, unit: 'g' });
+  if (has('bun')) add({ foodName: 'Bun kho', quantity: 300, unit: 'g' });
+  if (has('spaghetti', 'udon', 'soba', 'nui', 'mi ', ' mi', 'mì')) {
+    add({ foodName: has('mi goi') ? 'Mi goi' : 'Mi y', quantity: has('mi goi') ? 2 : 250, unit: has('mi goi') ? 'goi' : 'g' });
+  }
+  if (has('com', 'cơm')) add({ foodName: 'Gao', quantity: 250, unit: 'g' });
+  if (has('ga ', ' ga', 'gà', 'canh ga')) add({ foodName: 'Thit ga', quantity: 400, unit: 'g' });
+  if (has('bo ', ' bo', 'bò')) add({ foodName: 'Thit bo', quantity: 350, unit: 'g' });
+  if (has('heo', 'thit', 'suon', 'ba chi', 'gio heo')) add({ foodName: 'Thit heo', quantity: 400, unit: 'g' });
+  if (has('tom', 'tôm')) add({ foodName: 'Tom', quantity: 300, unit: 'g' });
+  if (has('muc', 'hai san', 'hải sản')) add({ foodName: 'Muc', quantity: 300, unit: 'g' });
+  if (has('ca ', ' ca', 'cá')) add({ foodName: 'Ca thu', quantity: 400, unit: 'g' });
+  if (has('trung', 'trứng')) add({ foodName: 'Trung ga', quantity: 2, unit: 'qua' });
+  if (has('dau phu', 'dau hu', 'tofu', 'đậu phụ')) add({ foodName: 'Dau hu', quantity: 2, unit: 'hop' });
+  if (has('nam', 'nấm')) add({ foodName: 'Nam huong', quantity: 200, unit: 'g' });
+  if (has('rau muong')) add({ foodName: 'Rau muong', quantity: 1, unit: 'bo' });
+  if (has('rau', 'canh', 'cai')) add({ foodName: 'Bap cai', quantity: 300, unit: 'g' });
+  if (has('ca chua', 'cà chua', 'sot ca')) add({ foodName: 'Ca chua', quantity: 250, unit: 'g' });
+  if (has('dua leo')) add({ foodName: 'Dua leo', quantity: 150, unit: 'g' });
+  if (has('bap', 'ngo')) add({ foodName: 'Bap my', quantity: 1, unit: 'qua' });
+  if (has('khoai')) add({ foodName: 'Khoai tay', quantity: 300, unit: 'g' });
+  if (has('sua chua')) add({ foodName: 'Sua chua', quantity: 1, unit: 'hop' });
+  if (has('sua ', 'sữa')) add({ foodName: 'Sua tuoi', quantity: 150, unit: 'ml' });
+  if (has('gung', 'gừng')) add({ foodName: 'Gung', quantity: 20, unit: 'g' });
+  if (has('sa ', ' sa', 'sả')) add({ foodName: 'Sa', quantity: 20, unit: 'g' });
+  if (has('toi', 'tỏi')) add({ foodName: 'Toi', quantity: 15, unit: 'g' });
+  if (has('ot', 'ớt')) add({ foodName: 'Ot', quantity: 5, unit: 'g', optional: true });
+  if (ingredients.length === 0) add({ foodName: 'Gao', quantity: 250, unit: 'g' });
+  add({ foodName: 'Dau an', quantity: 15, unit: 'ml', optional: true });
+  add({ foodName: 'Nuoc mam', quantity: 15, unit: 'ml', optional: true });
+
+  return ingredients.slice(0, 6);
+}
+
+function cookpadSteps(recipe: CookpadRecipeRecord) {
+  const rawSteps = (recipe.steps ?? []).map(cleanCookpadText).filter(Boolean);
+  const usableSteps = rawSteps
+    .filter((step) => !step.includes('@'))
+    .flatMap((step) => step.split(/(?=\d+\.\s)/g))
+    .map((step) => truncateText(step, 260))
+    .filter(Boolean);
+
+  if (usableSteps.length > 0) return usableSteps.slice(0, 6);
+
+  const name = cleanCookpadText(recipe.title);
+  return [
+    `So che nguyen lieu cho mon ${name}.`,
+    'Uop va chuan bi gia vi vua an.',
+    'Nau tren lua vua den khi nguyen lieu chin va tham vi.',
+    'Trinh bay va dung nong.',
+  ];
+}
+
+function cookpadDifficulty(recipe: CookpadRecipeRecord): SeedRecipe['difficulty'] {
+  const text = normalizeForMatch(`${recipe.title ?? ''} ${recipe.intro ?? ''}`);
+  if (text.includes('ham') || text.includes('kho') || text.includes('quay')) return 'medium';
+  if (text.includes('don gian') || text.includes('nhanh') || text.includes('salad')) return 'easy';
+  return 'medium';
+}
+
+function cookpadCookTime(recipe: CookpadRecipeRecord) {
+  const text = normalizeForMatch(`${recipe.title ?? ''} ${recipe.intro ?? ''}`);
+  if (text.includes('salad') || text.includes('trung')) return 15;
+  if (text.includes('ham') || text.includes('kho') || text.includes('quay')) return 45;
+  if (text.includes('canh') || text.includes('bun') || text.includes('pho') || text.includes('mi')) return 30;
+  return 25;
+}
+
+function cookpadTags(recipe: CookpadRecipeRecord) {
+  const text = normalizeForMatch(`${recipe.title ?? ''} ${recipe.intro ?? ''}`);
+  const tags = ['cookpad'];
+  if (text.includes('chay')) tags.push('vegetarian');
+  if (text.includes('ga')) tags.push('chicken');
+  if (text.includes('bo')) tags.push('beef');
+  if (text.includes('tom') || text.includes('ca') || text.includes('muc')) tags.push('seafood');
+  if (text.includes('bun') || text.includes('pho') || text.includes('mi')) tags.push('noodle');
+  if (text.includes('canh') || text.includes('sup')) tags.push('soup');
+  if (text.includes('salad')) tags.push('salad');
+  return [...new Set(tags)].slice(0, 5);
+}
+
+function loadCookpadRecipes(): SeedRecipe[] {
+  if (!existsSync(cookpadJsonPath)) return [];
+
+  const records = JSON.parse(readFileSync(cookpadJsonPath, 'utf8')) as CookpadRecipeRecord[];
+  return records
+    .filter(
+      (record) =>
+        cleanCookpadText(record.title).length > 0 &&
+        !record.url?.includes('/tao-moi') &&
+        !record.image_url?.includes('logo_ogp'),
+    )
+    .map((record) => {
+      const name = truncateText(cleanCookpadText(record.title), 180);
+      const intro = cleanCookpadText(record.intro);
+      const description = intro
+        ? truncateText(intro, 780)
+        : `Cong thuc Cookpad cho mon ${name}.`;
+
+      return {
+        name,
+        description,
+        imageUrl: cookpadImageUrl(record.image_url),
+        cookTimeMinutes: cookpadCookTime(record),
+        difficulty: cookpadDifficulty(record),
+        servings: 2,
+        ingredients: inferCookpadIngredients(record),
+        steps: cookpadSteps(record),
+        nutrition: { calories: 420, protein: 22, carbs: 45, fat: 16 },
+        tags: cookpadTags(record),
+      };
+    });
+}
 
 const recipes: SeedRecipe[] = [
   {
@@ -1161,9 +1330,8 @@ const extraRecipes: SeedRecipe[] = [
   },
 ];
 
-const archivedDemoRecipeNames = ['Bap cai cuon dau hu', 'Sup ga bap my'];
-
-recipes.push(...extraRecipes.slice(0, 25));
+const cookpadRecipes = loadCookpadRecipes();
+recipes.splice(0, recipes.length, ...cookpadRecipes);
 
 const demoUsers: SeedUser[] = [
   {
@@ -1474,27 +1642,27 @@ shoppingLists.push(...extraShoppingLists);
 
 const mealPlans: SeedMealPlan[] = [
   {
-    recipeName: 'Salad trai cay sua tuoi',
+    recipeName: recipes[0]?.name,
     offsetDays: 0,
     session: 'breakfast',
     servings: 2,
     isCompleted: true,
   },
   {
-    recipeName: 'Thit bo xao rau cu',
+    recipeName: recipes[1]?.name,
     offsetDays: 0,
     session: 'dinner',
     servings: 3,
-    note: 'Uu tien dung thit bo sap het han.',
+    note: 'Uu tien mon Cookpad moi seed.',
   },
   {
-    recipeName: 'Canh ca chua trung',
+    recipeName: recipes[2]?.name,
     offsetDays: 1,
     session: 'lunch',
     servings: 3,
   },
   {
-    recipeName: 'Ga kho gung',
+    recipeName: recipes[3]?.name,
     offsetDays: 2,
     session: 'dinner',
     servings: 4,
@@ -1657,15 +1825,12 @@ async function upsertRecipes(
   return result;
 }
 
-async function archiveDroppedDemoRecipes(recipeModel: Model<Recipe>) {
-  await recipeModel
-    .updateMany(
-      {
-        normalizedName: { $in: archivedDemoRecipeNames.map(normalizeName) },
-      },
-      { $set: { status: 'archived' } },
-    )
-    .exec();
+async function resetRecipes(
+  recipeModel: Model<Recipe>,
+  recipeFavoriteModel: Model<RecipeFavorite>,
+) {
+  await recipeFavoriteModel.deleteMany({}).exec();
+  await recipeModel.deleteMany({}).exec();
 }
 
 async function upsertAdminUser(userModel: Model<User>) {
@@ -2049,6 +2214,10 @@ async function bootstrap() {
   const unitModel = mongoose.model(Unit.name, UnitSchema);
   const foodModel = mongoose.model(Food.name, FoodSchema);
   const recipeModel = mongoose.model(Recipe.name, RecipeSchema);
+  const recipeFavoriteModel = mongoose.model(
+    RecipeFavorite.name,
+    RecipeFavoriteSchema,
+  );
   const userModel = mongoose.model(User.name, UserSchema);
   const familyModel = mongoose.model(Family.name, FamilySchema);
   const pantryModel = mongoose.model(PantryItem.name, PantryItemSchema);
@@ -2063,8 +2232,8 @@ async function bootstrap() {
   const categoryBySlug = await upsertCategories(categoryModel);
   await upsertUnits(unitModel);
   const foodByName = await upsertFoods(foodModel, categoryBySlug);
+  await resetRecipes(recipeModel, recipeFavoriteModel);
   const recipeByName = await upsertRecipes(recipeModel, foodByName);
-  await archiveDroppedDemoRecipes(recipeModel);
   const adminEmail = await upsertAdminUser(userModel);
   const usersByEmail = await upsertDemoUsers(userModel);
   const family = await upsertDemoFamily(familyModel, userModel, usersByEmail);

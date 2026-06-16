@@ -128,11 +128,21 @@ export class ReportsService {
       { $sort: { wastedQuantity: -1 } },
     ]);
 
+    const now = new Date();
+    const vnTime = new Date(now.getTime() + 7 * 60 * 60 * 1000);
+    const startOfTodayVN = new Date(Date.UTC(
+      vnTime.getUTCFullYear(),
+      vnTime.getUTCMonth(),
+      vnTime.getUTCDate(),
+      0, 0, 0, 0
+    ));
+    const startOfToday = new Date(startOfTodayVN.getTime() - 7 * 60 * 60 * 1000);
+
     const expiredActiveItems = await this.pantryItemModel
       .find({
         familyId,
         status: 'active',
-        expiryDate: { $lt: new Date() },
+        expiryDate: { $lt: startOfToday },
       })
       .sort({ expiryDate: 1 })
       .exec();

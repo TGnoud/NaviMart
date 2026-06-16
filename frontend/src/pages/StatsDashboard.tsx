@@ -93,10 +93,12 @@ export default function StatsDashboard() {
       consumedMap.set(event.day, Math.abs(event.totalQuantityDelta));
     });
 
-  const consumedByDay = dateList.map((day) => ({
-    day,
-    value: consumedMap.get(day) ?? 0,
-  }));
+  const consumedByDay = dateList
+    .map((day) => ({
+      day,
+      value: consumedMap.get(day) ?? 0,
+    }))
+    .filter((entry) => entry.value > 0);
   const maxConsumed = Math.max(1, ...consumedByDay.map((entry) => entry.value));
 
   const topConsumed = trends?.topConsumed ?? [];

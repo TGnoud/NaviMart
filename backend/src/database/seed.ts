@@ -147,39 +147,39 @@ type SeedMealPlan = {
 
 const categories: SeedCategory[] = [
   {
-    name: 'Rau cu',
+    name: 'Rau củ',
     slug: 'rau-cu',
-    description: 'Rau xanh, cu qua va nam tuoi.',
+    description: 'Rau xanh, củ quả và nấm tươi.',
     icon: 'leaf',
   },
   {
-    name: 'Thit ca',
+    name: 'Thịt cá',
     slug: 'thit-ca',
-    description: 'Thit, ca, hai san va protein tuoi song.',
+    description: 'Thịt, cá, hải sản và protein tươi sống.',
     icon: 'beef',
   },
   {
-    name: 'Do kho',
+    name: 'Đồ khô',
     slug: 'do-kho',
-    description: 'Gao, mi, ngu coc va thuc pham kho.',
+    description: 'Gạo, mì, ngũ cốc và thực phẩm khô.',
     icon: 'package',
   },
   {
-    name: 'Gia vi',
+    name: 'Gia vị',
     slug: 'gia-vi',
-    description: 'Gia vi, sot, dau an va nguyen lieu nem.',
+    description: 'Gia vị, sốt, dầu ăn và nguyên liệu nêm.',
     icon: 'chef-hat',
   },
   {
-    name: 'Sua trung',
+    name: 'Sữa trứng',
     slug: 'sua-trung',
-    description: 'Sua, trung va cac san pham tu sua.',
+    description: 'Sữa, trứng và các sản phẩm từ sữa.',
     icon: 'egg',
   },
   {
-    name: 'Trai cay',
+    name: 'Trái cây',
     slug: 'trai-cay',
-    description: 'Trai cay tuoi va trai cay cat san.',
+    description: 'Trái cây tươi và trái cây cắt sẵn.',
     icon: 'apple',
   },
 ];
@@ -189,265 +189,265 @@ const units: SeedUnit[] = [
   { code: 'kg', name: 'Kilogram', type: 'weight' },
   { code: 'ml', name: 'Milliliter', type: 'volume' },
   { code: 'l', name: 'Liter', type: 'volume' },
-  { code: 'cai', name: 'Cai', type: 'count' },
-  { code: 'qua', name: 'Qua', type: 'count' },
-  { code: 'bo', name: 'Bo', type: 'count' },
-  { code: 'hop', name: 'Hop', type: 'package' },
-  { code: 'goi', name: 'Goi', type: 'package' },
+  { code: 'cai', name: 'Cái', type: 'count' },
+  { code: 'qua', name: 'Quả', type: 'count' },
+  { code: 'bo', name: 'Bó', type: 'count' },
+  { code: 'hop', name: 'Hộp', type: 'package' },
+  { code: 'goi', name: 'Gói', type: 'package' },
   { code: 'chai', name: 'Chai', type: 'package' },
-  { code: 'muong', name: 'Muong', type: 'count' },
+  { code: 'muong', name: 'Muỗng', type: 'count' },
 ];
 
 const foods: SeedFood[] = [
   {
-    name: 'Thit bo',
+    name: 'Thịt bò',
     categorySlug: 'thit-ca',
     defaultUnit: 'g',
     aliases: ['bo', 'beef'],
     defaultStorageLocation: 'fridge',
     defaultShelfLifeDays: 3,
-    storageTips: 'Bao quan ngan mat, dung som trong 1-3 ngay.',
+    storageTips: 'Bảo quản ngăn mát, dùng sớm trong 1-3 ngày.',
     barcode: '8934673009012',
   },
   {
-    name: 'Thit ga',
+    name: 'Thịt gà',
     categorySlug: 'thit-ca',
     defaultUnit: 'g',
     aliases: ['ga', 'chicken'],
     defaultStorageLocation: 'fridge',
     defaultShelfLifeDays: 2,
-    storageTips: 'De trong hop kin, tranh tiep xuc thuc pham chin.',
+    storageTips: 'Để trong hộp kín, tránh tiếp xúc thực phẩm chín.',
   },
   {
-    name: 'Ca hoi',
+    name: 'Cá hồi',
     categorySlug: 'thit-ca',
     defaultUnit: 'g',
     aliases: ['salmon'],
     defaultStorageLocation: 'fridge',
     defaultShelfLifeDays: 2,
-    storageTips: 'Giu lanh sau khi mua, nen dung trong 24-48 gio.',
+    storageTips: 'Giữ lạnh sau khi mua, nên dùng trong 24-48 giờ.',
   },
   {
-    name: 'Trung ga',
+    name: 'Trứng gà',
     categorySlug: 'sua-trung',
     defaultUnit: 'qua',
     aliases: ['trung'],
     defaultStorageLocation: 'fridge',
     defaultShelfLifeDays: 21,
-    storageTips: 'De trong vi tri on dinh nhiet do, khong rua truoc khi cat.',
+    storageTips: 'Để trong vị trí ổn định nhiệt độ, không rửa trước khi cắt.',
     barcode: '8934673005678',
   },
   {
-    name: 'Sua tuoi',
+    name: 'Sữa tươi',
     categorySlug: 'sua-trung',
     defaultUnit: 'ml',
     aliases: ['sua'],
     defaultStorageLocation: 'fridge',
     defaultShelfLifeDays: 5,
-    storageTips: 'Dong nap kin sau khi mo va dung trong vai ngay.',
+    storageTips: 'Đóng nắp kín sau khi mở và dùng trong vài ngày.',
     barcode: '8934673001234',
   },
   {
-    name: 'Ca rot',
+    name: 'Cà rốt',
     categorySlug: 'rau-cu',
     defaultUnit: 'g',
     aliases: ['carrot'],
     defaultStorageLocation: 'fridge',
     defaultShelfLifeDays: 14,
-    storageTips: 'Cat bo la, de ngan rau cu.',
+    storageTips: 'Cắt bỏ lá, để ngăn rau củ.',
   },
   {
-    name: 'Bong cai xanh',
+    name: 'Bông cải xanh',
     categorySlug: 'rau-cu',
     defaultUnit: 'g',
     aliases: ['broccoli'],
     defaultStorageLocation: 'fridge',
     defaultShelfLifeDays: 5,
-    storageTips: 'De kho thoang trong tui giay hoac hop co lo thoang.',
+    storageTips: 'Để khô thoáng trong túi giấy hoặc hộp có lỗ thoáng.',
   },
   {
-    name: 'Ca chua',
+    name: 'Cà chua',
     categorySlug: 'rau-cu',
     defaultUnit: 'g',
     aliases: ['tomato'],
     defaultStorageLocation: 'pantry',
     defaultShelfLifeDays: 7,
-    storageTips: 'De noi thoang mat neu chua chin qua.',
+    storageTips: 'Để nơi thoáng mát nếu chưa chín quá.',
   },
   {
-    name: 'Hanh tay',
+    name: 'Hành tây',
     categorySlug: 'rau-cu',
     defaultUnit: 'g',
     aliases: ['onion'],
     defaultStorageLocation: 'pantry',
     defaultShelfLifeDays: 21,
-    storageTips: 'De noi kho, thoang, tranh anh nang truc tiep.',
+    storageTips: 'Để nơi khô, thoáng, tránh ánh nắng trực tiếp.',
   },
   {
-    name: 'Gao',
+    name: 'Gạo',
     categorySlug: 'do-kho',
     defaultUnit: 'g',
     aliases: ['rice'],
     defaultStorageLocation: 'pantry',
     defaultShelfLifeDays: 180,
-    storageTips: 'Bao quan trong hop kin, tranh am.',
+    storageTips: 'Bảo quản trong hộp kín, tránh ẩm.',
   },
   {
-    name: 'Mi goi',
+    name: 'Mì gói',
     categorySlug: 'do-kho',
     defaultUnit: 'goi',
     aliases: ['mi an lien'],
     defaultStorageLocation: 'pantry',
     defaultShelfLifeDays: 120,
-    storageTips: 'De noi kho mat.',
+    storageTips: 'Để nơi khô mát.',
     barcode: '8934673003456',
   },
   {
-    name: 'Dau an',
+    name: 'Dầu ăn',
     categorySlug: 'gia-vi',
     defaultUnit: 'ml',
     aliases: ['oil'],
     defaultStorageLocation: 'pantry',
     defaultShelfLifeDays: 180,
-    storageTips: 'Dong nap kin, tranh anh nang.',
+    storageTips: 'Đóng nắp kín, tránh ánh nắng.',
   },
   {
-    name: 'Nuoc mam',
+    name: 'Nước mắm',
     categorySlug: 'gia-vi',
     defaultUnit: 'ml',
     aliases: ['fish sauce'],
     defaultStorageLocation: 'pantry',
     defaultShelfLifeDays: 365,
-    storageTips: 'Dong nap kin sau khi dung.',
+    storageTips: 'Đóng nắp kín sau khi dùng.',
   },
   {
-    name: 'Gung',
+    name: 'Gừng',
     categorySlug: 'gia-vi',
     defaultUnit: 'g',
     aliases: ['ginger'],
     defaultStorageLocation: 'pantry',
     defaultShelfLifeDays: 14,
-    storageTips: 'De noi kho thoang hoac ngan mat neu da cat.',
+    storageTips: 'Để nơi khô thoáng hoặc ngăn mát nếu đã cắt.',
   },
   {
-    name: 'Tao',
+    name: 'Táo',
     categorySlug: 'trai-cay',
     defaultUnit: 'qua',
     aliases: ['apple'],
     defaultStorageLocation: 'fridge',
     defaultShelfLifeDays: 21,
-    storageTips: 'De ngan mat de giu do gion lau hon.',
+    storageTips: 'Để ngăn mát để giữ độ giòn lâu hơn.',
   },
   {
-    name: 'Chuoi',
+    name: 'Chuối',
     categorySlug: 'trai-cay',
     defaultUnit: 'qua',
     aliases: ['banana'],
     defaultStorageLocation: 'pantry',
     defaultShelfLifeDays: 5,
-    storageTips: 'De ngoai nhiet do phong, tach khoi trai cay khac neu chin nhanh.',
+    storageTips: 'Để ngoài nhiệt độ phòng, tách khỏi trái cây khác nếu chín nhanh.',
   },
 ];
 
 const extraFoods: SeedFood[] = [
   {
-    name: 'Thit heo',
+    name: 'Thịt heo',
     categorySlug: 'thit-ca',
     defaultUnit: 'g',
     aliases: ['heo', 'pork'],
     defaultStorageLocation: 'fridge',
     defaultShelfLifeDays: 3,
-    storageTips: 'Bao quan ngan mat trong hop kin, nen dung trong 2-3 ngay.',
+    storageTips: 'Bảo quản ngăn mát trong hộp kín, nên dùng trong 2-3 ngày.',
   },
   {
-    name: 'Tom',
+    name: 'Tôm',
     categorySlug: 'thit-ca',
     defaultUnit: 'g',
     aliases: ['shrimp'],
     defaultStorageLocation: 'freezer',
     defaultShelfLifeDays: 30,
-    storageTips: 'Cap dong neu chua dung ngay, ra dong trong ngan mat.',
+    storageTips: 'Cấp đông nếu chưa dùng ngay, rã đông trong ngăn mát.',
   },
   {
-    name: 'Muc',
+    name: 'Mực',
     categorySlug: 'thit-ca',
     defaultUnit: 'g',
     aliases: ['squid'],
     defaultStorageLocation: 'freezer',
     defaultShelfLifeDays: 30,
-    storageTips: 'Lam sach, de hop kin va cap dong.',
+    storageTips: 'Làm sạch, để hộp kín và cấp đông.',
   },
   {
-    name: 'Ca thu',
+    name: 'Cá thu',
     categorySlug: 'thit-ca',
     defaultUnit: 'g',
     aliases: ['mackerel'],
     defaultStorageLocation: 'freezer',
     defaultShelfLifeDays: 45,
-    storageTips: 'Chia khau phan nho truoc khi cap dong.',
+    storageTips: 'Chia khẩu phần nhỏ trước khi cấp đông.',
   },
   {
-    name: 'Dau hu',
+    name: 'Đậu hũ',
     categorySlug: 'sua-trung',
     defaultUnit: 'hop',
     aliases: ['tofu'],
     defaultStorageLocation: 'fridge',
     defaultShelfLifeDays: 5,
-    storageTips: 'Ngam nuoc sach va thay nuoc moi ngay neu da mo hop.',
+    storageTips: 'Ngâm nước sạch và thay nước mỗi ngày nếu đã mở hộp.',
   },
   {
-    name: 'Sua chua',
+    name: 'Sữa chua',
     categorySlug: 'sua-trung',
     defaultUnit: 'hop',
     aliases: ['yogurt'],
     defaultStorageLocation: 'fridge',
     defaultShelfLifeDays: 14,
-    storageTips: 'Giu lanh lien tuc, dung truoc han tren nap.',
+    storageTips: 'Giữ lạnh liên tục, dùng trước hạn trên nắp.',
   },
   {
-    name: 'Pho kho',
+    name: 'Phở khô',
     categorySlug: 'do-kho',
     defaultUnit: 'g',
     aliases: ['pho noodles'],
     defaultStorageLocation: 'pantry',
     defaultShelfLifeDays: 180,
-    storageTips: 'De noi kho thoang, dong kin sau khi mo.',
+    storageTips: 'Để nơi khô thoáng, đóng kín sau khi mở.',
   },
   {
-    name: 'Bun kho',
+    name: 'Bún khô',
     categorySlug: 'do-kho',
     defaultUnit: 'g',
     aliases: ['vermicelli'],
     defaultStorageLocation: 'pantry',
     defaultShelfLifeDays: 180,
-    storageTips: 'Bao quan trong hop kin tranh am.',
+    storageTips: 'Bảo quản trong hộp kín tránh ẩm.',
   },
   {
-    name: 'Mi y',
+    name: 'Mì Ý',
     categorySlug: 'do-kho',
     defaultUnit: 'g',
     aliases: ['spaghetti', 'pasta'],
     defaultStorageLocation: 'pantry',
     defaultShelfLifeDays: 240,
-    storageTips: 'De noi kho mat, tranh anh nang truc tiep.',
+    storageTips: 'Để nơi khô mát, tránh ánh nắng trực tiếp.',
   },
   {
-    name: 'Banh mi',
+    name: 'Bánh mì',
     categorySlug: 'do-kho',
     defaultUnit: 'cai',
     aliases: ['bread'],
     defaultStorageLocation: 'pantry',
     defaultShelfLifeDays: 2,
-    storageTips: 'Dung trong ngay, co the cap dong neu mua nhieu.',
+    storageTips: 'Dùng trong ngày, có thể cấp đông nếu mua nhiều.',
   },
   {
-    name: 'Khoai tay',
+    name: 'Khoai tây',
     categorySlug: 'rau-cu',
     defaultUnit: 'g',
     aliases: ['potato'],
     defaultStorageLocation: 'pantry',
     defaultShelfLifeDays: 21,
-    storageTips: 'De noi kho toi, tranh de gan hanh tay.',
+    storageTips: 'Để nơi khô tối, tránh để gần hành tây.',
   },
   {
     name: 'Khoai lang',
@@ -456,88 +456,88 @@ const extraFoods: SeedFood[] = [
     aliases: ['sweet potato'],
     defaultStorageLocation: 'pantry',
     defaultShelfLifeDays: 14,
-    storageTips: 'De noi kho thoang, khong de trong tu lanh lau.',
+    storageTips: 'Để nơi khô thoáng, không để trong tủ lạnh lâu.',
   },
   {
-    name: 'Rau muong',
+    name: 'Rau muống',
     categorySlug: 'rau-cu',
     defaultUnit: 'bo',
     aliases: ['water spinach'],
     defaultStorageLocation: 'fridge',
     defaultShelfLifeDays: 3,
-    storageTips: 'Boc giay am va de ngan rau.',
+    storageTips: 'Bọc giấy ẩm và để ngăn rau.',
   },
   {
-    name: 'Bap cai',
+    name: 'Bắp cải',
     categorySlug: 'rau-cu',
     defaultUnit: 'g',
     aliases: ['cabbage'],
     defaultStorageLocation: 'fridge',
     defaultShelfLifeDays: 10,
-    storageTips: 'Boc kin phan da cat va de ngan mat.',
+    storageTips: 'Bọc kín phần đã cắt và để ngăn mát.',
   },
   {
-    name: 'Dua leo',
+    name: 'Dưa leo',
     categorySlug: 'rau-cu',
     defaultUnit: 'g',
     aliases: ['cucumber'],
     defaultStorageLocation: 'fridge',
     defaultShelfLifeDays: 5,
-    storageTips: 'De ngan rau, tranh dong nuoc.',
+    storageTips: 'Để ngăn rau, tránh đọng nước.',
   },
   {
-    name: 'Nam huong',
+    name: 'Nấm hương',
     categorySlug: 'rau-cu',
     defaultUnit: 'g',
     aliases: ['mushroom'],
     defaultStorageLocation: 'fridge',
     defaultShelfLifeDays: 5,
-    storageTips: 'De trong tui giay hoac hop thoang khi.',
+    storageTips: 'Để trong túi giấy hoặc hộp thoáng khí.',
   },
   {
-    name: 'Bap my',
+    name: 'Bắp Mỹ',
     categorySlug: 'rau-cu',
     defaultUnit: 'qua',
     aliases: ['corn'],
     defaultStorageLocation: 'fridge',
     defaultShelfLifeDays: 5,
-    storageTips: 'Giu nguyen vo neu chua dung ngay.',
+    storageTips: 'Giữ nguyên vỏ nếu chưa dùng ngay.',
   },
   {
-    name: 'Dau que',
+    name: 'Đậu que',
     categorySlug: 'rau-cu',
     defaultUnit: 'g',
     aliases: ['green bean'],
     defaultStorageLocation: 'fridge',
     defaultShelfLifeDays: 5,
-    storageTips: 'De kho thoang trong hop kin.',
+    storageTips: 'Để khô thoáng trong hộp kín.',
   },
   {
-    name: 'Toi',
+    name: 'Tỏi',
     categorySlug: 'gia-vi',
     defaultUnit: 'g',
     aliases: ['garlic'],
     defaultStorageLocation: 'pantry',
     defaultShelfLifeDays: 60,
-    storageTips: 'De noi kho thoang, tranh am moc.',
+    storageTips: 'Để nơi khô thoáng, tránh ẩm mốc.',
   },
   {
-    name: 'Sa',
+    name: 'Sả',
     categorySlug: 'gia-vi',
     defaultUnit: 'g',
     aliases: ['lemongrass'],
     defaultStorageLocation: 'fridge',
     defaultShelfLifeDays: 14,
-    storageTips: 'Boc kin va de ngan mat hoac cap dong.',
+    storageTips: 'Bọc kín và để ngăn mát hoặc cấp đông.',
   },
   {
-    name: 'Ot',
+    name: 'Ớt',
     categorySlug: 'gia-vi',
     defaultUnit: 'g',
     aliases: ['chili'],
     defaultStorageLocation: 'fridge',
     defaultShelfLifeDays: 10,
-    storageTips: 'De kho, co the cap dong neu mua nhieu.',
+    storageTips: 'Để khô, có thể cấp đông nếu mua nhiều.',
   },
   {
     name: 'Cam',
@@ -546,25 +546,25 @@ const extraFoods: SeedFood[] = [
     aliases: ['orange'],
     defaultStorageLocation: 'fridge',
     defaultShelfLifeDays: 14,
-    storageTips: 'De ngan mat de giu nuoc lau hon.',
+    storageTips: 'Để ngăn mát để giữ nước lâu hơn.',
   },
   {
-    name: 'Dua hau',
+    name: 'Dưa hấu',
     categorySlug: 'trai-cay',
     defaultUnit: 'g',
     aliases: ['watermelon'],
     defaultStorageLocation: 'fridge',
     defaultShelfLifeDays: 5,
-    storageTips: 'Cat ra thi boc kin va dung trong 2-3 ngay.',
+    storageTips: 'Cắt ra thì bọc kín và dùng trong 2-3 ngày.',
   },
   {
-    name: 'Dau phong',
+    name: 'Đậu phộng',
     categorySlug: 'do-kho',
     defaultUnit: 'g',
     aliases: ['peanut'],
     defaultStorageLocation: 'pantry',
     defaultShelfLifeDays: 120,
-    storageTips: 'Bao quan hop kin, tranh dau bi hoi.',
+    storageTips: 'Bảo quản hộp kín, tránh dầu bị ôi.',
   },
 ];
 
@@ -648,37 +648,37 @@ function inferCookpadIngredients(recipe: CookpadRecipeRecord): SeedRecipeIngredi
   };
   const has = (...keywords: string[]) => keywords.some((keyword) => text.includes(keyword));
 
-  if (has('banh mi')) add({ foodName: 'Banh mi', quantity: 2, unit: 'cai' });
-  if (has('pho')) add({ foodName: 'Pho kho', quantity: 300, unit: 'g' });
-  if (has('bun')) add({ foodName: 'Bun kho', quantity: 300, unit: 'g' });
+  if (has('banh mi')) add({ foodName: 'Bánh mì', quantity: 2, unit: 'cai' });
+  if (has('pho')) add({ foodName: 'Phở khô', quantity: 300, unit: 'g' });
+  if (has('bun')) add({ foodName: 'Bún khô', quantity: 300, unit: 'g' });
   if (has('spaghetti', 'udon', 'soba', 'nui', 'mi ', ' mi', 'mì')) {
-    add({ foodName: has('mi goi') ? 'Mi goi' : 'Mi y', quantity: has('mi goi') ? 2 : 250, unit: has('mi goi') ? 'goi' : 'g' });
+    add({ foodName: has('mi goi') ? 'Mì gói' : 'Mì Ý', quantity: has('mi goi') ? 2 : 250, unit: has('mi goi') ? 'goi' : 'g' });
   }
-  if (has('com', 'cơm')) add({ foodName: 'Gao', quantity: 250, unit: 'g' });
-  if (has('ga ', ' ga', 'gà', 'canh ga')) add({ foodName: 'Thit ga', quantity: 400, unit: 'g' });
-  if (has('bo ', ' bo', 'bò')) add({ foodName: 'Thit bo', quantity: 350, unit: 'g' });
-  if (has('heo', 'thit', 'suon', 'ba chi', 'gio heo')) add({ foodName: 'Thit heo', quantity: 400, unit: 'g' });
-  if (has('tom', 'tôm')) add({ foodName: 'Tom', quantity: 300, unit: 'g' });
-  if (has('muc', 'hai san', 'hải sản')) add({ foodName: 'Muc', quantity: 300, unit: 'g' });
-  if (has('ca ', ' ca', 'cá')) add({ foodName: 'Ca thu', quantity: 400, unit: 'g' });
-  if (has('trung', 'trứng')) add({ foodName: 'Trung ga', quantity: 2, unit: 'qua' });
-  if (has('dau phu', 'dau hu', 'tofu', 'đậu phụ')) add({ foodName: 'Dau hu', quantity: 2, unit: 'hop' });
-  if (has('nam', 'nấm')) add({ foodName: 'Nam huong', quantity: 200, unit: 'g' });
-  if (has('rau muong')) add({ foodName: 'Rau muong', quantity: 1, unit: 'bo' });
-  if (has('rau', 'canh', 'cai')) add({ foodName: 'Bap cai', quantity: 300, unit: 'g' });
-  if (has('ca chua', 'cà chua', 'sot ca')) add({ foodName: 'Ca chua', quantity: 250, unit: 'g' });
-  if (has('dua leo')) add({ foodName: 'Dua leo', quantity: 150, unit: 'g' });
-  if (has('bap', 'ngo')) add({ foodName: 'Bap my', quantity: 1, unit: 'qua' });
-  if (has('khoai')) add({ foodName: 'Khoai tay', quantity: 300, unit: 'g' });
-  if (has('sua chua')) add({ foodName: 'Sua chua', quantity: 1, unit: 'hop' });
-  if (has('sua ', 'sữa')) add({ foodName: 'Sua tuoi', quantity: 150, unit: 'ml' });
-  if (has('gung', 'gừng')) add({ foodName: 'Gung', quantity: 20, unit: 'g' });
-  if (has('sa ', ' sa', 'sả')) add({ foodName: 'Sa', quantity: 20, unit: 'g' });
-  if (has('toi', 'tỏi')) add({ foodName: 'Toi', quantity: 15, unit: 'g' });
-  if (has('ot', 'ớt')) add({ foodName: 'Ot', quantity: 5, unit: 'g', optional: true });
-  if (ingredients.length === 0) add({ foodName: 'Gao', quantity: 250, unit: 'g' });
-  add({ foodName: 'Dau an', quantity: 15, unit: 'ml', optional: true });
-  add({ foodName: 'Nuoc mam', quantity: 15, unit: 'ml', optional: true });
+  if (has('com', 'cơm')) add({ foodName: 'Gạo', quantity: 250, unit: 'g' });
+  if (has('ga ', ' ga', 'gà', 'canh ga')) add({ foodName: 'Thịt gà', quantity: 400, unit: 'g' });
+  if (has('bo ', ' bo', 'bò')) add({ foodName: 'Thịt bò', quantity: 350, unit: 'g' });
+  if (has('heo', 'thit', 'suon', 'ba chi', 'gio heo')) add({ foodName: 'Thịt heo', quantity: 400, unit: 'g' });
+  if (has('tom', 'tôm')) add({ foodName: 'Tôm', quantity: 300, unit: 'g' });
+  if (has('muc', 'hai san', 'hải sản')) add({ foodName: 'Mực', quantity: 300, unit: 'g' });
+  if (has('ca ', ' ca', 'cá')) add({ foodName: 'Cá thu', quantity: 400, unit: 'g' });
+  if (has('trung', 'trứng')) add({ foodName: 'Trứng gà', quantity: 2, unit: 'qua' });
+  if (has('dau phu', 'dau hu', 'tofu', 'đậu phụ')) add({ foodName: 'Đậu hũ', quantity: 2, unit: 'hop' });
+  if (has('nam', 'nấm')) add({ foodName: 'Nấm hương', quantity: 200, unit: 'g' });
+  if (has('rau muong')) add({ foodName: 'Rau muống', quantity: 1, unit: 'bo' });
+  if (has('rau', 'canh', 'cai')) add({ foodName: 'Bắp cải', quantity: 300, unit: 'g' });
+  if (has('ca chua', 'cà chua', 'sot ca')) add({ foodName: 'Cà chua', quantity: 250, unit: 'g' });
+  if (has('dua leo')) add({ foodName: 'Dưa leo', quantity: 150, unit: 'g' });
+  if (has('bap', 'ngo')) add({ foodName: 'Bắp Mỹ', quantity: 1, unit: 'qua' });
+  if (has('khoai')) add({ foodName: 'Khoai tây', quantity: 300, unit: 'g' });
+  if (has('sua chua')) add({ foodName: 'Sữa chua', quantity: 1, unit: 'hop' });
+  if (has('sua ', 'sữa')) add({ foodName: 'Sữa tươi', quantity: 150, unit: 'ml' });
+  if (has('gung', 'gừng')) add({ foodName: 'Gừng', quantity: 20, unit: 'g' });
+  if (has('sa ', ' sa', 'sả')) add({ foodName: 'Sả', quantity: 20, unit: 'g' });
+  if (has('toi', 'tỏi')) add({ foodName: 'Tỏi', quantity: 15, unit: 'g' });
+  if (has('ot', 'ớt')) add({ foodName: 'Ớt', quantity: 5, unit: 'g', optional: true });
+  if (ingredients.length === 0) add({ foodName: 'Gạo', quantity: 250, unit: 'g' });
+  add({ foodName: 'Dầu ăn', quantity: 15, unit: 'ml', optional: true });
+  add({ foodName: 'Nước mắm', quantity: 15, unit: 'ml', optional: true });
 
   return ingredients.slice(0, 6);
 }

@@ -308,10 +308,6 @@ export default function AdminDashboard() {
           ))}
         </nav>
         <div className="px-3 py-4 border-t border-outline-variant/40 space-y-1">
-          <button onClick={() => navigate('/home')} className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container-low transition-colors">
-            <span className="material-symbols-outlined">storefront</span>
-            <span>Về ứng dụng</span>
-          </button>
           <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-error hover:bg-error-container/40 transition-colors">
             <span className="material-symbols-outlined">logout</span>
             <span>Đăng xuất</span>

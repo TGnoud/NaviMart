@@ -56,7 +56,13 @@ export class ReportsService {
       {
         $group: {
           _id: {
-            day: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } },
+            day: {
+              $dateToString: {
+                format: '%Y-%m-%d',
+                date: '$createdAt',
+                timezone: 'Asia/Ho_Chi_Minh',
+              },
+            },
             type: '$type',
           },
           totalQuantityDelta: { $sum: '$quantityDelta' },
@@ -109,7 +115,7 @@ export class ReportsService {
         $match: {
           familyId,
           createdAt: { $gte: query.startDate, $lte: query.endDate },
-          type: 'wasted',
+          type: { $in: ['wasted', 'expired'] },
         },
       },
       {
@@ -242,7 +248,7 @@ export class ReportsService {
         $match: {
           familyId,
           createdAt: { $gte: query.startDate, $lte: query.endDate },
-          type: 'wasted',
+          type: { $in: ['wasted', 'expired'] },
         },
       },
       {

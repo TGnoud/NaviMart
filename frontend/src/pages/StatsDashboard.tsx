@@ -70,9 +70,28 @@ export default function StatsDashboard() {
   const wasteRatio = addedTotal > 0 ? Math.round((wastedTotal / addedTotal) * 100) : 0;
 
   // Daily consumed/added events become the bar chart series.
-  const consumedByDay = (trends?.eventsByDay ?? [])
+  const { start, end } = getRange(period);
+  const dateList: string[] = [];
+  const curr = new Date(start);
+  while (curr <= end) {
+    const yyyy = curr.getFullYear();
+    const mm = String(curr.getMonth() + 1).padStart(2, '0');
+    const dd = String(curr.getDate()).padStart(2, '0');
+    dateList.push(`${yyyy}-${mm}-${dd}`);
+    curr.setDate(curr.getDate() + 1);
+  }
+
+  const consumedMap = new Map<string, number>();
+  (trends?.eventsByDay ?? [])
     .filter((event) => event.type === 'consumed')
-    .map((event) => ({ day: event.day, value: Math.abs(event.totalQuantityDelta) }));
+    .forEach((event) => {
+      consumedMap.set(event.day, Math.abs(event.totalQuantityDelta));
+    });
+
+  const consumedByDay = dateList.map((day) => ({
+    day,
+    value: consumedMap.get(day) ?? 0,
+  }));
   const maxConsumed = Math.max(1, ...consumedByDay.map((entry) => entry.value));
 
   const topConsumed = trends?.topConsumed ?? [];

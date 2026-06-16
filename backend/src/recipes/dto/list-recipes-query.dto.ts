@@ -59,4 +59,9 @@ export class ListRecipesQueryDto {
   @Min(1)
   @Max(500)
   limit?: number;
+
+  @ApiPropertyOptional({ example: '665f7b1e7c7a8f93df38b222' })
+  @IsOptional()
+  @IsMongoId()
+  authorId?: string;
 }

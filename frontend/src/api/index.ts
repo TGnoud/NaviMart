@@ -357,6 +357,7 @@ export const recipesApi = {
     status?: string;
     limit?: number;
     sort?: string;
+    authorId?: string;
   } = {}) => apiRequest<RecipeSummary[]>('/recipes', { query }),
 
   get: (recipeId: string) => apiRequest<RecipeDetail>(`/recipes/${recipeId}`),

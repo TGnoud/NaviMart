@@ -438,9 +438,14 @@ export class RecipesService {
   }
 
   private buildRecipeFilter(query: ListRecipesQueryDto) {
-    const filter: Record<string, unknown> = {
-      status: query.status ?? 'approved',
-    };
+    const filter: Record<string, any> = {};
+
+    if (query.authorId) {
+      filter.authorId = new Types.ObjectId(query.authorId);
+      filter.status = query.status ?? { $ne: 'archived' };
+    } else {
+      filter.status = query.status ?? 'approved';
+    }
 
     if (query.q) {
       const words = query.q.trim().split(/\s+/).filter(Boolean);

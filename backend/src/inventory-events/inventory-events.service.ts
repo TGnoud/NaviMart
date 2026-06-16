@@ -31,7 +31,12 @@ export class InventoryEventsService {
   ) {}
 
   async create(input: CreateInventoryEventInput) {
-    return this.inventoryEventModel.create(input);
+    const event = new this.inventoryEventModel(input);
+    if (input.createdAt) {
+      (event as any).createdAt = input.createdAt;
+      return event.save({ timestamps: false });
+    }
+    return event.save();
   }
 
   async createMany(inputs: CreateInventoryEventInput[]) {
@@ -39,6 +44,7 @@ export class InventoryEventsService {
       return [];
     }
 
-    return this.inventoryEventModel.insertMany(inputs);
+    // Tắt tự động timestamps của Mongoose để giữ nguyên createdAt được truyền thủ công
+    return this.inventoryEventModel.insertMany(inputs, { timestamps: false });
   }
 }

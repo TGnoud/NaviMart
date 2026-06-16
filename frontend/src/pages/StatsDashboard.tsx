@@ -221,9 +221,9 @@ export default function StatsDashboard() {
                         <p className="font-body-md">Chưa có dữ liệu tiêu thụ trong khoảng thời gian này.</p>
                       </div>
                     ) : (
-                      <div className="flex-1 flex flex-col justify-end pt-4 relative min-h-[250px]">
-                        <div className="flex items-end justify-around gap-1 w-full h-[220px] z-10 relative">
-                          {consumedByDay.slice(-14).map((entry) => (
+                      <div className="flex-1 flex flex-col justify-end pt-4 relative min-h-[250px] overflow-x-auto">
+                        <div className="flex items-end justify-around gap-1 w-full min-w-[480px] h-[220px] z-10 relative">
+                          {consumedByDay.map((entry) => (
                             <div key={entry.day} className="flex flex-col items-center flex-1 h-full justify-end group">
                               <span className="font-label-sm text-label-sm text-on-surface-variant opacity-0 group-hover:opacity-100 transition-opacity mb-1">{entry.value}</span>
                               <div

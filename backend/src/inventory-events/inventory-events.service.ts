@@ -20,6 +20,7 @@ export type CreateInventoryEventInput = {
   source?: (typeof INVENTORY_EVENT_SOURCES)[number];
   createdBy?: Types.ObjectId;
   note?: string;
+  createdAt?: Date;
 };
 
 @Injectable()

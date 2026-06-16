@@ -290,6 +290,7 @@ export class MealsService {
           source: 'meal',
           createdBy: new Types.ObjectId(user.userId),
           note: `Nấu món: ${recipe.name}`,
+          createdAt: meal.date,
         });
 
         remaining = Number((remaining - take).toFixed(3));
@@ -347,6 +348,7 @@ export class MealsService {
           source: 'meal',
           createdBy: new Types.ObjectId(user.userId),
           note: 'Hoàn lại do bỏ đánh dấu hoàn thành',
+          createdAt: meal.date,
         });
       } else {
         const recreated = await this.pantryItemModel.create({
@@ -376,6 +378,7 @@ export class MealsService {
           source: 'meal',
           createdBy: new Types.ObjectId(user.userId),
           note: 'Hoàn lại do bỏ đánh dấu hoàn thành',
+          createdAt: meal.date,
         });
       }
     }

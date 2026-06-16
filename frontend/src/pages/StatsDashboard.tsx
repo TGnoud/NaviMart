@@ -12,16 +12,21 @@ type Period = 'month' | 'week';
 
 function getRange(period: Period) {
   const now = new Date();
-  const end = new Date(now);
-  end.setHours(23, 59, 59, 999);
   const start = new Date(now);
+  const end = new Date(now);
   if (period === 'month') {
     start.setDate(1);
+    // Lấy ngày cuối cùng của tháng hiện tại
+    end.setMonth(end.getMonth() + 1);
+    end.setDate(0);
   } else {
     const day = (start.getDay() + 6) % 7;
     start.setDate(start.getDate() - day);
+    // Lấy ngày Chủ Nhật của tuần hiện tại
+    end.setDate(start.getDate() + 6);
   }
   start.setHours(0, 0, 0, 0);
+  end.setHours(23, 59, 59, 999);
   return { start, end };
 }
 
@@ -228,7 +233,7 @@ export default function StatsDashboard() {
                               <span className="font-label-sm text-label-sm text-on-surface-variant opacity-0 group-hover:opacity-100 transition-opacity mb-1">{entry.value}</span>
                               <div
                                 className="w-full max-w-[40px] bg-primary hover:bg-tertiary rounded-t-md transition-colors cursor-pointer shadow-sm"
-                                style={{ height: `${Math.max(6, (entry.value / maxConsumed) * 100)}%` }}
+                                style={{ height: `${entry.value > 0 ? Math.max(6, (entry.value / maxConsumed) * 100) : 0}%` }}
                               ></div>
                               <span className="font-label-sm text-[10px] text-on-surface-variant pt-2 rotate-0">{entry.day.slice(5)}</span>
                             </div>

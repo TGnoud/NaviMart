@@ -139,12 +139,14 @@ export class ReportsService {
 
     return {
       range: query,
-      wastedItems: wasteEvents.map((item) => ({
-        name: item._id.name,
-        unit: item._id.unit,
-        wastedQuantity: item.wastedQuantity,
-        eventCount: item.eventCount,
-      })),
+      wastedItems: wasteEvents
+        .filter((item) => item.wastedQuantity > 0)
+        .map((item) => ({
+          name: item._id.name,
+          unit: item._id.unit,
+          wastedQuantity: item.wastedQuantity,
+          eventCount: item.eventCount,
+        })),
       expiredActiveItems: expiredActiveItems.map((item) => ({
         id: item._id.toString(),
         name: item.name,

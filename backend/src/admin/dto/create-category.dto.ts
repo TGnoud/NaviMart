@@ -2,7 +2,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsOptional, IsString, Length, Matches } from 'class-validator';
 
 export class CreateCategoryDto {
-  @ApiProperty({ example: 'Rau cu' })
+  @ApiProperty({ example: 'Rau củ' })
   @IsString()
   @Length(1, 100)
   name!: string;
@@ -17,7 +17,7 @@ export class CreateCategoryDto {
   @Matches(/^[a-z0-9]+(?:-[a-z0-9]+)*$/)
   slug?: string;
 
-  @ApiPropertyOptional({ example: 'Rau cu tuoi theo mua.' })
+  @ApiPropertyOptional({ example: 'Rau củ tươi theo mùa.' })
   @IsOptional()
   @IsString()
   @Length(1, 300)

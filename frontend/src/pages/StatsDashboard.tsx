@@ -13,17 +13,17 @@ type Period = 'month' | 'week';
 function getRange(period: Period) {
   const now = new Date();
   const start = new Date(now);
-  const end = new Date(now);
+  const end = new Date(start);
   if (period === 'month') {
     start.setDate(1);
-    // Lấy ngày cuối cùng của tháng hiện tại
+    end.setDate(1);
     end.setMonth(end.getMonth() + 1);
     end.setDate(0);
   } else {
     const day = (start.getDay() + 6) % 7;
     start.setDate(start.getDate() - day);
-    // Lấy ngày Chủ Nhật của tuần hiện tại
-    end.setDate(start.getDate() + 6);
+    end.setTime(start.getTime());
+    end.setDate(end.getDate() + 6);
   }
   start.setHours(0, 0, 0, 0);
   end.setHours(23, 59, 59, 999);
@@ -47,7 +47,9 @@ export default function StatsDashboard() {
 
   useEffect(() => {
     let cancelled = false;
-    setLoading(true);
+    setTimeout(() => {
+      if (!cancelled) setLoading(true);
+    }, 0);
     const { start, end } = getRange(period);
     Promise.all([
       reportsApi.dashboard(start.toISOString(), end.toISOString()),

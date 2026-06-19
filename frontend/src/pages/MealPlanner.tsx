@@ -46,17 +46,33 @@ export default function MealPlanner() {
   const { showConfirm, showAlert } = useDialog();
   const navigate = useNavigate();
 
-  const weekStart = useMemo(() => startOfWeek(new Date()), []);
+  const [currentWeekStart, setCurrentWeekStart] = useState(() => startOfWeek(new Date()));
   const weekDays = useMemo(
     () =>
       Array.from({ length: 7 }, (_, i) => {
-        const date = new Date(weekStart);
-        date.setDate(weekStart.getDate() + i);
+        const date = new Date(currentWeekStart);
+        date.setDate(currentWeekStart.getDate() + i);
         return date;
       }),
-    [weekStart],
+    [currentWeekStart],
   );
   const [activeDay, setActiveDay] = useState(() => (new Date().getDay() + 6) % 7);
+
+  const handlePrevWeek = () => {
+    setCurrentWeekStart((prev) => {
+      const date = new Date(prev);
+      date.setDate(date.getDate() - 7);
+      return date;
+    });
+  };
+
+  const handleNextWeek = () => {
+    setCurrentWeekStart((prev) => {
+      const date = new Date(prev);
+      date.setDate(date.getDate() + 7);
+      return date;
+    });
+  };
 
   const [meals, setMeals] = useState<MealPlan[]>([]);
   const [loading, setLoading] = useState(true);
@@ -87,19 +103,22 @@ export default function MealPlanner() {
   const loadMeals = useCallback(async () => {
     setLoading(true);
     try {
-      const endOfWeek = new Date(weekStart);
-      endOfWeek.setDate(weekStart.getDate() + 7);
+      const endOfWeek = new Date(currentWeekStart);
+      endOfWeek.setDate(currentWeekStart.getDate() + 7);
       // meal.recipeName is populated server-side in one batched query
-      setMeals(await mealsApi.list(weekStart.toISOString(), endOfWeek.toISOString()));
+      setMeals(await mealsApi.list(currentWeekStart.toISOString(), endOfWeek.toISOString()));
     } catch (err) {
       handleError(err, 'Không tải được lịch trình bữa ăn.');
     } finally {
       setLoading(false);
     }
-  }, [weekStart, handleError]);
+  }, [currentWeekStart, handleError]);
 
   useEffect(() => {
-    loadMeals();
+    const timer = setTimeout(() => {
+      loadMeals();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [loadMeals]);
 
   // A meal "waiting" on a shortfall list turns green once that list is bought,
@@ -442,31 +461,51 @@ export default function MealPlanner() {
           </div>
         </header>
         <header className="shrink-0 bg-surface border-b border-outline-variant md:border-none md:bg-transparent md:pt-8 md:px-8 px-margin-mobile py-4 flex flex-col gap-4 z-30">
-          <div className="flex justify-between items-center w-full">
-            <div className="flex flex-col">
-              <h1 className="font-headline-md text-headline-md text-primary mb-2">Lịch trình bữa ăn</h1>
-              <p className="font-body-md text-body-md text-on-surface-variant">
-                {selectedDate.toLocaleDateString('vi-VN', { month: 'long', year: 'numeric' })}
-              </p>
-            </div>
-            <div className="flex gap-2">
+          <div className="flex flex-col items-center gap-1 w-full relative">
+            <h1 className="font-headline-md text-headline-md text-primary text-center">Lịch trình bữa ăn</h1>
+            <p className="font-body-md text-body-md text-on-surface-variant font-medium text-center capitalize">
+              {selectedDate.toLocaleDateString('vi-VN', { month: 'long', year: 'numeric' })}
+            </p>
+            <div className="absolute right-0 top-1/2 -translate-y-1/2 flex gap-2">
               <Link to="/recipe-suggestion" aria-label="Tìm kiếm món ăn" className="w-10 h-10 flex items-center justify-center rounded-full text-on-surface-variant bg-surface-container hover:bg-surface-container-high transition-colors">
                 <span className="material-symbols-outlined">search</span>
               </Link>
             </div>
           </div>
 
-          <div className="flex overflow-x-auto gap-3 pb-2 snap-x snap-mandatory hide-scrollbar -mx-margin-mobile px-margin-mobile md:mx-0 md:px-0">
-            {['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'].map((day, idx) => (
-              <button
-                key={idx}
-                onClick={() => setActiveDay(idx)}
-                className={`snap-center shrink-0 w-14 h-20 rounded-full flex flex-col items-center justify-center gap-1 transition-all ${activeDay === idx ? 'bg-primary text-on-primary shadow-md' : 'bg-surface-container-lowest border border-outline-variant text-on-surface-variant hover:bg-surface-container'}`}
-              >
-                <span className={`font-label-sm text-label-sm ${activeDay === idx ? 'opacity-80' : ''}`}>{day}</span>
-                <span className="font-headline-sm text-headline-sm font-bold">{weekDays[idx].getDate()}</span>
-              </button>
-            ))}
+          <div className="flex items-center justify-center gap-2 md:gap-4 w-full">
+            <button
+              onClick={handlePrevWeek}
+              className="w-10 h-10 flex items-center justify-center rounded-full text-on-surface-variant hover:bg-surface-container-high transition-colors shrink-0"
+              aria-label="Tuần trước"
+            >
+              <span className="material-symbols-outlined text-[24px]">chevron_left</span>
+            </button>
+
+            <div className="flex gap-2 md:gap-3 justify-center py-1 overflow-x-auto hide-scrollbar max-w-full">
+              {['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'].map((day, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => setActiveDay(idx)}
+                  className={`shrink-0 w-12 h-18 md:w-14 md:h-20 rounded-full flex flex-col items-center justify-center gap-1 transition-all ${
+                    activeDay === idx
+                      ? 'bg-primary text-on-primary shadow-md scale-105'
+                      : 'bg-surface-container-lowest border border-outline-variant text-on-surface-variant hover:bg-surface-container'
+                  }`}
+                >
+                  <span className={`font-label-sm text-label-sm ${activeDay === idx ? 'opacity-80' : ''}`}>{day}</span>
+                  <span className="font-headline-sm text-headline-sm font-bold">{weekDays[idx].getDate()}</span>
+                </button>
+              ))}
+            </div>
+
+            <button
+              onClick={handleNextWeek}
+              className="w-10 h-10 flex items-center justify-center rounded-full text-on-surface-variant hover:bg-surface-container-high transition-colors shrink-0"
+              aria-label="Tuần sau"
+            >
+              <span className="material-symbols-outlined text-[24px]">chevron_right</span>
+            </button>
           </div>
         </header>
 

@@ -6,7 +6,7 @@ import PaginationControls from '../components/PaginationControls';
 import SideNav from '../components/SideNav';
 import { CardGridSkeleton } from '../components/Skeleton';
 import { shoppingListsApi } from '../api';
-import type { ShoppingList } from '../api';
+import type { ShoppingList, ShoppingListType } from '../api';
 import { onSocketEvent } from '../api/socket';
 import { useDialog } from '../contexts/DialogContext';
 
@@ -16,6 +16,25 @@ function formatDate(value?: string) {
 }
 
 const LISTS_PAGE_SIZE = 6;
+
+function startOfWeek(date: Date) {
+  const result = new Date(date);
+  const offset = (result.getDay() + 6) % 7;
+  result.setDate(result.getDate() - offset);
+  result.setHours(0, 0, 0, 0);
+  return result;
+}
+
+function sameDay(a: Date, b: Date) {
+  return a.getFullYear() === b.getFullYear() &&
+    a.getMonth() === b.getMonth() &&
+    a.getDate() === b.getDate();
+}
+
+function toDateInput(date: Date) {
+  const local = new Date(date.getTime() - date.getTimezoneOffset() * 60_000);
+  return local.toISOString().slice(0, 10);
+}
 
 export default function MyLists() {
   const { showAlert } = useDialog();
@@ -32,6 +51,19 @@ export default function MyLists() {
   const [listNameInput, setListNameInput] = useState('');
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [scheduleMode, setScheduleMode] = useState<'daily' | 'weekly'>('daily');
+  const [currentWeekStart, setCurrentWeekStart] = useState(() => startOfWeek(new Date()));
+  const [plannedForInput, setPlannedForInput] = useState(() => toDateInput(new Date()));
+  const [listTypeInput, setListTypeInput] = useState<ShoppingListType>('daily');
+
+  const weekDays = useMemo(
+    () => Array.from({ length: 7 }, (_, index) => {
+      const date = new Date(currentWeekStart);
+      date.setDate(date.getDate() + index);
+      return date;
+    }),
+    [currentWeekStart],
+  );
 
   const loadLists = useCallback(async () => {
     setLoading(true);
@@ -87,9 +119,11 @@ export default function MyLists() {
     };
   }, []);
 
-  const openCreateModal = () => {
+  const openCreateModal = (date = new Date(), type: ShoppingListType = scheduleMode) => {
     setModalMode('create');
     setListNameInput('');
+    setListTypeInput(type);
+    setPlannedForInput(toDateInput(type === 'weekly' ? startOfWeek(date) : date));
     setIsModalOpen(true);
   };
 
@@ -105,7 +139,13 @@ export default function MyLists() {
     setSaving(true);
     try {
       if (modalMode === 'create') {
-        const created = await shoppingListsApi.create({ name: listNameInput.trim() });
+        const selectedDate = new Date(`${plannedForInput}T12:00:00`);
+        const plannedFor = (listTypeInput === 'weekly' ? startOfWeek(selectedDate) : selectedDate).toISOString();
+        const created = await shoppingListsApi.create({
+          name: listNameInput.trim(),
+          type: listTypeInput,
+          plannedFor,
+        });
         // The backend also broadcasts shoppingList:updated to our own socket, so
         // dedupe by id to avoid the list showing up twice (local add + echo).
         setActiveLists((lists) => [created, ...lists.filter((list) => list.id !== created.id)]);
@@ -188,8 +228,72 @@ export default function MyLists() {
           </div>
         </div>
 
+        {!loading && activeTab === 'Đang mua' && (
+          <section className="px-margin-mobile mb-stack-md">
+            <div className="bg-surface-container-lowest border border-outline-variant rounded-2xl overflow-hidden shadow-sm">
+              <div className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-outline-variant">
+                <div className="flex bg-surface-container-high rounded-lg p-1">
+                  <button onClick={() => setScheduleMode('daily')} className={`px-4 py-2 rounded-md font-label-md ${scheduleMode === 'daily' ? 'bg-surface text-primary shadow-sm' : 'text-on-surface-variant'}`}>Theo ngày</button>
+                  <button onClick={() => setScheduleMode('weekly')} className={`px-4 py-2 rounded-md font-label-md ${scheduleMode === 'weekly' ? 'bg-surface text-primary shadow-sm' : 'text-on-surface-variant'}`}>Theo tuần</button>
+                </div>
+                <div className="flex items-center justify-between sm:justify-end gap-2">
+                  <button aria-label="Tuần trước" onClick={() => setCurrentWeekStart((date) => { const next = new Date(date); next.setDate(next.getDate() - 7); return next; })} className="p-2 rounded-full hover:bg-surface-container-high"><span className="material-symbols-outlined">chevron_left</span></button>
+                  <span className="font-label-md text-on-surface min-w-48 text-center">
+                    {weekDays[0].toLocaleDateString('vi-VN')} – {weekDays[6].toLocaleDateString('vi-VN')}
+                  </span>
+                  <button aria-label="Tuần sau" onClick={() => setCurrentWeekStart((date) => { const next = new Date(date); next.setDate(next.getDate() + 7); return next; })} className="p-2 rounded-full hover:bg-surface-container-high"><span className="material-symbols-outlined">chevron_right</span></button>
+                </div>
+              </div>
+
+              {scheduleMode === 'daily' ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 divide-y lg:divide-y-0 lg:divide-x divide-outline-variant">
+                  {weekDays.map((date) => {
+                    const dayLists = activeLists.filter((list) => list.type !== 'weekly' && list.plannedFor && sameDay(new Date(list.plannedFor), date));
+                    return (
+                      <div key={date.toISOString()} className="min-h-48 p-3 flex flex-col gap-2">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-label-sm text-on-surface-variant">{date.toLocaleDateString('vi-VN', { weekday: 'short' })}</p>
+                            <p className={`font-headline-sm ${sameDay(date, new Date()) ? 'text-primary' : 'text-on-surface'}`}>{date.getDate()}</p>
+                          </div>
+                          <button aria-label="Thêm danh sách theo ngày" onClick={() => openCreateModal(date, 'daily')} className="w-8 h-8 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center"><span className="material-symbols-outlined text-lg">add</span></button>
+                        </div>
+                        {dayLists.map((list) => (
+                          <Link key={list.id} to={`/list-detail/${list.id}`} className="p-2 rounded-lg bg-surface-container-low border border-outline-variant hover:border-primary">
+                            <p className="font-label-md text-on-surface font-semibold line-clamp-2">{list.name}</p>
+                            <p className="font-label-sm text-on-surface-variant">{list.progress.bought}/{list.progress.total} đã mua</p>
+                          </Link>
+                        ))}
+                        {dayLists.length === 0 && <p className="text-label-sm text-outline mt-auto">Chưa có danh sách</p>}
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="p-4 min-h-64">
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <h2 className="font-headline-sm text-on-surface">Danh sách của tuần</h2>
+                      <p className="font-body-sm text-on-surface-variant">Bắt đầu từ {formatDate(currentWeekStart.toISOString())}</p>
+                    </div>
+                    <button onClick={() => openCreateModal(currentWeekStart, 'weekly')} className="flex items-center gap-2 px-4 py-2 rounded-full bg-primary text-on-primary"><span className="material-symbols-outlined">add</span>Thêm vào tuần</button>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                    {activeLists.filter((list) => list.type === 'weekly' && list.plannedFor && sameDay(startOfWeek(new Date(list.plannedFor)), currentWeekStart)).map((list) => (
+                      <Link key={list.id} to={`/list-detail/${list.id}`} className="p-4 rounded-xl bg-surface-container-low border border-outline-variant hover:border-primary">
+                        <h3 className="font-headline-sm text-on-surface">{list.name}</h3>
+                        <p className="font-body-sm text-on-surface-variant mt-1">{list.progress.bought}/{list.progress.total} đã mua</p>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </section>
+        )}
+
         {loading ? (
-          <div className="px-margin-mobile grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-stack-md">
+          <div className="hidden px-margin-mobile grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-stack-md">
             <CardGridSkeleton count={6} />
           </div>
         ) : activeTab === 'Đang mua' ? (
@@ -236,7 +340,7 @@ export default function MyLists() {
               </div>
             )}
 
-            <article onClick={openCreateModal} className="hidden md:flex bg-surface-container-lowest rounded-2xl p-6 border border-dashed border-outline hover:border-primary hover:bg-primary-container/20 transition-all cursor-pointer flex-col items-center justify-center min-h-[200px] gap-4">
+            <article onClick={() => openCreateModal()} className="hidden md:flex bg-surface-container-lowest rounded-2xl p-6 border border-dashed border-outline hover:border-primary hover:bg-primary-container/20 transition-all cursor-pointer flex-col items-center justify-center min-h-[200px] gap-4">
               <div className="w-14 h-14 rounded-full bg-primary-container text-primary flex items-center justify-center">
                 <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>add</span>
               </div>
@@ -296,7 +400,7 @@ export default function MyLists() {
         </div>
       </main>
 
-      <button className="md:hidden fixed bottom-[85px] right-margin-mobile z-40 bg-primary text-on-primary rounded-[16px] shadow-lg flex items-center gap-2 px-4 py-4 hover:shadow-xl hover:-translate-y-1 transition-all active:scale-95 group" onClick={openCreateModal}>
+      <button className="md:hidden fixed bottom-[85px] right-margin-mobile z-40 bg-primary text-on-primary rounded-[16px] shadow-lg flex items-center gap-2 px-4 py-4 hover:shadow-xl hover:-translate-y-1 transition-all active:scale-95 group" onClick={() => openCreateModal()}>
         <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>add</span>
         <span className="font-label-sm text-label-sm font-semibold whitespace-nowrap pr-1">Tạo danh sách</span>
       </button>
@@ -319,6 +423,36 @@ export default function MyLists() {
               onChange={(e) => setListNameInput(e.target.value)}
               onKeyDown={(e) => { if (e.key === 'Enter') handleSaveList(); }}
             />
+            {modalMode === 'create' && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <label className="font-label-sm text-on-surface-variant">
+                  Loại danh sách
+                  <select
+                    value={listTypeInput}
+                    onChange={(event) => {
+                      const type = event.target.value as ShoppingListType;
+                      setListTypeInput(type);
+                      if (type === 'weekly') {
+                        setPlannedForInput(toDateInput(startOfWeek(new Date(`${plannedForInput}T12:00:00`))));
+                      }
+                    }}
+                    className="mt-1 w-full px-3 py-3 bg-surface-container border border-outline-variant rounded-lg text-on-surface"
+                  >
+                    <option value="daily">Theo ngày</option>
+                    <option value="weekly">Theo tuần</option>
+                  </select>
+                </label>
+                <label className="font-label-sm text-on-surface-variant">
+                  {listTypeInput === 'weekly' ? 'Tuần bắt đầu' : 'Ngày dự kiến'}
+                  <input
+                    type="date"
+                    value={plannedForInput}
+                    onChange={(event) => setPlannedForInput(event.target.value)}
+                    className="mt-1 w-full px-3 py-3 bg-surface-container border border-outline-variant rounded-lg text-on-surface"
+                  />
+                </label>
+              </div>
+            )}
             <div className="flex justify-end gap-2 mt-2">
               <button onClick={() => setIsModalOpen(false)} className="px-4 py-2 font-label-md text-primary hover:bg-primary/10 rounded-full transition-colors">Hủy</button>
               <button 

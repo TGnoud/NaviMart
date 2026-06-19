@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import SideNav from '../components/SideNav';
-import { recipesApi, uploadsApi } from '../api';
-import type { RecipeEditorInput } from '../api';
+import { catalogApi, recipesApi, uploadsApi } from '../api';
+import type { CatalogUnit, RecipeEditorInput } from '../api';
 import { useDialog } from '../contexts/DialogContext';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -31,8 +31,24 @@ export default function RecipeEditor() {
   const [saving, setSaving] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [visibility, setVisibility] = useState<'personal' | 'shared'>('personal');
+  const [units, setUnits] = useState<CatalogUnit[]>([]);
 
   const canCreate = user?.role === 'admin' || user?.role === 'housewife';
+
+  useEffect(() => {
+    let cancelled = false;
+    catalogApi
+      .units()
+      .then((data) => {
+        if (!cancelled) setUnits(data);
+      })
+      .catch(() => {
+        if (!cancelled) setUnits([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     if (!recipeId) return;
@@ -296,12 +312,21 @@ export default function RecipeEditor() {
                         placeholder="SL"
                         className={`${inputClass} w-20`}
                       />
-                      <input
+                      <select
                         value={row.unit}
                         onChange={(e) => updateIngredient(index, { unit: e.target.value })}
-                        placeholder="Đơn vị"
                         className={`${inputClass} w-24`}
-                      />
+                      >
+                        {units.length === 0 && <option value={row.unit}>{row.unit || 'g'}</option>}
+                        {units.length > 0 && row.unit && !units.some((unit) => unit.code === row.unit) && (
+                          <option value={row.unit}>{row.unit}</option>
+                        )}
+                        {units.map((unit) => (
+                          <option key={unit.id} value={unit.code}>
+                            {unit.code}
+                          </option>
+                        ))}
+                      </select>
                       <label className="flex items-center gap-1.5 font-label-sm text-on-surface-variant whitespace-nowrap cursor-pointer">
                         <input
                           type="checkbox"

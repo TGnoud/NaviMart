@@ -182,8 +182,8 @@ export default function RecipeDetail() {
           <h1 className="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed truncate">Chi tiết công thức</h1>
           <div className="flex gap-2">
             <button onClick={toggleFavorite} className="p-2 -mr-2 rounded-full hover:bg-surface-container-high transition-colors active:opacity-80">
-              <span className={`material-symbols-outlined ${isFavorite ? 'text-error' : 'text-on-surface-variant'}`} style={isFavorite ? { fontVariationSettings: "'FILL' 1" } : undefined}>
-                {isFavorite ? 'favorite' : 'favorite_border'}
+              <span className={`material-symbols-outlined ${isFavorite ? 'text-amber-500' : 'text-on-surface-variant'}`} style={isFavorite ? { fontVariationSettings: "'FILL' 1" } : undefined}>
+                star
               </span>
             </button>
           </div>
@@ -226,8 +226,8 @@ export default function RecipeDetail() {
                     onClick={toggleFavorite}
                     className="hidden md:flex absolute top-4 right-4 w-11 h-11 items-center justify-center rounded-full bg-surface/90 backdrop-blur-sm shadow-sm hover:bg-surface transition-colors"
                   >
-                    <span className={`material-symbols-outlined ${isFavorite ? 'text-error' : 'text-on-surface-variant'}`} style={isFavorite ? { fontVariationSettings: "'FILL' 1" } : undefined}>
-                      {isFavorite ? 'favorite' : 'favorite_border'}
+                    <span className={`material-symbols-outlined ${isFavorite ? 'text-amber-500' : 'text-on-surface-variant'}`} style={isFavorite ? { fontVariationSettings: "'FILL' 1" } : undefined}>
+                      star
                     </span>
                   </button>
                 </div>
@@ -250,7 +250,7 @@ export default function RecipeDetail() {
                   )}
                   <div className="flex flex-wrap gap-6 text-on-surface-variant font-body-md text-body-md">
                     <div className="flex items-center gap-2">
-                      <span className="material-symbols-outlined text-secondary-container">favorite</span>
+                      <span className="material-symbols-outlined text-secondary-container">star</span>
                       <span>{recipe.favoritesCount ?? 0} lượt yêu thích</span>
                     </div>
                     <div className="flex items-center gap-2">

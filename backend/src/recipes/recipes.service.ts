@@ -140,7 +140,18 @@ export class RecipesService {
       )
       .slice(0, limit);
 
-    return suggestions;
+    const favoriteRecipeIds = await this.getFavoriteRecipeIdSet(
+      user,
+      suggestions.map((suggestion) => new Types.ObjectId(suggestion.recipe.id)),
+    );
+
+    return suggestions.map((suggestion) => ({
+      ...suggestion,
+      recipe: {
+        ...suggestion.recipe,
+        isFavorite: favoriteRecipeIds.has(suggestion.recipe.id),
+      },
+    }));
   }
 
   async addFavorite(user: AuthenticatedUser, recipeId: string) {

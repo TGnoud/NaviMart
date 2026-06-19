@@ -91,6 +91,131 @@ export class NotificationsService {
     return { modifiedCount: result.modifiedCount };
   }
 
+  async normalizeLegacyVietnameseText() {
+    const updates = await Promise.all([
+      this.notificationModel
+        .updateMany(
+          {
+            type: 'pantry_expiring',
+            $or: [
+              { title: / sap het han$/ },
+              { body: / se het han vao / },
+            ],
+          },
+          [
+            {
+              $set: {
+                title: {
+                  $replaceAll: {
+                    input: '$title',
+                    find: ' sap het han',
+                    replacement: ' sắp hết hạn',
+                  },
+                },
+                body: {
+                  $replaceAll: {
+                    input: '$body',
+                    find: ' se het han vao ',
+                    replacement: ' sẽ hết hạn vào ',
+                  },
+                },
+              },
+            },
+          ] as never,
+        )
+        .exec(),
+      this.notificationModel
+        .updateMany(
+          {
+            type: 'pantry_expired',
+            $or: [
+              { title: / da het han$/ },
+              { body: / da qua han su dung/ },
+            ],
+          },
+          [
+            {
+              $set: {
+                title: {
+                  $replaceAll: {
+                    input: '$title',
+                    find: ' da het han',
+                    replacement: ' đã hết hạn',
+                  },
+                },
+                body: {
+                  $replaceAll: {
+                    input: {
+                      $replaceAll: {
+                        input: '$body',
+                        find: ' da qua han su dung.',
+                        replacement: ' đã quá hạn sử dụng.',
+                      },
+                    },
+                    find: ' Hay kiem tra va danh dau lang phi neu can.',
+                    replacement:
+                      ' Hãy kiểm tra và đánh dấu lãng phí nếu cần.',
+                  },
+                },
+              },
+            },
+          ] as never,
+        )
+        .exec(),
+      this.notificationModel
+        .updateMany(
+          { title: 'Thuc pham sap het han' },
+          { $set: { title: 'Thực phẩm sắp hết hạn' } },
+        )
+        .exec(),
+      this.notificationModel
+        .updateMany(
+          { body: 'Ca hoi se het han trong 1 ngay. Hay len mon an phu hop.' },
+          {
+            $set: {
+              body: 'Cá hồi sẽ hết hạn trong 1 ngày. Hãy lên món ăn phù hợp.',
+            },
+          },
+        )
+        .exec(),
+      this.notificationModel
+        .updateMany(
+          { title: 'Thuc pham da qua han' },
+          { $set: { title: 'Thực phẩm đã quá hạn' } },
+        )
+        .exec(),
+      this.notificationModel
+        .updateMany(
+          { body: 'Chuoi da qua han. Kiem tra kho de xu ly.' },
+          { $set: { body: 'Chuối đã quá hạn. Kiểm tra kho để xử lý.' } },
+        )
+        .exec(),
+      this.notificationModel
+        .updateMany(
+          { title: 'Nhac mua sam' },
+          { $set: { title: 'Nhắc mua sắm' } },
+        )
+        .exec(),
+      this.notificationModel
+        .updateMany(
+          { body: 'Danh sach Di cho hom nay van con mon chua mua.' },
+          {
+            $set: {
+              body: 'Danh sách Đi chợ hôm nay vẫn còn món chưa mua.',
+            },
+          },
+        )
+        .exec(),
+    ]);
+
+    return {
+      modifiedCount: updates.reduce(
+        (sum, result) => sum + (result.modifiedCount ?? 0),
+        0,
+      ),
+    };
+  }
+
   async createManyDeduped(inputs: CreateNotificationInput[]) {
     if (inputs.length === 0) {
       return { createdCount: 0, created: [] as NotificationResponse[] };

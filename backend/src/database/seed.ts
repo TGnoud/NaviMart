@@ -1515,7 +1515,7 @@ const pantryItems: SeedPantryItem[] = [
     expiresInDays: -1,
     location: 'pantry',
     source: 'manual',
-    note: 'Mau du lieu qua han de kiem tra thong bao.',
+    note: 'Mẫu dữ liệu quá hạn để kiểm tra thông báo.',
   },
 ];
 
@@ -2224,22 +2224,22 @@ async function upsertNotifications(
     const notifications = [
       {
         type: 'pantry_expiring',
-        title: 'Thuc pham sap het han',
-        body: 'Ca hoi se het han trong 1 ngay. Hay len mon an phu hop.',
+        title: 'Thực phẩm sắp hết hạn',
+        body: 'Cá hồi sẽ hết hạn trong 1 ngày. Hãy lên món ăn phù hợp.',
         data: { pantryItemId: expiring?._id?.toString(), path: '/pantry' },
         dedupeKey: `seed:${user._id}:pantry_expiring:ca-hoi`,
       },
       {
         type: 'pantry_expired',
-        title: 'Thuc pham da qua han',
-        body: 'Chuoi da qua han. Kiem tra kho de xu ly.',
+        title: 'Thực phẩm đã quá hạn',
+        body: 'Chuối đã quá hạn. Kiểm tra kho để xử lý.',
         data: { pantryItemId: expired?._id?.toString(), path: '/pantry' },
         dedupeKey: `seed:${user._id}:pantry_expired:chuoi`,
       },
       {
         type: 'shopping_reminder',
-        title: 'Nhac mua sam',
-        body: 'Danh sach Di cho hom nay van con mon chua mua.',
+        title: 'Nhắc mua sắm',
+        body: 'Danh sách Đi chợ hôm nay vẫn còn món chưa mua.',
         data: { path: '/lists' },
         dedupeKey: `seed:${user._id}:shopping_reminder:today`,
       },

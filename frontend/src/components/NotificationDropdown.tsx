@@ -67,6 +67,18 @@ export default function NotificationDropdown() {
 
   const hasUnread = notifications.some((notification) => !notification.readAt);
 
+  const markAsRead = async (notification: AppNotification) => {
+    if (notification.readAt) return;
+    try {
+      const updated = await notificationsApi.markAsRead(notification.id);
+      setNotifications((items) =>
+        items.map((item) => (item.id === notification.id ? updated : item)),
+      );
+    } catch {
+      // Không chặn thao tác người dùng nếu đánh dấu đọc thất bại.
+    }
+  };
+
   return (
     <div ref={wrapperRef} className="relative">
       <button
@@ -108,6 +120,7 @@ export default function NotificationDropdown() {
                   <button
                     key={notification.id}
                     type="button"
+                    onClick={() => markAsRead(notification)}
                     className={`w-full text-left px-4 py-3 hover:bg-surface-container-low transition-colors ${
                       index !== notifications.length - 1 ? 'border-b border-outline-variant/20' : ''
                     }`}

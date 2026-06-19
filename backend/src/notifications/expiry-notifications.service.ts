@@ -94,12 +94,12 @@ export class ExpiryNotificationsService {
           type,
           title:
             expiryStatus === 'expired'
-              ? `${item.name} da het han`
-              : `${item.name} sap het han`,
+              ? `${item.name} đã hết hạn`
+              : `${item.name} sắp hết hạn`,
           body:
             expiryStatus === 'expired'
-              ? `${item.name} da qua han su dung. Hay kiem tra va danh dau lang phi neu can.`
-              : `${item.name} se het han vao ${item.expiryDate.toISOString().slice(0, 10)}.`,
+              ? `${item.name} đã quá hạn sử dụng. Hãy kiểm tra và đánh dấu lãng phí nếu cần.`
+              : `${item.name} sẽ hết hạn vào ${item.expiryDate.toISOString().slice(0, 10)}.`,
           data: {
             pantryItemId: item._id.toString(),
             foodId: item.foodId?.toString(),
@@ -132,6 +132,7 @@ export class ExpiryNotificationsService {
 
   @Timeout(5000)
   async createExpiryNotificationsOnStartup() {
+    await this.notificationsService.normalizeLegacyVietnameseText();
     await this.createExpiryNotifications();
   }
 }

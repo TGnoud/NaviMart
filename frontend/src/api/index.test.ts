@@ -129,9 +129,9 @@ describe('recipesApi', () => {
 
 describe('catalogApi', () => {
   it('searchFoods forwards its query', () => {
-    void catalogApi.searchFoods({ q: 'milk', limit: 5 });
+    void catalogApi.searchFoods({ q: 'milk', categoryId: 'c1', limit: 5 });
     expect(mockedRequest).toHaveBeenCalledWith('/catalog/foods', {
-      query: { q: 'milk', limit: 5 },
+      query: { q: 'milk', categoryId: 'c1', limit: 5 },
     });
   });
 

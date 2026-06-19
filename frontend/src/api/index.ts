@@ -108,7 +108,7 @@ export type CatalogUnit = {
 export const catalogApi = {
   categories: () => apiRequest<CatalogCategory[]>('/catalog/categories'),
 
-  searchFoods: (query: { q?: string; barcode?: string; limit?: number } = {}) =>
+  searchFoods: (query: { q?: string; barcode?: string; categoryId?: string; limit?: number } = {}) =>
     apiRequest<CatalogFood[]>('/catalog/foods', { query }),
 
   units: () => apiRequest<CatalogUnit[]>('/catalog/units'),

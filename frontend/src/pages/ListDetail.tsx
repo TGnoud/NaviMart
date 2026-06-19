@@ -250,6 +250,7 @@ export default function ListDetail() {
                       onChange={setNewItem}
                       onSelectFood={handleAddFood}
                       onSubmit={handleAddItem}
+                      categoryId={newItemCategoryId}
                       icon="add_shopping_cart"
                       placeholder="Thêm món đồ nhanh (gõ để tìm, Enter để thêm)..."
                       className="w-full pl-10 pr-4 py-3 rounded-none border border-[#c1c1c1] bg-surface-container-lowest font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container shadow-sm transition-all"

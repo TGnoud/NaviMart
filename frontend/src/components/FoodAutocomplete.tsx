@@ -10,6 +10,7 @@ type Props = {
   placeholder?: string;
   className?: string;
   icon?: string;
+  categoryId?: string;
 };
 
 // Text input with a dropdown of matching foods from the system catalog.
@@ -22,6 +23,7 @@ export default function FoodAutocomplete({
   placeholder,
   className,
   icon,
+  categoryId,
 }: Props) {
   const [suggestions, setSuggestions] = useState<CatalogFood[]>([]);
   const [open, setOpen] = useState(false);
@@ -42,7 +44,7 @@ export default function FoodAutocomplete({
     }
     const timer = setTimeout(() => {
       catalogApi
-        .searchFoods({ q: term, limit: 6 })
+        .searchFoods({ q: term, categoryId: categoryId || undefined, limit: 6 })
         .then((foods) => {
           setSuggestions(foods);
           setOpen(foods.length > 0);
@@ -51,7 +53,7 @@ export default function FoodAutocomplete({
         .catch(() => undefined);
     }, 250);
     return () => clearTimeout(timer);
-  }, [value]);
+  }, [value, categoryId]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { ListFoodsQueryDto } from './dto/list-foods-query.dto';
 import { Category, CategoryDocument } from './schemas/category.schema';
 import { Food, FoodDocument } from './schemas/food.schema';
@@ -25,6 +25,10 @@ export class CatalogService {
 
   async findAllFoods(query: ListFoodsQueryDto) {
     const filter: Record<string, unknown> = { status: 'active' };
+
+    if (query.categoryId) {
+      filter.categoryId = new Types.ObjectId(query.categoryId);
+    }
 
     if (query.barcode) {
       filter.barcode = query.barcode;

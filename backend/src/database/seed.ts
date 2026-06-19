@@ -613,9 +613,12 @@ function cookpadImageUrl(value?: string) {
 }
 
 const cookpadUnitMap: Record<string, string> = {
-  g: 'g', gr: 'g', gram: 'g', kg: 'kg', ml: 'ml', l: 'l', lit: 'l', lít: 'l',
+  g: 'g', gr: 'g', gram: 'g', gam: 'g', kg: 'kg', ml: 'ml', l: 'l', lit: 'l', lít: 'l',
   cái: 'cai', quả: 'qua', trái: 'qua', củ: 'qua', bó: 'bo', hộp: 'hop',
-  gói: 'goi', chai: 'chai', muỗng: 'muong', thìa: 'muong', chén: 'muong',
+  k: 'kg', con: 'cai', cây: 'cai', ít: 'cai', miếng: 'cai', lát: 'cai',
+  nhánh: 'cai', tép: 'cai', cup: 'muong',
+  tbsp: 'muong', tsp: 'muong', gói: 'goi', chai: 'chai', muỗng: 'muong',
+  thìa: 'muong', chén: 'muong',
 };
 
 function categorySlugForFood(name: string) {
@@ -636,40 +639,98 @@ function categorySlugForFood(name: string) {
 function parseCookpadIngredient(rawValue: string): SeedRecipeIngredient | undefined {
   let value = cleanCookpadText(rawValue)
     .replace(/^(gia vị|ăn kèm|phần ăn kèm|nguyên liệu)\s*:\s*/i, '')
-    .replace(/^[+\-–•]\s*/, '')
+    .replace(/^\(\s*(tùy chọn|tuỳ chọn|optional)\s*\)\s*/i, '')
+    .replace(/^[+\-–—−•=]\s*/, '')
     .trim();
+  const optional = /\(\s*(tùy chọn|tuỳ chọn|optional)\s*\)/i.test(
+    cleanCookpadText(rawValue),
+  );
   if (!value) return undefined;
 
-  const match = value.match(/^(\d+(?:[.,]\d+)?(?:\s*\/\s*\d+)?)\s*([\p{L}]+)?\s+(.*)$/u);
   let quantity = 1;
   let unit = 'cai';
+  const parenthesizedMatch = value.match(
+    /^\((?:khoảng\s*)?(\d+(?:\s+\d+\s*\/\s*\d+|(?:[.,]\d+)?(?:\s*\/\s*\d+)?(?:\s*[-–]\s*\d+(?:[.,]\d+)?)?))\s*([\p{L}]+)?[^)]*\)\s*(.+)$/iu,
+  );
+  const shorthandMatch = value.match(/^(\d+)\s*\/\s*(?:m?cf)\s+(.+)$/i);
+  const match = parenthesizedMatch ??
+    value.match(/^(\d+(?:\s+\d+\s*\/\s*\d+|(?:[.,]\d+)?(?:\s*\/\s*\d+)?(?:\s*[-–]\s*\d+(?:[.,]\d+)?)?))\s*([\p{L}]+)?\s+(.*)$/u) ??
+    (shorthandMatch ? [shorthandMatch[0], shorthandMatch[1], 'muỗng', shorthandMatch[2]] : null);
   if (match) {
     const rawQuantity = match[1].replace(',', '.');
-    quantity = rawQuantity.includes('/')
-      ? rawQuantity.split('/').map(Number).reduce((a, b) => a / b)
-      : Number(rawQuantity);
+    quantity = /^\d+\s+\d+\s*\/\s*\d+$/.test(rawQuantity)
+      ? Number(rawQuantity.split(/\s+/)[0]) + rawQuantity.split(/\s+/)[1].split('/').map(Number).reduce((a, b) => a / b)
+      : rawQuantity.includes('/')
+        ? rawQuantity.split('/').map(Number).reduce((a, b) => a / b)
+      : Number(rawQuantity.split(/[-–]/)[0].trim());
     const mappedUnit = match[2] ? cookpadUnitMap[match[2].toLowerCase()] : undefined;
     if (mappedUnit) {
       unit = mappedUnit;
       value = match[3];
+      if (/^(muỗng|thìa)$/i.test(match[2] ?? '')) {
+        value = value.replace(/^(canh|cà phê|cafe)\s+/i, '');
+      }
     } else {
       value = `${match[2] ?? ''} ${match[3]}`.trim();
     }
   }
 
-  const foodName = value
+  let foodName = value
+    .replace(
+      /^[=\-–—−]\s*\d+(?:\s+\d+\s*\/\s*\d+|(?:[.,]\d+)?(?:\s*\/\s*\d+)?)\s*[\p{L}]+\s+/u,
+      '',
+    )
+    .replace(/^\((?:khoảng\s*)?\d+(?:[.,]\d+)?\s*[\p{L}]*[^)]*\)\s*/iu, '')
+    .replace(/^(?:\([^)]*\)\s*)+/, '')
     .replace(/^\s*(ít|một ít)\s+/i, '')
     .replace(/\s*\([^)]*(tùy chọn|tuỳ chọn|optional)[^)]*\)\s*$/i, '')
     .replace(/\s+/g, ' ')
     .trim();
+  if (/^tỉ lệ\s+\d+\s*:\s*\d+\s+nước/i.test(foodName)) {
+    foodName = 'Nước';
+  } else {
+    foodName = foodName.split(/[:,;]/, 1)[0].trim();
+  }
+  foodName = foodName
+    .replace(/\s*\([^)]*\)/g, '')
+    .replace(/\s*\(+[^)]*$/g, '')
+    .replace(/\s+(?:mình|mà mình|do nhà)\s+.*$/i, '')
+    .replace(/\s+(?:lóc xương|rút xương|không da|đã rửa|rửa sạch)\b.*$/i, '')
+    .replace(/^(?:nhỏ|lớn|vừa)\s+/i, '')
+    .replace(/\s+(?:nhỏ|lớn|vừa|băm|xay|mài)$/i, '')
+    .replace(/\s+/g, ' ')
+    .trim();
   if (!foodName) return undefined;
-  return { foodName, quantity: Number.isFinite(quantity) ? quantity : 1, unit };
+  return {
+    foodName,
+    quantity: Number.isFinite(quantity) ? quantity : 1,
+    unit,
+    optional,
+  };
 }
 
 function cookpadIngredients(recipe: CookpadRecipeRecord): SeedRecipeIngredient[] {
+  const exactSteps = new Set(
+    (recipe.steps ?? []).map((step) => normalizeForMatch(cleanCookpadText(step))),
+  );
   return (recipe.ingredients ?? [])
+    .filter((rawValue) => {
+      const value = cleanCookpadText(rawValue);
+      const normalized = normalizeForMatch(value);
+      if (exactSteps.has(normalized)) return false;
+      if (/^(hoặc dùng|nồi hoặc|dụng cụ|cách làm|lưu ý)\b/i.test(value)) return false;
+      return true;
+    })
     .map(parseCookpadIngredient)
-    .filter((item): item is SeedRecipeIngredient => Boolean(item));
+    .filter((item): item is SeedRecipeIngredient =>
+      Boolean(
+        item &&
+        item.foodName.length <= 60 &&
+        !/^(xay|cho|dùng|nấu|rửa|vặn|trộn|hỗn hợp|gia vị thông dụng|canh |chè )\b/i.test(
+          item.foodName,
+        ),
+      ),
+    );
 }
 
 function cookpadSteps(recipe: CookpadRecipeRecord) {
@@ -1724,6 +1785,14 @@ function recipeOrThrow(recipeByName: Map<string, Recipe>, recipeName: string) {
 
 async function upsertCategories(categoryModel: Model<Category>) {
   const result = new Map<string, Category>();
+  const activeSlugs = categories.map((category) => category.slug);
+
+  await categoryModel
+    .updateMany(
+      { slug: { $nin: activeSlugs }, status: 'active' },
+      { $set: { status: 'archived' } },
+    )
+    .exec();
 
   for (const category of categories) {
     const document = await categoryModel
@@ -1803,6 +1872,17 @@ async function upsertFoods(
     result.set(food.name, document);
     result.set(normalizeName(food.name), document);
   }
+
+  await foodModel
+    .updateMany(
+      {
+        isSystem: true,
+        normalizedName: { $nin: foods.map((food) => normalizeName(food.name)) },
+        status: 'active',
+      },
+      { $set: { status: 'archived' } },
+    )
+    .exec();
 
   return result;
 }

@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { Cron } from '@nestjs/schedule';
+import { Cron, Timeout } from '@nestjs/schedule';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Family } from '../families/schemas/family.schema';
@@ -128,5 +128,10 @@ export class ExpiryNotificationsService {
     );
 
     return result;
+  }
+
+  @Timeout(5000)
+  async createExpiryNotificationsOnStartup() {
+    await this.createExpiryNotifications();
   }
 }

@@ -423,10 +423,14 @@ export default function RecipeSuggestion() {
                 <section>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                     {pagedMyRecipes.map((recipe) => {
-                      const statusInfo = STATUS_LABELS[recipe.status] || {
-                        label: 'Chờ duyệt',
-                        className: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300',
-                      };
+                      const statusInfo = recipe.visibility === 'personal'
+                        ? { label: 'Cá nhân', className: 'bg-surface-container-high text-on-surface-variant' }
+                        : recipe.status === 'approved'
+                          ? { label: 'Đã chia sẻ', className: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' }
+                          : STATUS_LABELS[recipe.status] || {
+                            label: 'Chờ duyệt',
+                            className: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300',
+                          };
                       return (
                         <Link
                           key={recipe.id}

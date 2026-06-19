@@ -13,11 +13,16 @@ import {
   Min,
   ValidateNested,
 } from 'class-validator';
-import { RECIPE_DIFFICULTIES, RECIPE_STATUSES } from '../schemas/recipe.schema';
+import { RECIPE_DIFFICULTIES, RECIPE_STATUSES, RECIPE_VISIBILITIES } from '../schemas/recipe.schema';
 import { RecipeIngredientDto } from './recipe-ingredient.dto';
 import { RecipeNutritionDto } from './recipe-nutrition.dto';
 
 export class CreateRecipeDto {
+  @ApiPropertyOptional({ example: 'personal', enum: RECIPE_VISIBILITIES })
+  @IsOptional()
+  @IsIn(RECIPE_VISIBILITIES)
+  visibility?: (typeof RECIPE_VISIBILITIES)[number];
+
   @ApiProperty({ example: 'Thit bo xao rau cu' })
   @IsString()
   @Length(1, 200)

@@ -111,6 +111,7 @@ export type MealCompletionResult = {
 
 export type RecipeDifficulty = 'easy' | 'medium' | 'hard';
 export type RecipeStatus = 'pending' | 'approved' | 'rejected' | 'archived';
+export type RecipeVisibility = 'personal' | 'shared';
 
 export type RecipeSummary = {
   id: string;
@@ -121,6 +122,7 @@ export type RecipeSummary = {
   difficulty: RecipeDifficulty;
   servings: number;
   status: RecipeStatus;
+  visibility: RecipeVisibility;
   tags: string[];
   ingredientCount: number;
   isFavorite?: boolean;

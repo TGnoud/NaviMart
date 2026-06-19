@@ -30,6 +30,7 @@ export default function RecipeEditor() {
   const [loading, setLoading] = useState(isEdit);
   const [saving, setSaving] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [visibility, setVisibility] = useState<'personal' | 'shared'>('personal');
 
   const canCreate = user?.role === 'admin' || user?.role === 'housewife';
 
@@ -98,6 +99,7 @@ export default function RecipeEditor() {
     }
 
     const payload: RecipeEditorInput = {
+      visibility: isEdit ? undefined : visibility,
       name: name.trim(),
       description: description.trim() || undefined,
       imageUrl: imageUrl.trim() || undefined,
@@ -122,10 +124,14 @@ export default function RecipeEditor() {
     try {
       if (isEdit) {
         await recipesApi.update(recipeId!, payload);
-        showAlert('Đã cập nhật công thức! Công thức sẽ hiển thị sau khi admin duyệt lại.');
+        showAlert('Đã cập nhật công thức!');
       } else {
         await recipesApi.create(payload);
-        showAlert('Đã gửi công thức! Công thức sẽ hiển thị công khai sau khi admin duyệt.');
+        showAlert(
+          visibility === 'personal'
+            ? 'Đã lưu vào công thức cá nhân.'
+            : 'Đã gửi công thức chia sẻ và đang chờ admin duyệt.',
+        );
       }
       navigate('/recipe-suggestion');
     } catch (err) {
@@ -158,7 +164,7 @@ export default function RecipeEditor() {
             className="bg-primary text-on-primary font-label-md font-bold px-5 py-2.5 rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center gap-2"
           >
             <span className="material-symbols-outlined text-[20px]">send</span>
-            {saving ? 'Đang gửi...' : isEdit ? 'Cập nhật' : 'Gửi duyệt'}
+            {saving ? 'Đang lưu...' : isEdit ? 'Cập nhật' : visibility === 'personal' ? 'Lưu cá nhân' : 'Gửi duyệt'}
           </button>
         </header>
 
@@ -176,10 +182,29 @@ export default function RecipeEditor() {
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-6">
+                {!isEdit && (
+                  <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-4">
+                    <p className="font-label-md text-on-surface mb-3">Chế độ công thức</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <button type="button" onClick={() => setVisibility('personal')} className={`p-4 rounded-xl border text-left ${visibility === 'personal' ? 'border-primary bg-primary-container/30' : 'border-outline-variant'}`}>
+                        <span className="material-symbols-outlined text-primary">lock</span>
+                        <p className="font-label-md text-on-surface font-bold">Công thức cá nhân</p>
+                        <p className="font-body-sm text-on-surface-variant">Chỉ bạn xem, được lưu ngay.</p>
+                      </button>
+                      <button type="button" onClick={() => setVisibility('shared')} className={`p-4 rounded-xl border text-left ${visibility === 'shared' ? 'border-primary bg-primary-container/30' : 'border-outline-variant'}`}>
+                        <span className="material-symbols-outlined text-primary">public</span>
+                        <p className="font-label-md text-on-surface font-bold">Chia sẻ cộng đồng</p>
+                        <p className="font-body-sm text-on-surface-variant">Chờ admin duyệt trước khi công khai.</p>
+                      </button>
+                    </div>
+                  </div>
+                )}
                 <div className="bg-primary-container/20 border border-primary/20 rounded-xl px-4 py-3 flex items-start gap-2">
                   <span className="material-symbols-outlined text-primary mt-0.5">info</span>
                   <p className="font-body-md text-body-md text-on-surface">
-                    Công thức của bạn sẽ ở trạng thái <b>chờ duyệt</b> và chỉ hiển thị công khai sau khi quản trị viên phê duyệt.
+                    {visibility === 'personal'
+                      ? <>Công thức sẽ được lưu trong mục <b>Công thức cá nhân</b>.</>
+                      : <>Công thức chia sẻ sẽ ở trạng thái <b>chờ duyệt</b> và công khai sau khi quản trị viên phê duyệt.</>}
                   </p>
                 </div>
 
@@ -337,7 +362,7 @@ export default function RecipeEditor() {
                   className="w-full bg-primary text-on-primary py-4 rounded-xl font-headline-sm text-headline-sm flex items-center justify-center gap-2 hover:opacity-90 transition-opacity shadow-sm disabled:opacity-50"
                 >
                   <span className="material-symbols-outlined">send</span>
-                  {saving ? 'Đang gửi...' : isEdit ? 'Cập nhật công thức' : 'Gửi công thức chờ duyệt'}
+                  {saving ? 'Đang lưu...' : isEdit ? 'Cập nhật công thức' : visibility === 'personal' ? 'Lưu công thức cá nhân' : 'Gửi công thức chờ duyệt'}
                 </button>
               </form>
             )}

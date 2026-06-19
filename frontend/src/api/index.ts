@@ -401,6 +401,7 @@ export type GeneratedShoppingListResult = {
 };
 
 export type RecipeEditorInput = {
+  visibility?: 'personal' | 'shared';
   name: string;
   description?: string;
   imageUrl?: string;

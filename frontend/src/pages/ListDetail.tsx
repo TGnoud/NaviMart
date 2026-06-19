@@ -2,8 +2,8 @@ import { useCallback, useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import BottomNav from '../components/BottomNav';
 import NotificationDropdown from '../components/NotificationDropdown';
-import { shoppingListsApi } from '../api';
-import type { CatalogFood, ShoppingList } from '../api';
+import { catalogApi, shoppingListsApi } from '../api';
+import type { CatalogCategory, CatalogFood, ShoppingList } from '../api';
 import { onSocketEvent } from '../api/socket';
 import { useDialog } from '../contexts/DialogContext';
 import FoodAutocomplete from '../components/FoodAutocomplete';
@@ -16,6 +16,9 @@ export default function ListDetail() {
   const [list, setList] = useState<ShoppingList | null>(null);
   const [loading, setLoading] = useState(true);
   const [newItem, setNewItem] = useState('');
+  const [categories, setCategories] = useState<CatalogCategory[]>([]);
+  const [newItemCategoryId, setNewItemCategoryId] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('all');
   const [completing, setCompleting] = useState(false);
 
   const handleError = useCallback(
@@ -28,10 +31,12 @@ export default function ListDetail() {
   useEffect(() => {
     if (!listId) return;
     let cancelled = false;
-    shoppingListsApi
-      .get(listId)
-      .then((data) => {
-        if (!cancelled) setList(data);
+    Promise.all([shoppingListsApi.get(listId), catalogApi.categories()])
+      .then(([data, categoryData]) => {
+        if (!cancelled) {
+          setList(data);
+          setCategories(categoryData);
+        }
       })
       .catch((err) => handleError(err, 'Không tải được danh sách.'))
       .finally(() => {
@@ -103,15 +108,21 @@ export default function ListDetail() {
 
   const handleAddItem = async () => {
     if (!newItem.trim() || !listId || isCompleted) return;
+    if (!newItemCategoryId) {
+      showAlert('Vui lòng chọn danh mục thực phẩm trước khi thêm.');
+      return;
+    }
     try {
       setList(
         await shoppingListsApi.addItem(listId, {
           name: newItem.trim(),
+          categoryId: newItemCategoryId,
           quantity: 1,
           unit: 'cái',
         }),
       );
       setNewItem('');
+      setNewItemCategoryId('');
     } catch (err) {
       handleError(err, 'Không thêm được món đồ.');
     }
@@ -124,10 +135,12 @@ export default function ListDetail() {
       setList(
         await shoppingListsApi.addItem(listId, {
           foodId: food.id,
+          categoryId: food.categoryId,
           quantity: 1,
         }),
       );
       setNewItem('');
+      setNewItemCategoryId('');
     } catch (err) {
       handleError(err, 'Không thêm được món đồ.');
     }
@@ -159,8 +172,11 @@ export default function ListDetail() {
   };
 
   const items = list?.items ?? [];
-  const pendingItems = items.filter((item) => !item.checked);
-  const boughtItems = items.filter((item) => item.checked);
+  const visibleItems = categoryFilter === 'all'
+    ? items
+    : items.filter((item) => item.categoryId === categoryFilter);
+  const pendingItems = visibleItems.filter((item) => !item.checked);
+  const boughtItems = visibleItems.filter((item) => item.checked);
 
   return (
     <div className="bg-background text-on-background h-screen overflow-hidden font-body-md antialiased flex flex-col">
@@ -228,7 +244,7 @@ export default function ListDetail() {
                 )}
 
                 {!isCompleted && (
-                  <div className="mt-stack-md">
+                  <div className="mt-stack-md grid grid-cols-1 sm:grid-cols-[minmax(0,1fr)_240px] gap-2">
                     <FoodAutocomplete
                       value={newItem}
                       onChange={setNewItem}
@@ -238,9 +254,36 @@ export default function ListDetail() {
                       placeholder="Thêm món đồ nhanh (gõ để tìm, Enter để thêm)..."
                       className="w-full pl-10 pr-4 py-3 rounded-none border border-[#c1c1c1] bg-surface-container-lowest font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container shadow-sm transition-all"
                     />
+                    <select
+                      value={newItemCategoryId}
+                      onChange={(event) => setNewItemCategoryId(event.target.value)}
+                      aria-label="Danh mục thực phẩm"
+                      className="w-full px-3 py-3 border border-[#c1c1c1] bg-surface-container-lowest text-on-surface focus:outline-none focus:border-primary-container"
+                    >
+                      <option value="">Chọn danh mục *</option>
+                      {categories.map((category) => (
+                        <option key={category.id} value={category.id}>{category.name}</option>
+                      ))}
+                    </select>
                   </div>
                 )}
               </section>
+
+              <div className="px-margin-mobile mb-stack-md flex gap-2 overflow-x-auto pb-1">
+                <button
+                  type="button"
+                  onClick={() => setCategoryFilter('all')}
+                  className={`whitespace-nowrap px-4 py-2 rounded-full ${categoryFilter === 'all' ? 'bg-primary-container text-on-primary-container' : 'bg-surface-container-high text-on-surface-variant'}`}
+                >Tất cả</button>
+                {categories.map((category) => (
+                  <button
+                    key={category.id}
+                    type="button"
+                    onClick={() => setCategoryFilter(category.id)}
+                    className={`whitespace-nowrap px-4 py-2 rounded-full ${categoryFilter === category.id ? 'bg-primary-container text-on-primary-container' : 'bg-surface-container-high text-on-surface-variant'}`}
+                  >{category.name}</button>
+                ))}
+              </div>
 
               {[
                 { title: 'Cần mua', icon: 'shopping_cart', groupItems: pendingItems },

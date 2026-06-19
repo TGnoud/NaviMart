@@ -146,42 +146,16 @@ type SeedMealPlan = {
 };
 
 const categories: SeedCategory[] = [
-  {
-    name: 'Rau củ',
-    slug: 'rau-cu',
-    description: 'Rau xanh, củ quả và nấm tươi.',
-    icon: 'leaf',
-  },
-  {
-    name: 'Thịt cá',
-    slug: 'thit-ca',
-    description: 'Thịt, cá, hải sản và protein tươi sống.',
-    icon: 'beef',
-  },
-  {
-    name: 'Đồ khô',
-    slug: 'do-kho',
-    description: 'Gạo, mì, ngũ cốc và thực phẩm khô.',
-    icon: 'package',
-  },
-  {
-    name: 'Gia vị',
-    slug: 'gia-vi',
-    description: 'Gia vị, sốt, dầu ăn và nguyên liệu nêm.',
-    icon: 'chef-hat',
-  },
-  {
-    name: 'Sữa trứng',
-    slug: 'sua-trung',
-    description: 'Sữa, trứng và các sản phẩm từ sữa.',
-    icon: 'egg',
-  },
-  {
-    name: 'Trái cây',
-    slug: 'trai-cay',
-    description: 'Trái cây tươi và trái cây cắt sẵn.',
-    icon: 'apple',
-  },
+  { name: 'Rau củ', slug: 'rau-cu', description: 'Rau xanh, củ quả và rau thơm.', icon: 'leaf' },
+  { name: 'Thịt', slug: 'thit', description: 'Thịt gia súc, gia cầm và sản phẩm từ thịt.', icon: 'beef' },
+  { name: 'Cá và hải sản', slug: 'ca-hai-san', description: 'Cá, tôm, cua, mực và hải sản.', icon: 'set_meal' },
+  { name: 'Trứng và sữa', slug: 'trung-sua', description: 'Trứng, sữa và sản phẩm từ sữa.', icon: 'egg' },
+  { name: 'Gạo, mì và ngũ cốc', slug: 'gao-mi-ngu-coc', description: 'Gạo, bún, mì, nui, bột và ngũ cốc.', icon: 'grain' },
+  { name: 'Gia vị và sốt', slug: 'gia-vi-sot', description: 'Gia vị, nước chấm, sốt và dầu ăn.', icon: 'chef-hat' },
+  { name: 'Đồ khô', slug: 'do-kho', description: 'Thực phẩm khô, đóng gói và đồ hộp.', icon: 'package' },
+  { name: 'Đậu và nấm', slug: 'dau-nam', description: 'Các loại đậu, đậu phụ và nấm.', icon: 'nutrition' },
+  { name: 'Trái cây', slug: 'trai-cay', description: 'Trái cây tươi, khô và chế biến.', icon: 'apple' },
+  { name: 'Đồ uống và khác', slug: 'do-uong-khac', description: 'Đồ uống và thực phẩm chưa thuộc nhóm khác.', icon: 'local_drink' },
 ];
 
 const units: SeedUnit[] = [
@@ -638,49 +612,64 @@ function cookpadImageUrl(value?: string) {
   return imageUrl.startsWith('//') ? `https:${imageUrl}` : imageUrl;
 }
 
-function inferCookpadIngredients(recipe: CookpadRecipeRecord): SeedRecipeIngredient[] {
-  const text = normalizeForMatch(`${recipe.title ?? ''} ${recipe.intro ?? ''}`);
-  const ingredients: SeedRecipeIngredient[] = [];
-  const add = (ingredient: SeedRecipeIngredient) => {
-    if (!ingredients.some((item) => item.foodName === ingredient.foodName)) {
-      ingredients.push(ingredient);
+const cookpadUnitMap: Record<string, string> = {
+  g: 'g', gr: 'g', gram: 'g', kg: 'kg', ml: 'ml', l: 'l', lit: 'l', lít: 'l',
+  cái: 'cai', quả: 'qua', trái: 'qua', củ: 'qua', bó: 'bo', hộp: 'hop',
+  gói: 'goi', chai: 'chai', muỗng: 'muong', thìa: 'muong', chén: 'muong',
+};
+
+function categorySlugForFood(name: string) {
+  const value = normalizeForMatch(name);
+  const has = (...words: string[]) => words.some((word) => value.includes(word));
+  if (has('thit', 'heo', 'bo ', 'ga ', 'vit', 'suon', 'gio', 'cha lua', 'xuc xich')) return 'thit';
+  if (has('ca ', 'tom', 'cua', 'ghe', 'muc', 'hai san', 'so ', 'oc ', 'ngheu', 'cha ca')) return 'ca-hai-san';
+  if (has('trung', 'sua', 'pho mai', 'bơ lạt', 'bo lat', 'kem tuoi', 'yogurt')) return 'trung-sua';
+  if (has('gao', 'com', 'bun', 'mi', 'pho', 'nui', 'bot', 'yen mach', 'ngu coc', 'banh mi')) return 'gao-mi-ngu-coc';
+  if (has('muoi', 'duong', 'mam', 'tuong', 'sot', 'dau an', 'tieu', 'hat nem', 'bot ngot', 'sa te', 'giam', 'mayonnaise')) return 'gia-vi-sot';
+  if (has('dau hu', 'dau phu', 'dau ', 'nam', 'tofu', 'oc dau')) return 'dau-nam';
+  if (has('xoai', 'tao', 'chuoi', 'cam', 'chanh', 'dua hau', 'dua luoi', 'bo sap', 'nho', 'dau tay', 'trai cay')) return 'trai-cay';
+  if (has('rau', 'cu ', 'ca chua', 'khoai', 'hanh', 'toi', 'ot', 'gung', 'sa ', 'bap cai', 'bi ', 'muop', 'dua leo', 'gia ', 'ngo ', 'la ')) return 'rau-cu';
+  if (has('nuoc', 'tra', 'ca phe', 'ruou', 'bia', 'siro')) return 'do-uong-khac';
+  return 'do-kho';
+}
+
+function parseCookpadIngredient(rawValue: string): SeedRecipeIngredient | undefined {
+  let value = cleanCookpadText(rawValue)
+    .replace(/^(gia vị|ăn kèm|phần ăn kèm|nguyên liệu)\s*:\s*/i, '')
+    .replace(/^[+\-–•]\s*/, '')
+    .trim();
+  if (!value) return undefined;
+
+  const match = value.match(/^(\d+(?:[.,]\d+)?(?:\s*\/\s*\d+)?)\s*([\p{L}]+)?\s+(.*)$/u);
+  let quantity = 1;
+  let unit = 'cai';
+  if (match) {
+    const rawQuantity = match[1].replace(',', '.');
+    quantity = rawQuantity.includes('/')
+      ? rawQuantity.split('/').map(Number).reduce((a, b) => a / b)
+      : Number(rawQuantity);
+    const mappedUnit = match[2] ? cookpadUnitMap[match[2].toLowerCase()] : undefined;
+    if (mappedUnit) {
+      unit = mappedUnit;
+      value = match[3];
+    } else {
+      value = `${match[2] ?? ''} ${match[3]}`.trim();
     }
-  };
-  const has = (...keywords: string[]) => keywords.some((keyword) => text.includes(keyword));
-
-  if (has('banh mi')) add({ foodName: 'Bánh mì', quantity: 2, unit: 'cai' });
-  if (has('pho')) add({ foodName: 'Phở khô', quantity: 300, unit: 'g' });
-  if (has('bun')) add({ foodName: 'Bún khô', quantity: 300, unit: 'g' });
-  if (has('spaghetti', 'udon', 'soba', 'nui', 'mi ', ' mi', 'mì')) {
-    add({ foodName: has('mi goi') ? 'Mì gói' : 'Mì Ý', quantity: has('mi goi') ? 2 : 250, unit: has('mi goi') ? 'goi' : 'g' });
   }
-  if (has('com', 'cơm')) add({ foodName: 'Gạo', quantity: 250, unit: 'g' });
-  if (has('ga ', ' ga', 'gà', 'canh ga')) add({ foodName: 'Thịt gà', quantity: 400, unit: 'g' });
-  if (has('bo ', ' bo', 'bò')) add({ foodName: 'Thịt bò', quantity: 350, unit: 'g' });
-  if (has('heo', 'thit', 'suon', 'ba chi', 'gio heo')) add({ foodName: 'Thịt heo', quantity: 400, unit: 'g' });
-  if (has('tom', 'tôm')) add({ foodName: 'Tôm', quantity: 300, unit: 'g' });
-  if (has('muc', 'hai san', 'hải sản')) add({ foodName: 'Mực', quantity: 300, unit: 'g' });
-  if (has('ca ', ' ca', 'cá')) add({ foodName: 'Cá thu', quantity: 400, unit: 'g' });
-  if (has('trung', 'trứng')) add({ foodName: 'Trứng gà', quantity: 2, unit: 'qua' });
-  if (has('dau phu', 'dau hu', 'tofu', 'đậu phụ')) add({ foodName: 'Đậu hũ', quantity: 2, unit: 'hop' });
-  if (has('nam', 'nấm')) add({ foodName: 'Nấm hương', quantity: 200, unit: 'g' });
-  if (has('rau muong')) add({ foodName: 'Rau muống', quantity: 1, unit: 'bo' });
-  if (has('rau', 'canh', 'cai')) add({ foodName: 'Bắp cải', quantity: 300, unit: 'g' });
-  if (has('ca chua', 'cà chua', 'sot ca')) add({ foodName: 'Cà chua', quantity: 250, unit: 'g' });
-  if (has('dua leo')) add({ foodName: 'Dưa leo', quantity: 150, unit: 'g' });
-  if (has('bap', 'ngo')) add({ foodName: 'Bắp Mỹ', quantity: 1, unit: 'qua' });
-  if (has('khoai')) add({ foodName: 'Khoai tây', quantity: 300, unit: 'g' });
-  if (has('sua chua')) add({ foodName: 'Sữa chua', quantity: 1, unit: 'hop' });
-  if (has('sua ', 'sữa')) add({ foodName: 'Sữa tươi', quantity: 150, unit: 'ml' });
-  if (has('gung', 'gừng')) add({ foodName: 'Gừng', quantity: 20, unit: 'g' });
-  if (has('sa ', ' sa', 'sả')) add({ foodName: 'Sả', quantity: 20, unit: 'g' });
-  if (has('toi', 'tỏi')) add({ foodName: 'Tỏi', quantity: 15, unit: 'g' });
-  if (has('ot', 'ớt')) add({ foodName: 'Ớt', quantity: 5, unit: 'g', optional: true });
-  if (ingredients.length === 0) add({ foodName: 'Gạo', quantity: 250, unit: 'g' });
-  add({ foodName: 'Dầu ăn', quantity: 15, unit: 'ml', optional: true });
-  add({ foodName: 'Nước mắm', quantity: 15, unit: 'ml', optional: true });
 
-  return ingredients.slice(0, 6);
+  const foodName = value
+    .replace(/^\s*(ít|một ít)\s+/i, '')
+    .replace(/\s*\([^)]*(tùy chọn|tuỳ chọn|optional)[^)]*\)\s*$/i, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+  if (!foodName) return undefined;
+  return { foodName, quantity: Number.isFinite(quantity) ? quantity : 1, unit };
+}
+
+function cookpadIngredients(recipe: CookpadRecipeRecord): SeedRecipeIngredient[] {
+  return (recipe.ingredients ?? [])
+    .map(parseCookpadIngredient)
+    .filter((item): item is SeedRecipeIngredient => Boolean(item));
 }
 
 function cookpadSteps(recipe: CookpadRecipeRecord) {
@@ -734,6 +723,9 @@ function loadCookpadRecipes(): SeedRecipe[] {
   if (!existsSync(cookpadJsonPath)) return [];
 
   const records = JSON.parse(readFileSync(cookpadJsonPath, 'utf8')) as CookpadRecipeRecord[];
+  const foodByNormalizedName = new Map(
+    foods.map((food) => [normalizeForMatch(food.name), food]),
+  );
   return records
     .filter(
       (record) =>
@@ -744,6 +736,23 @@ function loadCookpadRecipes(): SeedRecipe[] {
     .map((record) => {
       const name = truncateText(cleanCookpadText(record.title), 180);
       const intro = cleanCookpadText(record.intro);
+      const ingredients = cookpadIngredients(record).map((ingredient) => {
+        const key = normalizeForMatch(ingredient.foodName);
+        let food = foodByNormalizedName.get(key);
+        if (!food) {
+          food = {
+            name: ingredient.foodName,
+            categorySlug: categorySlugForFood(ingredient.foodName),
+            defaultUnit: ingredient.unit ?? 'cai',
+            defaultStorageLocation: 'pantry',
+            defaultShelfLifeDays: 30,
+            storageTips: 'Bảo quản phù hợp theo hướng dẫn trên bao bì hoặc đặc tính thực phẩm.',
+          };
+          foods.push(food);
+          foodByNormalizedName.set(key, food);
+        }
+        return { ...ingredient, foodName: food.name };
+      });
       const description = intro
         ? truncateText(intro, 780)
         : `Cong thuc Cookpad cho mon ${name}.`;
@@ -755,7 +764,7 @@ function loadCookpadRecipes(): SeedRecipe[] {
         cookTimeMinutes: cookpadCookTime(record),
         difficulty: cookpadDifficulty(record),
         servings: 2,
-        ingredients: inferCookpadIngredients(record),
+        ingredients,
         steps: cookpadSteps(record),
         nutrition: { calories: 420, protein: 22, carbs: 45, fat: 16 },
         tags: cookpadTags(record),
@@ -1676,7 +1685,12 @@ const mealPlans: SeedMealPlan[] = [
 ];
 
 function normalizeName(name: string) {
-  return name.trim().toLowerCase();
+  return name
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/đ/g, 'd')
+    .trim();
 }
 
 function daysFromNow(days: number) {
@@ -1687,7 +1701,13 @@ function daysFromNow(days: number) {
 }
 
 function foodOrThrow(foodByName: Map<string, Food>, foodName: string) {
-  const food = foodByName.get(foodName);
+  const normalizedName = normalizeName(foodName);
+  const food =
+    foodByName.get(foodName) ??
+    foodByName.get(normalizedName) ??
+    [...foodByName.values()].find(
+      (candidate) => normalizeName(candidate.name) === normalizedName,
+    );
   if (!food) {
     throw new Error(`Missing food: ${foodName}`);
   }
@@ -1739,14 +1759,27 @@ async function upsertFoods(
   const result = new Map<string, Food>();
 
   for (const food of foods) {
-    const category = categoryBySlug.get(food.categorySlug);
+    const categorySlug =
+      food.categorySlug === 'thit-ca' ||
+      food.categorySlug === 'sua-trung' ||
+      food.categorySlug === 'gia-vi'
+        ? categorySlugForFood(food.name)
+        : food.categorySlug === 'do-kho'
+          ? categorySlugForFood(food.name)
+          : food.categorySlug;
+    const category = categoryBySlug.get(categorySlug);
     if (!category) {
       throw new Error(`Missing category for food: ${food.name}`);
     }
 
     const document = await foodModel
       .findOneAndUpdate(
-        { normalizedName: normalizeName(food.name) },
+        {
+          $or: [
+            { normalizedName: normalizeName(food.name) },
+            { normalizedName: food.name.trim().toLowerCase() },
+          ],
+        },
         {
           $set: {
             name: food.name,
@@ -1768,6 +1801,7 @@ async function upsertFoods(
       .exec();
 
     result.set(food.name, document);
+    result.set(normalizeName(food.name), document);
   }
 
   return result;
@@ -1781,7 +1815,9 @@ async function upsertRecipes(
 
   for (const recipe of recipes) {
     const ingredients = recipe.ingredients.map((ingredient) => {
-      const food = foodByName.get(ingredient.foodName);
+      const food =
+        foodByName.get(ingredient.foodName) ??
+        foodByName.get(normalizeName(ingredient.foodName));
       if (!food) {
         throw new Error(`Missing food for recipe ingredient: ${ingredient.foodName}`);
       }
@@ -1798,7 +1834,12 @@ async function upsertRecipes(
 
     const document = await recipeModel
       .findOneAndUpdate(
-        { normalizedName: normalizeName(recipe.name) },
+        {
+          $or: [
+            { normalizedName: normalizeName(recipe.name) },
+            { normalizedName: recipe.name.trim().toLowerCase() },
+          ],
+        },
         {
           $set: {
             name: recipe.name,

@@ -15,6 +15,7 @@ import {
   FAMILY_PERMISSIONS,
 } from '../families/schemas/family.schema';
 import { User, UserDocument } from '../users/schemas/user.schema';
+import { ExpiryNotificationsService } from '../notifications/expiry-notifications.service';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
@@ -36,6 +37,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
     private readonly gmailMailService: GmailMailService,
+    private readonly expiryNotificationsService: ExpiryNotificationsService,
   ) {}
 
   async register(registerDto: RegisterDto) {
@@ -104,6 +106,9 @@ export class AuthService {
     const tokens = await this.issueTokens(user, loginDto.rememberMe);
     await this.storeRefreshToken(user._id, tokens.refreshToken);
     await user.save();
+    void this.expiryNotificationsService
+      .createExpiryNotifications()
+      .catch(() => undefined);
 
     return {
       user: this.toUserResponse(user),

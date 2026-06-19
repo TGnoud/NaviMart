@@ -22,6 +22,6 @@ import {
   ],
   controllers: [NotificationsController],
   providers: [NotificationsService, ExpiryNotificationsService],
-  exports: [NotificationsService],
+  exports: [NotificationsService, ExpiryNotificationsService],
 })
 export class NotificationsModule {}

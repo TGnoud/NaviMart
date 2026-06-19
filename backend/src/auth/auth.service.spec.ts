@@ -47,6 +47,7 @@ describe('AuthService', () => {
     sendPasswordResetCode: jest.Mock;
     sendEmailVerificationCode: jest.Mock;
   };
+  let expiryNotificationsService: { createExpiryNotifications: jest.Mock };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -67,6 +68,9 @@ describe('AuthService', () => {
       sendEmailVerificationCode: jest.fn(),
     };
     mockHash.mockResolvedValue('hashed');
+    expiryNotificationsService = {
+      createExpiryNotifications: jest.fn().mockResolvedValue({ createdCount: 0 }),
+    };
 
     service = new AuthService(
       userModel as never,
@@ -74,6 +78,7 @@ describe('AuthService', () => {
       jwtService as never,
       configService as never,
       gmailMailService as never,
+      expiryNotificationsService as never,
     );
   });
 
@@ -151,6 +156,7 @@ describe('AuthService', () => {
 
       expect(result.tokens.accessToken).toBe('signed.jwt');
       expect(doc.save).toHaveBeenCalled();
+      expect(expiryNotificationsService.createExpiryNotifications).toHaveBeenCalledTimes(1);
     });
   });
 

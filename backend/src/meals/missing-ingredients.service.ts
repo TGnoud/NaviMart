@@ -6,6 +6,7 @@ import { Family } from '../families/schemas/family.schema';
 import { resolveActiveFamilyId } from '../families/family-access.util';
 import { PantryItem } from '../pantry/schemas/pantry-item.schema';
 import { Recipe, RecipeDocument } from '../recipes/schemas/recipe.schema';
+import { toVietnameseUnitCode } from '../catalog/schemas/unit.schema';
 
 @Injectable()
 export class MissingIngredientsService {
@@ -87,7 +88,8 @@ export class MissingIngredientsService {
     T extends { foodId?: Types.ObjectId; name: string; unit: string },
   >(pantryItems: T[], ingredient: { foodId?: string; name: string; unit: string }) {
     return pantryItems.filter((item) => {
-      const sameUnit = item.unit.toLowerCase() === ingredient.unit.toLowerCase();
+      const sameUnit =
+        this.normalizeUnit(item.unit) === this.normalizeUnit(ingredient.unit);
       if (!sameUnit) {
         return false;
       }
@@ -115,6 +117,10 @@ export class MissingIngredientsService {
       (sum, item) => sum + item.quantity,
       0,
     );
+  }
+
+  private normalizeUnit(unit: string) {
+    return toVietnameseUnitCode(unit).toLowerCase();
   }
 
   private getActiveFamilyId(user: AuthenticatedUser) {

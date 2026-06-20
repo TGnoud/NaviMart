@@ -159,18 +159,20 @@ const categories: SeedCategory[] = [
 ];
 
 const units: SeedUnit[] = [
-  { code: 'g', name: 'Gram', type: 'weight' },
-  { code: 'kg', name: 'Kilogram', type: 'weight' },
-  { code: 'ml', name: 'Milliliter', type: 'volume' },
-  { code: 'l', name: 'Liter', type: 'volume' },
-  { code: 'cai', name: 'Cái', type: 'count' },
-  { code: 'qua', name: 'Quả', type: 'count' },
-  { code: 'bo', name: 'Bó', type: 'count' },
-  { code: 'hop', name: 'Hộp', type: 'package' },
-  { code: 'goi', name: 'Gói', type: 'package' },
+  { code: 'g', name: 'Gam', type: 'weight' },
+  { code: 'kg', name: 'Kilôgam', type: 'weight' },
+  { code: 'ml', name: 'Mililít', type: 'volume' },
+  { code: 'l', name: 'Lít', type: 'volume' },
+  { code: 'cái', name: 'Cái', type: 'count' },
+  { code: 'quả', name: 'Quả', type: 'count' },
+  { code: 'bó', name: 'Bó', type: 'count' },
+  { code: 'hộp', name: 'Hộp', type: 'package' },
+  { code: 'gói', name: 'Gói', type: 'package' },
   { code: 'chai', name: 'Chai', type: 'package' },
-  { code: 'muong', name: 'Muỗng', type: 'count' },
+  { code: 'muỗng', name: 'Muỗng', type: 'count' },
 ];
+
+const legacyUnitCodes = ['cai', 'qua', 'bo', 'hop', 'goi', 'muong'];
 
 const foods: SeedFood[] = [
   {
@@ -204,7 +206,7 @@ const foods: SeedFood[] = [
   {
     name: 'Trứng gà',
     categorySlug: 'sua-trung',
-    defaultUnit: 'qua',
+    defaultUnit: 'quả',
     aliases: ['trung'],
     defaultStorageLocation: 'fridge',
     defaultShelfLifeDays: 21,
@@ -269,7 +271,7 @@ const foods: SeedFood[] = [
   {
     name: 'Mì gói',
     categorySlug: 'do-kho',
-    defaultUnit: 'goi',
+    defaultUnit: 'gói',
     aliases: ['mi an lien'],
     defaultStorageLocation: 'pantry',
     defaultShelfLifeDays: 120,
@@ -306,7 +308,7 @@ const foods: SeedFood[] = [
   {
     name: 'Táo',
     categorySlug: 'trai-cay',
-    defaultUnit: 'qua',
+    defaultUnit: 'quả',
     aliases: ['apple'],
     defaultStorageLocation: 'fridge',
     defaultShelfLifeDays: 21,
@@ -315,7 +317,7 @@ const foods: SeedFood[] = [
   {
     name: 'Chuối',
     categorySlug: 'trai-cay',
-    defaultUnit: 'qua',
+    defaultUnit: 'quả',
     aliases: ['banana'],
     defaultStorageLocation: 'pantry',
     defaultShelfLifeDays: 5,
@@ -363,7 +365,7 @@ const extraFoods: SeedFood[] = [
   {
     name: 'Đậu hũ',
     categorySlug: 'sua-trung',
-    defaultUnit: 'hop',
+    defaultUnit: 'hộp',
     aliases: ['tofu'],
     defaultStorageLocation: 'fridge',
     defaultShelfLifeDays: 5,
@@ -372,7 +374,7 @@ const extraFoods: SeedFood[] = [
   {
     name: 'Sữa chua',
     categorySlug: 'sua-trung',
-    defaultUnit: 'hop',
+    defaultUnit: 'hộp',
     aliases: ['yogurt'],
     defaultStorageLocation: 'fridge',
     defaultShelfLifeDays: 14,
@@ -408,7 +410,7 @@ const extraFoods: SeedFood[] = [
   {
     name: 'Bánh mì',
     categorySlug: 'do-kho',
-    defaultUnit: 'cai',
+    defaultUnit: 'cái',
     aliases: ['bread'],
     defaultStorageLocation: 'pantry',
     defaultShelfLifeDays: 2,
@@ -435,7 +437,7 @@ const extraFoods: SeedFood[] = [
   {
     name: 'Rau muống',
     categorySlug: 'rau-cu',
-    defaultUnit: 'bo',
+    defaultUnit: 'bó',
     aliases: ['water spinach'],
     defaultStorageLocation: 'fridge',
     defaultShelfLifeDays: 3,
@@ -471,7 +473,7 @@ const extraFoods: SeedFood[] = [
   {
     name: 'Bắp Mỹ',
     categorySlug: 'rau-cu',
-    defaultUnit: 'qua',
+    defaultUnit: 'quả',
     aliases: ['corn'],
     defaultStorageLocation: 'fridge',
     defaultShelfLifeDays: 5,
@@ -516,7 +518,7 @@ const extraFoods: SeedFood[] = [
   {
     name: 'Cam',
     categorySlug: 'trai-cay',
-    defaultUnit: 'qua',
+    defaultUnit: 'quả',
     aliases: ['orange'],
     defaultStorageLocation: 'fridge',
     defaultShelfLifeDays: 14,
@@ -614,11 +616,11 @@ function cookpadImageUrl(value?: string) {
 
 const cookpadUnitMap: Record<string, string> = {
   g: 'g', gr: 'g', gram: 'g', gam: 'g', kg: 'kg', ml: 'ml', l: 'l', lit: 'l', lít: 'l',
-  cái: 'cai', quả: 'qua', trái: 'qua', củ: 'qua', bó: 'bo', hộp: 'hop',
-  k: 'kg', con: 'cai', cây: 'cai', ít: 'cai', miếng: 'cai', lát: 'cai',
-  nhánh: 'cai', tép: 'cai', cup: 'muong',
-  tbsp: 'muong', tsp: 'muong', gói: 'goi', chai: 'chai', muỗng: 'muong',
-  thìa: 'muong', chén: 'muong',
+  cái: 'cái', quả: 'quả', trái: 'quả', củ: 'quả', bó: 'bó', hộp: 'hộp',
+  k: 'kg', con: 'cái', cây: 'cái', ít: 'cái', miếng: 'cái', lát: 'cái',
+  nhánh: 'cái', tép: 'cái', cup: 'muỗng',
+  tbsp: 'muỗng', tsp: 'muỗng', gói: 'gói', chai: 'chai', muỗng: 'muỗng',
+  thìa: 'muỗng', chén: 'muỗng',
 };
 
 function categorySlugForFood(name: string) {
@@ -648,7 +650,7 @@ function parseCookpadIngredient(rawValue: string): SeedRecipeIngredient | undefi
   if (!value) return undefined;
 
   let quantity = 1;
-  let unit = 'cai';
+  let unit = 'cái';
   const parenthesizedMatch = value.match(
     /^\((?:khoảng\s*)?(\d+(?:\s+\d+\s*\/\s*\d+|(?:[.,]\d+)?(?:\s*\/\s*\d+)?(?:\s*[-–]\s*\d+(?:[.,]\d+)?)?))\s*([\p{L}]+)?[^)]*\)\s*(.+)$/iu,
   );
@@ -865,7 +867,7 @@ const recipes: SeedRecipe[] = [
     difficulty: 'easy',
     servings: 2,
     ingredients: [
-      { foodName: 'Trung ga', quantity: 2, unit: 'qua' },
+      { foodName: 'Trung ga', quantity: 2, unit: 'quả' },
       { foodName: 'Ca chua', quantity: 200, unit: 'g' },
       { foodName: 'Nuoc mam', quantity: 10, unit: 'ml' },
     ],
@@ -930,8 +932,8 @@ const recipes: SeedRecipe[] = [
     difficulty: 'easy',
     servings: 2,
     ingredients: [
-      { foodName: 'Tao', quantity: 2, unit: 'qua' },
-      { foodName: 'Chuoi', quantity: 2, unit: 'qua' },
+      { foodName: 'Tao', quantity: 2, unit: 'quả' },
+      { foodName: 'Chuoi', quantity: 2, unit: 'quả' },
       { foodName: 'Sua tuoi', quantity: 150, unit: 'ml' },
     ],
     steps: [
@@ -1074,7 +1076,7 @@ const extraRecipes: SeedRecipe[] = [
     difficulty: 'easy',
     servings: 2,
     ingredients: [
-      { foodName: 'Dau hu', quantity: 2, unit: 'hop' },
+      { foodName: 'Dau hu', quantity: 2, unit: 'hộp' },
       { foodName: 'Ca chua', quantity: 250, unit: 'g' },
       { foodName: 'Hanh tay', quantity: 80, unit: 'g' },
       { foodName: 'Dau an', quantity: 15, unit: 'ml' },
@@ -1091,7 +1093,7 @@ const extraRecipes: SeedRecipe[] = [
     difficulty: 'easy',
     servings: 2,
     ingredients: [
-      { foodName: 'Rau muong', quantity: 1, unit: 'bo' },
+      { foodName: 'Rau muong', quantity: 1, unit: 'bó' },
       { foodName: 'Toi', quantity: 20, unit: 'g' },
       { foodName: 'Dau an', quantity: 15, unit: 'ml' },
       { foodName: 'Nuoc mam', quantity: 10, unit: 'ml' },
@@ -1125,7 +1127,7 @@ const extraRecipes: SeedRecipe[] = [
     servings: 2,
     ingredients: [
       { foodName: 'Khoai tay', quantity: 400, unit: 'g' },
-      { foodName: 'Trung ga', quantity: 2, unit: 'qua' },
+      { foodName: 'Trung ga', quantity: 2, unit: 'quả' },
       { foodName: 'Sua tuoi', quantity: 80, unit: 'ml' },
     ],
     steps: ['Luoc khoai tay den mem.', 'Nghien khoai voi sua.', 'An cung trung op la hoac trung luoc.'],
@@ -1141,7 +1143,7 @@ const extraRecipes: SeedRecipe[] = [
     servings: 2,
     ingredients: [
       { foodName: 'Khoai lang', quantity: 500, unit: 'g' },
-      { foodName: 'Sua chua', quantity: 2, unit: 'hop' },
+      { foodName: 'Sua chua', quantity: 2, unit: 'hộp' },
     ],
     steps: ['Nuong khoai den mem.', 'Cat doi va them sua chua.', 'Dung am hoac lanh.'],
     nutrition: { calories: 360, protein: 10, carbs: 68, fat: 5 },
@@ -1172,8 +1174,8 @@ const extraRecipes: SeedRecipe[] = [
     difficulty: 'easy',
     servings: 1,
     ingredients: [
-      { foodName: 'Banh mi', quantity: 1, unit: 'cai' },
-      { foodName: 'Trung ga', quantity: 2, unit: 'qua' },
+      { foodName: 'Banh mi', quantity: 1, unit: 'cái' },
+      { foodName: 'Trung ga', quantity: 2, unit: 'quả' },
       { foodName: 'Dua leo', quantity: 80, unit: 'g' },
     ],
     steps: ['Op la trung.', 'Nuong nong banh mi.', 'An kem dua leo.'],
@@ -1190,8 +1192,8 @@ const extraRecipes: SeedRecipe[] = [
     ingredients: [
       { foodName: 'Thit ga', quantity: 300, unit: 'g' },
       { foodName: 'Dua leo', quantity: 200, unit: 'g' },
-      { foodName: 'Sua chua', quantity: 1, unit: 'hop' },
-      { foodName: 'Cam', quantity: 1, unit: 'qua', optional: true },
+      { foodName: 'Sua chua', quantity: 1, unit: 'hộp' },
+      { foodName: 'Cam', quantity: 1, unit: 'quả', optional: true },
     ],
     steps: ['Luoc va xe ga.', 'Cat dua leo.', 'Tron voi sua chua va cam.'],
     nutrition: { calories: 350, protein: 34, carbs: 20, fat: 12 },
@@ -1223,9 +1225,9 @@ const extraRecipes: SeedRecipe[] = [
     servings: 2,
     ingredients: [
       { foodName: 'Gao', quantity: 250, unit: 'g' },
-      { foodName: 'Trung ga', quantity: 2, unit: 'qua' },
+      { foodName: 'Trung ga', quantity: 2, unit: 'quả' },
       { foodName: 'Ca rot', quantity: 100, unit: 'g' },
-      { foodName: 'Bap my', quantity: 1, unit: 'qua' },
+      { foodName: 'Bap my', quantity: 1, unit: 'quả' },
       { foodName: 'Dau que', quantity: 80, unit: 'g' },
     ],
     steps: ['Nau com de nguoi.', 'Xao rau cu.', 'Them com va trung dao deu.'],
@@ -1240,7 +1242,7 @@ const extraRecipes: SeedRecipe[] = [
     difficulty: 'easy',
     servings: 2,
     ingredients: [
-      { foodName: 'Bap my', quantity: 1, unit: 'qua' },
+      { foodName: 'Bap my', quantity: 1, unit: 'quả' },
       { foodName: 'Dau que', quantity: 200, unit: 'g' },
       { foodName: 'Dau an', quantity: 10, unit: 'ml' },
       { foodName: 'Toi', quantity: 10, unit: 'g' },
@@ -1274,9 +1276,9 @@ const extraRecipes: SeedRecipe[] = [
     difficulty: 'easy',
     servings: 2,
     ingredients: [
-      { foodName: 'Tao', quantity: 2, unit: 'qua' },
-      { foodName: 'Cam', quantity: 2, unit: 'qua' },
-      { foodName: 'Sua chua', quantity: 2, unit: 'hop' },
+      { foodName: 'Tao', quantity: 2, unit: 'quả' },
+      { foodName: 'Cam', quantity: 2, unit: 'quả' },
+      { foodName: 'Sua chua', quantity: 2, unit: 'hộp' },
     ],
     steps: ['Cat tao va cam.', 'Cho vao bat.', 'Them sua chua va tron deu.'],
     nutrition: { calories: 310, protein: 8, carbs: 62, fat: 4 },
@@ -1323,7 +1325,7 @@ const extraRecipes: SeedRecipe[] = [
     servings: 4,
     ingredients: [
       { foodName: 'Thit heo', quantity: 700, unit: 'g' },
-      { foodName: 'Trung ga', quantity: 4, unit: 'qua' },
+      { foodName: 'Trung ga', quantity: 4, unit: 'quả' },
       { foodName: 'Nuoc mam', quantity: 40, unit: 'ml' },
       { foodName: 'Toi', quantity: 15, unit: 'g' },
     ],
@@ -1356,9 +1358,9 @@ const extraRecipes: SeedRecipe[] = [
     difficulty: 'easy',
     servings: 1,
     ingredients: [
-      { foodName: 'Mi goi', quantity: 1, unit: 'goi' },
-      { foodName: 'Trung ga', quantity: 1, unit: 'qua' },
-      { foodName: 'Rau muong', quantity: 0.5, unit: 'bo' },
+      { foodName: 'Mi goi', quantity: 1, unit: 'gói' },
+      { foodName: 'Trung ga', quantity: 1, unit: 'quả' },
+      { foodName: 'Rau muong', quantity: 0.5, unit: 'bó' },
     ],
     steps: ['Nau mi goi.', 'Them rau muong.', 'Tha trung vao sau cung.'],
     nutrition: { calories: 480, protein: 16, carbs: 62, fat: 18 },
@@ -1373,7 +1375,7 @@ const extraRecipes: SeedRecipe[] = [
     servings: 3,
     ingredients: [
       { foodName: 'Bap cai', quantity: 400, unit: 'g' },
-      { foodName: 'Dau hu', quantity: 2, unit: 'hop' },
+      { foodName: 'Dau hu', quantity: 2, unit: 'hộp' },
       { foodName: 'Nam huong', quantity: 150, unit: 'g' },
       { foodName: 'Ca rot', quantity: 100, unit: 'g' },
     ],
@@ -1390,8 +1392,8 @@ const extraRecipes: SeedRecipe[] = [
     servings: 3,
     ingredients: [
       { foodName: 'Thit ga', quantity: 300, unit: 'g' },
-      { foodName: 'Bap my', quantity: 1, unit: 'qua' },
-      { foodName: 'Trung ga', quantity: 1, unit: 'qua' },
+      { foodName: 'Bap my', quantity: 1, unit: 'quả' },
+      { foodName: 'Trung ga', quantity: 1, unit: 'quả' },
       { foodName: 'Ca rot', quantity: 100, unit: 'g' },
     ],
     steps: ['Luoc va xe ga.', 'Nau bap my va ca rot.', 'Them trung danh tan tao van.'],
@@ -1463,7 +1465,7 @@ const pantryItems: SeedPantryItem[] = [
   {
     foodName: 'Trung ga',
     quantity: 12,
-    unit: 'qua',
+    unit: 'quả',
     expiresInDays: 12,
     location: 'fridge',
     source: 'shopping',
@@ -1503,7 +1505,7 @@ const pantryItems: SeedPantryItem[] = [
   {
     foodName: 'Mi goi',
     quantity: 6,
-    unit: 'goi',
+    unit: 'gói',
     expiresInDays: 45,
     location: 'pantry',
     source: 'shopping',
@@ -1511,7 +1513,7 @@ const pantryItems: SeedPantryItem[] = [
   {
     foodName: 'Chuoi',
     quantity: 6,
-    unit: 'qua',
+    unit: 'quả',
     expiresInDays: -1,
     location: 'pantry',
     source: 'manual',
@@ -1524,24 +1526,24 @@ const extraPantryItems: SeedPantryItem[] = [
   { foodName: 'Tom', quantity: 600, unit: 'g', expiresInDays: 18, location: 'freezer', source: 'shopping' },
   { foodName: 'Muc', quantity: 500, unit: 'g', expiresInDays: 20, location: 'freezer', source: 'shopping' },
   { foodName: 'Ca thu', quantity: 700, unit: 'g', expiresInDays: 25, location: 'freezer', source: 'shopping' },
-  { foodName: 'Dau hu', quantity: 4, unit: 'hop', expiresInDays: 3, location: 'fridge', source: 'manual' },
-  { foodName: 'Sua chua', quantity: 6, unit: 'hop', expiresInDays: 9, location: 'fridge', source: 'shopping' },
+  { foodName: 'Dau hu', quantity: 4, unit: 'hộp', expiresInDays: 3, location: 'fridge', source: 'manual' },
+  { foodName: 'Sua chua', quantity: 6, unit: 'hộp', expiresInDays: 9, location: 'fridge', source: 'shopping' },
   { foodName: 'Pho kho', quantity: 800, unit: 'g', expiresInDays: 120, location: 'pantry', source: 'import' },
   { foodName: 'Bun kho', quantity: 700, unit: 'g', expiresInDays: 100, location: 'pantry', source: 'import' },
   { foodName: 'Mi y', quantity: 500, unit: 'g', expiresInDays: 180, location: 'pantry', source: 'shopping' },
-  { foodName: 'Banh mi', quantity: 3, unit: 'cai', expiresInDays: 1, location: 'pantry', source: 'manual' },
+  { foodName: 'Banh mi', quantity: 3, unit: 'cái', expiresInDays: 1, location: 'pantry', source: 'manual' },
   { foodName: 'Khoai tay', quantity: 1200, unit: 'g', expiresInDays: 18, location: 'pantry', source: 'shopping' },
   { foodName: 'Khoai lang', quantity: 900, unit: 'g', expiresInDays: 12, location: 'pantry', source: 'shopping' },
-  { foodName: 'Rau muong', quantity: 2, unit: 'bo', expiresInDays: 2, location: 'fridge', source: 'shopping' },
+  { foodName: 'Rau muong', quantity: 2, unit: 'bó', expiresInDays: 2, location: 'fridge', source: 'shopping' },
   { foodName: 'Bap cai', quantity: 700, unit: 'g', expiresInDays: 8, location: 'fridge', source: 'shopping' },
   { foodName: 'Dua leo', quantity: 600, unit: 'g', expiresInDays: 4, location: 'fridge', source: 'shopping' },
   { foodName: 'Nam huong', quantity: 300, unit: 'g', expiresInDays: 4, location: 'fridge', source: 'manual' },
-  { foodName: 'Bap my', quantity: 4, unit: 'qua', expiresInDays: 5, location: 'fridge', source: 'shopping' },
+  { foodName: 'Bap my', quantity: 4, unit: 'quả', expiresInDays: 5, location: 'fridge', source: 'shopping' },
   { foodName: 'Dau que', quantity: 400, unit: 'g', expiresInDays: 5, location: 'fridge', source: 'shopping' },
   { foodName: 'Toi', quantity: 250, unit: 'g', expiresInDays: 45, location: 'pantry', source: 'import' },
   { foodName: 'Sa', quantity: 180, unit: 'g', expiresInDays: 10, location: 'fridge', source: 'shopping' },
   { foodName: 'Ot', quantity: 120, unit: 'g', expiresInDays: 8, location: 'fridge', source: 'shopping' },
-  { foodName: 'Cam', quantity: 8, unit: 'qua', expiresInDays: 10, location: 'fridge', source: 'shopping' },
+  { foodName: 'Cam', quantity: 8, unit: 'quả', expiresInDays: 10, location: 'fridge', source: 'shopping' },
   { foodName: 'Dua hau', quantity: 1200, unit: 'g', expiresInDays: 3, location: 'fridge', source: 'manual' },
   { foodName: 'Dau phong', quantity: 500, unit: 'g', expiresInDays: 90, location: 'pantry', source: 'import' },
 ];
@@ -1557,7 +1559,7 @@ const shoppingLists: SeedShoppingList[] = [
     items: [
       { foodName: 'Ca chua', quantity: 500, unit: 'g' },
       { foodName: 'Hanh tay', quantity: 300, unit: 'g', checked: true },
-      { foodName: 'Tao', quantity: 4, unit: 'qua' },
+      { foodName: 'Tao', quantity: 4, unit: 'quả' },
       { foodName: 'Nuoc mam', quantity: 1, unit: 'chai', note: 'Loai it man.' },
     ],
   },
@@ -1580,8 +1582,8 @@ const shoppingLists: SeedShoppingList[] = [
     completedOffsetDays: -4,
     items: [
       { foodName: 'Gao', quantity: 5, unit: 'kg', checked: true },
-      { foodName: 'Trung ga', quantity: 12, unit: 'qua', checked: true },
-      { foodName: 'Mi goi', quantity: 6, unit: 'goi', checked: true },
+      { foodName: 'Trung ga', quantity: 12, unit: 'quả', checked: true },
+      { foodName: 'Mi goi', quantity: 6, unit: 'gói', checked: true },
     ],
   },
 ];
@@ -1616,7 +1618,7 @@ const extraShoppingLists: SeedShoppingList[] = [
     status: 'active',
     plannedInDays: 3,
     items: [
-      { foodName: 'Rau muong', quantity: 2, unit: 'bo' },
+      { foodName: 'Rau muong', quantity: 2, unit: 'bó' },
       { foodName: 'Bap cai', quantity: 700, unit: 'g' },
       { foodName: 'Dua leo', quantity: 500, unit: 'g' },
       { foodName: 'Dau que', quantity: 300, unit: 'g' },
@@ -1640,10 +1642,10 @@ const extraShoppingLists: SeedShoppingList[] = [
     status: 'active',
     plannedInDays: 0,
     items: [
-      { foodName: 'Banh mi', quantity: 4, unit: 'cai' },
-      { foodName: 'Trung ga', quantity: 10, unit: 'qua' },
-      { foodName: 'Sua chua', quantity: 6, unit: 'hop' },
-      { foodName: 'Cam', quantity: 6, unit: 'qua' },
+      { foodName: 'Banh mi', quantity: 4, unit: 'cái' },
+      { foodName: 'Trung ga', quantity: 10, unit: 'quả' },
+      { foodName: 'Sua chua', quantity: 6, unit: 'hộp' },
+      { foodName: 'Cam', quantity: 6, unit: 'quả' },
     ],
   },
   {
@@ -1664,10 +1666,10 @@ const extraShoppingLists: SeedShoppingList[] = [
     status: 'active',
     plannedInDays: 6,
     items: [
-      { foodName: 'Tao', quantity: 6, unit: 'qua' },
-      { foodName: 'Chuoi', quantity: 8, unit: 'qua' },
+      { foodName: 'Tao', quantity: 6, unit: 'quả' },
+      { foodName: 'Chuoi', quantity: 8, unit: 'quả' },
       { foodName: 'Dua hau', quantity: 1500, unit: 'g' },
-      { foodName: 'Cam', quantity: 8, unit: 'qua' },
+      { foodName: 'Cam', quantity: 8, unit: 'quả' },
     ],
   },
   {
@@ -1701,9 +1703,9 @@ const extraShoppingLists: SeedShoppingList[] = [
     plannedInDays: -3,
     completedOffsetDays: -3,
     items: [
-      { foodName: 'Banh mi', quantity: 4, unit: 'cai', checked: true },
+      { foodName: 'Banh mi', quantity: 4, unit: 'cái', checked: true },
       { foodName: 'Sua tuoi', quantity: 2, unit: 'l', checked: true },
-      { foodName: 'Trung ga', quantity: 10, unit: 'qua', checked: true },
+      { foodName: 'Trung ga', quantity: 10, unit: 'quả', checked: true },
     ],
   },
 ];
@@ -1810,6 +1812,13 @@ async function upsertCategories(categoryModel: Model<Category>) {
 }
 
 async function upsertUnits(unitModel: Model<Unit>) {
+  await unitModel
+    .updateMany(
+      { code: { $in: legacyUnitCodes }, status: 'active' },
+      { $set: { status: 'archived' } },
+    )
+    .exec();
+
   for (const unit of units) {
     await unitModel
       .findOneAndUpdate(

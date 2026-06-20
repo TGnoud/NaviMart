@@ -4,7 +4,12 @@ import { Model, Types } from 'mongoose';
 import { ListFoodsQueryDto } from './dto/list-foods-query.dto';
 import { Category, CategoryDocument } from './schemas/category.schema';
 import { Food, FoodDocument } from './schemas/food.schema';
-import { Unit, UnitDocument } from './schemas/unit.schema';
+import {
+  Unit,
+  UnitDocument,
+  toVietnameseUnitCode,
+  toVietnameseUnitName,
+} from './schemas/unit.schema';
 
 @Injectable()
 export class CatalogService {
@@ -82,7 +87,7 @@ export class CatalogService {
       id: food._id.toString(),
       name: food.name,
       categoryId: food.categoryId.toString(),
-      defaultUnit: food.defaultUnit,
+      defaultUnit: toVietnameseUnitCode(food.defaultUnit),
       aliases: food.aliases,
       defaultStorageLocation: food.defaultStorageLocation,
       defaultShelfLifeDays: food.defaultShelfLifeDays,
@@ -95,8 +100,8 @@ export class CatalogService {
   private toUnitResponse(unit: UnitDocument) {
     return {
       id: unit._id.toString(),
-      code: unit.code,
-      name: unit.name,
+      code: toVietnameseUnitCode(unit.code),
+      name: toVietnameseUnitName(unit.code, unit.name),
       type: unit.type,
     };
   }

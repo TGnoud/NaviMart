@@ -119,7 +119,7 @@ describe('CatalogService', () => {
 
       expect(unitModel.find).toHaveBeenCalledWith({ status: 'active' });
       expect(query.sort).toHaveBeenCalledWith({ code: 1 });
-      expect(result[0]).toMatchObject({ code: 'g', name: 'gram' });
+      expect(result[0]).toMatchObject({ code: 'g', name: 'Gam' });
     });
   });
 });

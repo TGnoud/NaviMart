@@ -230,7 +230,29 @@ export default function MyLists() {
             </div>
           ) : (
             <section className="px-margin-mobile mb-stack-md">
-              <div className="bg-surface-container-lowest border border-outline-variant rounded-2xl overflow-hidden shadow-sm flex flex-col">
+              {activeTab === 'Đã mua' ? (
+                <div className="flex flex-col gap-3">
+                  {completedLists.map(list => (
+                    <Link key={list.id} to={`/list-detail/${list.id}`} className="bg-surface-container-lowest border border-outline-variant p-4 rounded-xl flex items-center justify-between hover:bg-surface-container-low transition-colors shadow-sm">
+                      <div className="flex flex-col">
+                         <span className="font-label-lg font-bold text-on-surface mb-1">{list.name}</span>
+                         <span className="font-body-md text-on-surface-variant text-sm">
+                           {list.completedAt ? `Hoàn thành: ${new Date(list.completedAt).toLocaleDateString('vi-VN')}` : (list.plannedFor ? `Dự kiến: ${new Date(list.plannedFor).toLocaleDateString('vi-VN')}` : 'Không rõ ngày')}
+                           {list.progress.total > 0 ? ` • ${list.progress.bought}/${list.progress.total} món` : ''}
+                         </span>
+                      </div>
+                      <span className="material-symbols-outlined text-outline">chevron_right</span>
+                    </Link>
+                  ))}
+                  {completedLists.length === 0 && (
+                    <div className="flex flex-col items-center justify-center py-16 text-on-surface-variant">
+                      <span className="material-symbols-outlined text-6xl mb-4 text-outline">history</span>
+                      <p className="font-body-lg text-body-lg">Chưa có danh sách nào hoàn thành.</p>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="bg-surface-container-lowest border border-outline-variant rounded-2xl overflow-hidden shadow-sm flex flex-col">
                 {/* Calendar Header */}
                 <div className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-outline-variant">
                   <div className="flex bg-surface-container-high rounded-lg p-1">
@@ -319,7 +341,8 @@ export default function MyLists() {
                     )}
                   </div>
                 </div>
-              </div>
+                </div>
+              )}
             </section>
           )}
         </div>

@@ -17,6 +17,7 @@ const ListDetail = lazy(() => import('./pages/ListDetail'));
 const RecipeDetail = lazy(() => import('./pages/RecipeDetail'));
 const PantryDashboard = lazy(() => import('./pages/PantryDashboard'));
 const AddItem = lazy(() => import('./pages/AddItem'));
+const EditItem = lazy(() => import('./pages/EditItem'));
 const RecipeSuggestion = lazy(() => import('./pages/RecipeSuggestion'));
 const RecipeEditor = lazy(() => import('./pages/RecipeEditor'));
 const MealPlanner = lazy(() => import('./pages/MealPlanner'));
@@ -47,6 +48,7 @@ function App() {
             <Route path="/recipe-detail/:recipeId" element={<RecipeDetail />} />
             <Route path="/pantry" element={<PantryDashboard />} />
             <Route path="/add-item" element={<AddItem />} />
+            <Route path="/edit-item/:id" element={<EditItem />} />
             <Route path="/recipe-suggestion" element={<RecipeSuggestion />} />
             <Route path="/recipe-editor" element={<RecipeEditor />} />
             <Route path="/recipe-editor/:recipeId" element={<RecipeEditor />} />

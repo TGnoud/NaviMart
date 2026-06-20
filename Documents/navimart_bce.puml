@@ -1,0 +1,231 @@
+@startuml NaviMart_BCE_Class_Diagram
+
+' Định dạng màu sắc cho từng stereotype theo chuẩn BCE
+skinparam class {
+    BackgroundColor<<Boundary>> #E3F2FD
+    BackgroundColor<<Control>> #FFF3E0
+    BackgroundColor<<Entity>> #E8F5E9
+}
+
+package "Users Module" {
+    class UsersController <<Boundary>> {
+        + getProfile()
+        + updateProfile()
+    }
+    
+    class UsersService <<Control>> {
+        + findUserById()
+        + updateUser()
+    }
+    
+    class User <<Entity>> {
+        + ObjectId _id
+        + String email
+        + String phone
+        + String passwordHash
+        + String firstName
+        + String lastName
+        + String displayName
+        + String role
+        + String status
+        + ObjectId activeFamilyId
+    }
+    
+    class UserNotificationSettings <<Entity>> {
+        + Boolean expiryReminder
+        + Number expiryReminderDays
+        + Boolean shoppingReminder
+    }
+    
+    UsersController --> UsersService
+    UsersService --> User
+    User *-- UserNotificationSettings
+}
+
+package "Families Module" {
+    class FamiliesController <<Boundary>> {
+        + getFamily()
+        + createInvite()
+        + joinFamily()
+    }
+    
+    class FamiliesService <<Control>> {
+        + getFamilyDetails()
+        + generateInviteCode()
+        + addMember()
+    }
+    
+    class Family <<Entity>> {
+        + ObjectId _id
+        + String name
+        + ObjectId ownerId
+    }
+    
+    class FamilyMember <<Entity>> {
+        + ObjectId userId
+        + String role
+        + String[] permissions
+        + String status
+        + Date joinedAt
+    }
+    
+    class FamilyInviteCode <<Entity>> {
+        + String codeHash
+        + String[] permissions
+        + ObjectId createdBy
+        + Date expiresAt
+    }
+    
+    FamiliesController --> FamiliesService
+    FamiliesService --> Family
+    Family *-- FamilyMember
+    Family *-- FamilyInviteCode
+}
+
+package "Pantry Module" {
+    class PantryController <<Boundary>> {
+        + getPantryItems()
+        + addItem()
+        + updateItem()
+    }
+    
+    class PantryService <<Control>> {
+        + getItemsByFamily()
+        + addPantryItem()
+        + consumeItem()
+    }
+    
+    class PantryItem <<Entity>> {
+        + ObjectId _id
+        + ObjectId familyId
+        + ObjectId foodId
+        + String name
+        + ObjectId categoryId
+        + Number quantity
+        + String unit
+        + Date expiryDate
+        + String location
+        + String status
+        + String source
+    }
+    
+    PantryController --> PantryService
+    PantryService --> PantryItem
+}
+
+package "Recipes Module" {
+    class RecipesController <<Boundary>> {
+        + searchRecipes()
+        + getRecipeDetails()
+    }
+    
+    class RecipesService <<Control>> {
+        + findRecipes()
+        + getRecipeById()
+    }
+    
+    class Recipe <<Entity>> {
+        + ObjectId _id
+        + String name
+        + String description
+        + Number cookTimeMinutes
+        + String difficulty
+        + Number servings
+        + String[] steps
+        + String status
+    }
+    
+    class RecipeIngredient <<Entity>> {
+        + ObjectId foodId
+        + String name
+        + ObjectId categoryId
+        + Number quantity
+        + String unit
+    }
+    
+    RecipesController --> RecipesService
+    RecipesService --> Recipe
+    Recipe *-- RecipeIngredient
+}
+
+package "ShoppingLists Module" {
+    class ShoppingListsController <<Boundary>> {
+        + getLists()
+        + createList()
+        + checkItem()
+    }
+    
+    class ShoppingListsService <<Control>> {
+        + getListsByFamily()
+        + createShoppingList()
+        + toggleItemStatus()
+    }
+    
+    class ShoppingList <<Entity>> {
+        + ObjectId _id
+        + ObjectId familyId
+        + String name
+        + String type
+        + String status
+        + Date plannedFor
+    }
+    
+    class ShoppingListItem <<Entity>> {
+        + ObjectId _id
+        + ObjectId foodId
+        + String name
+        + Number quantity
+        + String unit
+        + Boolean checked
+        + String status
+    }
+    
+    ShoppingListsController --> ShoppingListsService
+    ShoppingListsService --> ShoppingList
+    ShoppingList *-- ShoppingListItem
+}
+
+package "Meals Module" {
+    class MealsController <<Boundary>> {
+        + getMealPlans()
+        + addMeal()
+        + completeMeal()
+    }
+    
+    class MealsService <<Control>> {
+        + getMealsByDate()
+        + scheduleMeal()
+        + markMealCompleted()
+    }
+    
+    class MealPlan <<Entity>> {
+        + ObjectId _id
+        + ObjectId familyId
+        + Date date
+        + String session
+        + ObjectId recipeId
+        + Boolean isCompleted
+    }
+    
+    class ConsumedPantryEntry <<Entity>> {
+        + ObjectId pantryItemId
+        + ObjectId foodId
+        + String name
+        + Number quantity
+    }
+    
+    MealsController --> MealsService
+    MealsService --> MealPlan
+    MealPlan *-- ConsumedPantryEntry
+}
+
+' Liên kết chéo giữa các Service (Control) với các Entity khác theo logic nghiệp vụ
+FamiliesService --> User : "Cập nhật activeFamilyId"
+PantryService --> Family : "Kiểm tra quyền hạn"
+RecipesService --> User : "Author"
+ShoppingListsService --> Family : "Thuộc về gia đình"
+MealsService --> Recipe : "Đọc công thức để tính nguyên liệu"
+MealsService --> PantryItem : "Trừ nguyên liệu trong kho"
+MealsService --> ShoppingList : "Sinh danh sách mua sắm tự động"
+
+@enduml

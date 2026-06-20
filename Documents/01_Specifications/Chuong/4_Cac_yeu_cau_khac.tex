@@ -1,0 +1,61 @@
+\section{Chức năng (Functionality)}
+\begin{itemize}
+    \item Trong các chuỗi sự kiện của các use case, tất cả các bước có thao tác với cơ sở dữ liệu, nếu có lỗi trong quá trình kết nối hoặc thao tác, hệ thống cần đưa ra thông báo lỗi tương ứng để tác nhân biết đó là lỗi liên quan đến cơ sở dữ liệu chứ không phải do lỗi thao tác của người dùng.
+    \item Các chức năng yêu cầu quyền hạn cụ thể (như tạo nhóm gia đình, duyệt công thức, xem báo cáo) thì Khách bắt buộc phải đăng nhập và được xác thực với vai trò tương ứng (Người nội trợ, Thành viên gia đình hoặc Quản trị viên).
+    \item \textbf{Định dạng hiển thị chung:}
+    \begin{itemize}
+        \item Số (số lượng thực phẩm, ngày tháng): Căn giữa
+        \item Chữ (tên thực phẩm, tên người dùng): Căn phải
+        \item Font: Arial 14, màu đen.
+        \item Nền: Trắng.
+    \end{itemize}
+\end{itemize}
+
+\section{Tính dễ dùng (Usability)}
+\begin{itemize}
+    \item Giao diện phần mềm cần được thiết kế sao cho dễ thao tác, đặc biệt tối ưu hóa cho màn hình thiết bị di động (Responsive Design) vì người dùng thường xuyên thao tác trực tiếp tại siêu thị, chợ hoặc trong không gian bếp.
+    \item Cần có hướng dẫn cụ thể lỗi sai của người dùng để người dùng biết định vị lỗi, biết lỗi gì và biết cách sửa lỗi (Ví dụ: Nếu nhập sai định dạng hạn sử dụng, hệ thống phải báo "Ngày hết hạn phải lớn hơn ngày hiện tại", hoặc khi thêm thực phẩm bị bỏ trống tên thì ô nhập liệu cần được bôi đỏ).
+    \item Hệ thống nên hỗ trợ nhận diện tự động hoặc gợi ý tên thực phẩm thông minh khi người dùng gõ từ khóa, giúp rút ngắn thời gian nhập liệu danh sách mua sắm.
+\end{itemize}
+
+\section{Các yêu cầu khác}
+
+\subsection{Yêu cầu về Hiệu năng (Efficiency/Performance)}
+\begin{itemize}
+    \item Thời gian phản hồi cho các thao tác đồng bộ dữ liệu theo thời gian thực (như khi Thành viên cập nhật trạng thái "Đã mua" hoặc trừ số lượng tồn kho) phải diễn ra dưới 2 giây.
+    \item Hệ thống cần đảm bảo hoạt động ổn định khi có nhiều nhóm gia đình truy cập đồng thời, tối thiểu hỗ trợ được lượng người dùng lớn thao tác cùng lúc trong các khung giờ cao điểm đi chợ (như chiều tối).
+    \item Các tác vụ nặng như tự động quét toàn bộ kho tủ lạnh để gửi cảnh báo hết hạn hàng ngày (Cron Job) cần được thiết lập chạy ngầm vào khung giờ thấp điểm (ví dụ: 2h00 - 4h00 sáng) để tối ưu tài nguyên máy chủ.
+\end{itemize}
+
+\subsection{Tính tin cậy (Reliability)}
+\begin{itemize}
+    \item Hệ thống cần đạt tỷ lệ thời gian hoạt động (Uptime) ở mức 99.9\%, đảm bảo người dùng có thể tra cứu danh sách mua sắm và tủ lạnh bất cứ lúc nào họ cần.
+    \item Dữ liệu phải được sao lưu (backup) định kỳ hàng ngày để phòng tránh rủi ro mất mát thông tin mua sắm và kho thực phẩm của người dùng.
+    \item Trong trường hợp mất kết nối với cơ sở dữ liệu, hệ thống không được sập hoàn toàn (crash) mà phải xử lý ngoại lệ trơn tru và hiển thị trang thông báo bảo trì thân thiện.
+\end{itemize}
+
+\subsection{Tính dễ bảo trì (Maintainability)}
+\begin{itemize}
+    \item Hệ thống cần được thiết kế theo các nguyên lý công nghệ phần mềm tiêu chuẩn (ví dụ: áp dụng các Design Pattern phù hợp, mô hình hóa kiến trúc rõ ràng) để dễ dàng bảo trì và mở rộng thêm các chức năng mới trong tương lai.
+    \item Mọi lỗi phát sinh ở phía hệ thống đều phải được ghi nhận vào nhật ký hoạt động (log), giúp Quản trị viên và đội ngũ phát triển dễ dàng theo dõi, truy vết và khắc phục sự cố một cách nhanh chóng.
+\end{itemize}
+
+\subsection{Tính khả chuyển (Portability)}
+\begin{itemize}
+    \item Phần mềm cần được triển khai dưới dạng ứng dụng Web đa nền tảng, có thể hoạt động tốt trên các trình duyệt phổ biến hiện nay như Google Chrome, Safari, Microsoft Edge.
+    \item Các dịch vụ backend của hệ thống có thể được đóng gói bằng Docker (quản lý qua docker-compose và cấu hình volumes) nhằm đảm bảo tính đồng nhất tuyệt đối giữa môi trường phát triển và môi trường triển khai thực tế.
+\end{itemize}
+
+\subsection{Yêu cầu về an toàn bảo mật (Security)}
+\begin{itemize}
+    \item Mật khẩu người dùng bắt buộc phải được mã hóa một chiều an toàn trước khi lưu vào cơ sở dữ liệu.
+    \item Mọi luồng dữ liệu truyền tải giữa người dùng và máy chủ phải được mã hóa thông qua giao thức HTTPS.
+    \item Hệ thống cần áp dụng cơ chế phân quyền chặt chẽ: Dữ liệu về danh sách mua sắm và tủ lạnh của nhóm gia đình nào thì chỉ các thành viên trong nhóm đó mới được phép truy cập và chỉnh sửa. Quản trị viên chỉ quản lý tài khoản và danh mục nền tảng, không được phép can thiệp hay xem dữ liệu nội bộ của gia đình.
+\end{itemize}
+
+\subsection{Yêu cầu về giao diện (Interface Requirements)}
+\begin{itemize}
+    \item Giao diện cần áp dụng phương pháp tiếp cận ưu tiên thiết bị di động (Mobile-First) và Responsive Design, vì người dùng thường xuyên thao tác trên điện thoại thông minh khi đang ở siêu thị hoặc trong bếp.
+    \item Sử dụng màu sắc trực quan để cảnh báo: Ví dụ thực phẩm sắp hết hạn (< 3 ngày) hiển thị màu vàng, thực phẩm đã hết hạn hiển thị màu đỏ để thu hút ngay sự chú ý của Người nội trợ.
+    \item Hỗ trợ tính năng tự động hoàn thành (Auto-complete) khi nhập liệu tên thực phẩm để giảm thiểu thao tác gõ phím.
+\end{itemize}

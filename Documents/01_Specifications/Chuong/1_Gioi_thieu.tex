@@ -1,0 +1,31 @@
+\section{Mục đích}
+Tài liệu này đưa ra mô tả chi tiết cho phần mềm "Hệ thống đi chợ tiện lợi". Tài liệu mô tả mục đích, các tính năng của hệ thống, các giao diện và ràng buộc của hệ thống cần thực hiện để phản ứng tới các kích thích bên ngoài.
+
+Tài liệu này được dùng làm cơ sở thống nhất yêu cầu, dành cho các bên liên quan (stakeholder) và các nhà phát triển phần mềm trong suốt quá trình xây dựng, kiểm thử và vận hành dự án.
+
+\section{Phạm vi}
+Hệ thống "Đi chợ tiện lợi" được xây dựng nhằm hỗ trợ người dùng lập kế hoạch mua sắm, quản lý thực phẩm trong tủ lạnh và lên thực đơn hàng ngày để tối ưu hóa việc sử dụng thực phẩm.
+
+Mục đích của phần mềm nhằm tạo ra một vòng tuần hoàn khép kín: danh sách mua sắm sau khi hoàn tất sẽ tự động cập nhật vào kho tủ lạnh; dữ liệu trong tủ lạnh là nguồn để gợi ý món ăn và lên kế hoạch bữa ăn; kế hoạch bữa ăn khi thiếu nguyên liệu sẽ sinh ra danh sách mua sắm mới.
+
+Hệ thống cung cấp các chức năng phục vụ 3 đối tượng tác nhân chính:
+\begin{itemize}
+    \item \textbf{Người nội trợ:} Có toàn quyền quản lý đối với không gian lưu trữ của gia đình, bao gồm quản lý danh sách mua sắm, phân loại thực phẩm, quản lý thực phẩm tồn kho, nhận cảnh báo hết hạn, lên kế hoạch bữa ăn, xem báo cáo và quản lý nhóm gia đình.
+    \item \textbf{Thành viên gia đình:} Có thể tương tác với kho thực phẩm chung bằng cách cập nhật số lượng sử dụng và đồng bộ danh sách mua sắm với Người nội trợ.
+    \item \textbf{Quản trị viên (Admin):} Thực hiện các chức năng quản lý cấp cao bao gồm quản lý danh mục (loại thực phẩm, công thức mẫu), kiểm soát nội dung, quản lý tài khoản người dùng và theo dõi hiệu suất hoạt động của toàn hệ thống.
+\end{itemize}
+
+\section{Từ điển thuật ngữ}
+\begin{itemize}
+    \item \textbf{Người nội trợ:} Là vai trò của người dùng chính, trực tiếp tạo tài khoản, thiết lập dữ liệu và quản lý các hoạt động mua sắm, ăn uống của gia đình.
+    \item \textbf{Thành viên gia đình:} Là những người dùng được Người nội trợ mời vào nhóm để cùng phối hợp sử dụng thực phẩm và đi chợ.
+    \item \textbf{Quản trị viên (Admin):} Là người vận hành, kiểm soát dữ liệu nền tảng và quản lý toàn bộ người dùng trong hệ thống.
+    \item \textbf{Nhóm gia đình:} Tập hợp các tài khoản người dùng (gồm 1 Người nội trợ và các Thành viên gia đình) được liên kết với nhau để chia sẻ chung không gian quản lý thực phẩm.
+    \item \textbf{Danh sách mua sắm:} Danh mục các thực phẩm cần mua. Các mặt hàng trong đây có thể được chuyển sang trạng thái "Đã mua" và đồng bộ thời gian thực giữa các thành viên.
+    \item \textbf{Kho tủ lạnh (Thực phẩm tồn kho):} Nơi hệ thống quản lý dữ liệu thực phẩm hiện có sau khi mua, bao gồm thông tin về tên, số lượng, hạn sử dụng và vị trí lưu trữ.
+\end{itemize}
+
+\section{Tài liệu tham khảo}
+\begin{itemize}
+    \item Lecture note
+\end{itemize}

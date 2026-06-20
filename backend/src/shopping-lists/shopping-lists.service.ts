@@ -65,13 +65,47 @@ export class ShoppingListsService {
 
   async create(user: AuthenticatedUser, dto: CreateShoppingListDto) {
     const familyId = await this.getActiveFamilyId(user);
+    const createdBy = new Types.ObjectId(user.userId);
+    const type = dto.type ?? 'custom';
+
+    if (dto.recurrenceEndDate && dto.plannedFor && ['daily', 'weekly', 'monthly'].includes(type)) {
+      const recurrenceGroupId = new Types.ObjectId().toString();
+      const listsToCreate: Partial<ShoppingList>[] = [];
+      let currentDate = new Date(dto.plannedFor);
+      const endDate = new Date(dto.recurrenceEndDate);
+
+      while (currentDate <= endDate) {
+        listsToCreate.push({
+          familyId,
+          name: dto.name,
+          type,
+          plannedFor: new Date(currentDate),
+          createdBy,
+          recurrenceGroupId,
+        });
+
+        if (type === 'daily') {
+          currentDate.setDate(currentDate.getDate() + 1);
+        } else if (type === 'weekly') {
+          currentDate.setDate(currentDate.getDate() + 7);
+        } else if (type === 'monthly') {
+          currentDate.setMonth(currentDate.getMonth() + 1);
+        }
+      }
+
+      if (listsToCreate.length > 0) {
+        const createdLists = await this.shoppingListModel.insertMany(listsToCreate);
+        createdLists.forEach(list => this.emitListUpdated(this.toShoppingListResponse(list as any)));
+        return this.toShoppingListResponse(createdLists[0] as any);
+      }
+    }
 
     const list = await this.shoppingListModel.create({
       familyId,
       name: dto.name,
-      type: dto.type ?? 'custom',
+      type,
       plannedFor: dto.plannedFor,
-      createdBy: new Types.ObjectId(user.userId),
+      createdBy,
     });
 
     return this.emitListUpdated(this.toShoppingListResponse(list));
@@ -107,16 +141,38 @@ export class ShoppingListsService {
     return this.emitListUpdated(this.toShoppingListResponse(list));
   }
 
-  async remove(user: AuthenticatedUser, listId: string) {
+  async remove(user: AuthenticatedUser, listId: string, deleteAll?: boolean) {
     const list = await this.findListForUser(user, listId);
-    list.status = 'archived';
-    await list.save();
 
-    this.realtimeService.emitToFamily(
-      list.familyId.toString(),
-      'shoppingList:removed',
-      { id: list._id.toString() },
-    );
+    if (deleteAll && list.recurrenceGroupId) {
+      const listsToArchive = await this.shoppingListModel.find({
+        familyId: list.familyId,
+        recurrenceGroupId: list.recurrenceGroupId,
+        status: { $ne: 'archived' },
+      }).exec();
+
+      await this.shoppingListModel.updateMany(
+        { _id: { $in: listsToArchive.map((l) => l._id) } },
+        { $set: { status: 'archived' } }
+      );
+
+      listsToArchive.forEach((l) => {
+        this.realtimeService.emitToFamily(
+          list.familyId.toString(),
+          'shoppingList:removed',
+          { id: l._id.toString() },
+        );
+      });
+    } else {
+      list.status = 'archived';
+      await list.save();
+
+      this.realtimeService.emitToFamily(
+        list.familyId.toString(),
+        'shoppingList:removed',
+        { id: list._id.toString() },
+      );
+    }
 
     return { success: true };
   }
@@ -125,14 +181,34 @@ export class ShoppingListsService {
     user: AuthenticatedUser,
     listId: string,
     dto: CreateShoppingListItemDto,
+    addAll?: boolean,
   ) {
     const list = await this.findListForUser(user, listId);
     const item = await this.buildShoppingListItem(dto);
 
-    list.items.push(item as ShoppingListItem);
-    await list.save();
+    if (addAll && list.recurrenceGroupId) {
+      const listsToUpdate = await this.shoppingListModel.find({
+        familyId: list.familyId,
+        recurrenceGroupId: list.recurrenceGroupId,
+        status: { $ne: 'archived' },
+      }).exec();
 
-    return this.emitListUpdated(this.toShoppingListResponse(list));
+      await Promise.all(listsToUpdate.map(async (l) => {
+        // Create a new ObjectId for each item so they don't share the same _id
+        const newItem = { ...item, _id: new Types.ObjectId() };
+        l.items.push(newItem as any);
+        await l.save();
+        this.emitListUpdated(this.toShoppingListResponse(l));
+      }));
+
+      // Find the updated current list to return
+      const updatedList = listsToUpdate.find(l => l._id.toString() === listId);
+      return updatedList ? this.toShoppingListResponse(updatedList) : this.emitListUpdated(this.toShoppingListResponse(list));
+    } else {
+      list.items.push(item as ShoppingListItem);
+      await list.save();
+      return this.emitListUpdated(this.toShoppingListResponse(list));
+    }
   }
 
   async updateItem(
@@ -180,6 +256,7 @@ export class ShoppingListsService {
     }
 
     await list.save();
+
     return this.emitListUpdated(this.toShoppingListResponse(list));
   }
 

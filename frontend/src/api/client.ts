@@ -133,6 +133,7 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
     return fetch(buildUrl(path, query), {
       method,
       headers,
+      cache: 'no-store',
       body:
         body === undefined
           ? undefined

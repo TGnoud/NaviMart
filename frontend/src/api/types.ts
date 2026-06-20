@@ -21,7 +21,7 @@ export type AuthResponse = {
   };
 };
 
-export type ShoppingListType = 'daily' | 'weekly' | 'custom';
+export type ShoppingListType = 'daily' | 'weekly' | 'monthly' | 'custom';
 export type ShoppingListStatus = 'active' | 'completed' | 'archived';
 export type ShoppingItemStatus = 'pending' | 'bought';
 
@@ -46,6 +46,7 @@ export type ShoppingList = {
   status: ShoppingListStatus;
   plannedFor?: string;
   completedAt?: string;
+  recurrenceGroupId?: string;
   createdBy: string;
   progress: { bought: number; total: number };
   items: ShoppingListItem[];
@@ -111,6 +112,7 @@ export type MealCompletionResult = {
 
 export type RecipeDifficulty = 'easy' | 'medium' | 'hard';
 export type RecipeStatus = 'pending' | 'approved' | 'rejected' | 'archived';
+export type RecipeVisibility = 'personal' | 'shared';
 
 export type RecipeSummary = {
   id: string;
@@ -121,6 +123,7 @@ export type RecipeSummary = {
   difficulty: RecipeDifficulty;
   servings: number;
   status: RecipeStatus;
+  visibility: RecipeVisibility;
   tags: string[];
   ingredientCount: number;
   isFavorite?: boolean;

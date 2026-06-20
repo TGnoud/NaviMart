@@ -19,4 +19,10 @@ export class CreateShoppingListDto {
   @Type(() => Date)
   @IsDate()
   plannedFor?: Date;
+
+  @ApiPropertyOptional({ example: '2026-07-13T00:00:00.000Z' })
+  @IsOptional()
+  @Type(() => Date)
+  @IsDate()
+  recurrenceEndDate?: Date;
 }

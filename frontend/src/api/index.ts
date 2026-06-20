@@ -108,7 +108,7 @@ export type CatalogUnit = {
 export const catalogApi = {
   categories: () => apiRequest<CatalogCategory[]>('/catalog/categories'),
 
-  searchFoods: (query: { q?: string; barcode?: string; limit?: number } = {}) =>
+  searchFoods: (query: { q?: string; barcode?: string; categoryId?: string; limit?: number } = {}) =>
     apiRequest<CatalogFood[]>('/catalog/foods', { query }),
 
   units: () => apiRequest<CatalogUnit[]>('/catalog/units'),
@@ -181,7 +181,7 @@ export const shoppingListsApi = {
   list: (status?: ShoppingListStatus) =>
     apiRequest<ShoppingList[]>('/shopping-lists', { query: { status } }),
 
-  create: (input: { name: string; type?: ShoppingListType; plannedFor?: string }) =>
+  create: (input: { name: string; type?: ShoppingListType; plannedFor?: string; recurrenceEndDate?: string }) =>
     apiRequest<ShoppingList>('/shopping-lists', { method: 'POST', body: input }),
 
   get: (listId: string) => apiRequest<ShoppingList>(`/shopping-lists/${listId}`),
@@ -196,8 +196,8 @@ export const shoppingListsApi = {
     },
   ) => apiRequest<ShoppingList>(`/shopping-lists/${listId}`, { method: 'PATCH', body: input }),
 
-  remove: (listId: string) =>
-    apiRequest<{ success: boolean }>(`/shopping-lists/${listId}`, { method: 'DELETE' }),
+  remove: (listId: string, deleteAll?: boolean) =>
+    apiRequest<{ success: boolean }>(`/shopping-lists/${listId}`, { method: 'DELETE', query: { deleteAll } }),
 
   complete: (
     listId: string,
@@ -214,11 +214,8 @@ export const shoppingListsApi = {
   addItem: (
     listId: string,
     input: { name?: string; foodId?: string; categoryId?: string; quantity: number; unit?: string; note?: string },
-  ) =>
-    apiRequest<ShoppingList>(`/shopping-lists/${listId}/items`, {
-      method: 'POST',
-      body: input,
-    }),
+    addAll?: boolean,
+  ) => apiRequest<ShoppingList>(`/shopping-lists/${listId}/items`, { method: 'POST', body: input, query: { addAll } }),
 
   updateItem: (
     listId: string,
@@ -380,7 +377,7 @@ export const recipesApi = {
 
   generateShoppingList: (
     recipeId: string,
-    input: { name?: string; plannedFor?: string; servings?: number } = {},
+    input: { name?: string; plannedFor?: string; servings?: number; type?: string; recurrenceEndDate?: string } = {},
   ) =>
     apiRequest<GeneratedShoppingListResult>(`/recipes/${recipeId}/generate-shopping-list`, {
       method: 'POST',
@@ -401,6 +398,7 @@ export type GeneratedShoppingListResult = {
 };
 
 export type RecipeEditorInput = {
+  visibility?: 'personal' | 'shared';
   name: string;
   description?: string;
   imageUrl?: string;

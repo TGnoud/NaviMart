@@ -41,6 +41,13 @@ export default function RecipeDetail() {
   const [mealDate, setMealDate] = useState(todayInputValue);
   const [mealSession, setMealSession] = useState<MealSession>('dinner');
   const [mealServings, setMealServings] = useState(1);
+  
+  const [showShoppingListModal, setShowShoppingListModal] = useState(false);
+  const [slName, setSlName] = useState('');
+  const [slDate, setSlDate] = useState(todayInputValue());
+  const [slScheduleMode, setSlScheduleMode] = useState('one_time');
+  const [slStartDate, setSlStartDate] = useState(todayInputValue());
+  const [slEndDate, setSlEndDate] = useState('');
 
   const handleError = useCallback(
     (err: unknown, fallback: string) => {
@@ -103,17 +110,48 @@ export default function RecipeDetail() {
 
   const missingLines = missing?.missingIngredients ?? [];
 
+  const openShoppingListModal = () => {
+    if (missingLines.length === 0) {
+      showAlert('Bạn đã có đủ nguyên liệu cho món này!');
+      return;
+    }
+    setSlName(`Nguyên liệu cho ${recipe?.name || 'món ăn'}`);
+    setSlDate(todayInputValue());
+    setSlScheduleMode('one_time');
+    setSlStartDate(todayInputValue());
+    setSlEndDate('');
+    setShowShoppingListModal(true);
+  };
+
   const addMissingToShoppingList = async () => {
     if (!recipeId || working) return;
     if (missingLines.length === 0) {
       showAlert('Bạn đã có đủ nguyên liệu cho món này!');
       return;
     }
+    
+    if (slScheduleMode !== 'one_time' && (!slStartDate || !slEndDate || new Date(slStartDate) > new Date(slEndDate))) {
+      showAlert('Khoảng thời gian lặp lại không hợp lệ.');
+      return;
+    }
+    
     setWorking(true);
     try {
-      const { shoppingList } = await recipesApi.generateShoppingList(recipeId, { servings });
-      showAlert(`Đã tạo danh sách "${shoppingList.name}" với ${shoppingList.items.length} nguyên liệu còn thiếu!`);
-      navigate(`/list-detail/${shoppingList.id}`);
+      const payload: any = {
+        name: slName,
+        servings,
+        type: slScheduleMode === 'one_time' ? 'custom' : slScheduleMode,
+        plannedFor: slScheduleMode === 'one_time' ? new Date(slDate).toISOString() : new Date(slStartDate).toISOString(),
+      };
+      
+      if (slScheduleMode !== 'one_time') {
+        payload.recurrenceEndDate = new Date(slEndDate).toISOString();
+      }
+      
+      const { shoppingList } = await recipesApi.generateShoppingList(recipeId, payload);
+      showAlert(`Đã tạo danh sách "${shoppingList.name}" với ${shoppingList.items?.length || 0} nguyên liệu còn thiếu!`);
+      setShowShoppingListModal(false);
+      navigate(slScheduleMode === 'one_time' ? `/list-detail/${shoppingList.id}` : '/lists');
     } catch (err) {
       handleError(err, 'Không tạo được danh sách mua sắm.');
     } finally {
@@ -182,8 +220,8 @@ export default function RecipeDetail() {
           <h1 className="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed truncate">Chi tiết công thức</h1>
           <div className="flex gap-2">
             <button onClick={toggleFavorite} className="p-2 -mr-2 rounded-full hover:bg-surface-container-high transition-colors active:opacity-80">
-              <span className={`material-symbols-outlined ${isFavorite ? 'text-error' : 'text-on-surface-variant'}`} style={isFavorite ? { fontVariationSettings: "'FILL' 1" } : undefined}>
-                {isFavorite ? 'favorite' : 'favorite_border'}
+              <span className={`material-symbols-outlined ${isFavorite ? 'text-amber-500' : 'text-on-surface-variant'}`} style={isFavorite ? { fontVariationSettings: "'FILL' 1" } : undefined}>
+                star
               </span>
             </button>
           </div>
@@ -226,8 +264,8 @@ export default function RecipeDetail() {
                     onClick={toggleFavorite}
                     className="hidden md:flex absolute top-4 right-4 w-11 h-11 items-center justify-center rounded-full bg-surface/90 backdrop-blur-sm shadow-sm hover:bg-surface transition-colors"
                   >
-                    <span className={`material-symbols-outlined ${isFavorite ? 'text-error' : 'text-on-surface-variant'}`} style={isFavorite ? { fontVariationSettings: "'FILL' 1" } : undefined}>
-                      {isFavorite ? 'favorite' : 'favorite_border'}
+                    <span className={`material-symbols-outlined ${isFavorite ? 'text-amber-500' : 'text-on-surface-variant'}`} style={isFavorite ? { fontVariationSettings: "'FILL' 1" } : undefined}>
+                      star
                     </span>
                   </button>
                 </div>
@@ -250,7 +288,7 @@ export default function RecipeDetail() {
                   )}
                   <div className="flex flex-wrap gap-6 text-on-surface-variant font-body-md text-body-md">
                     <div className="flex items-center gap-2">
-                      <span className="material-symbols-outlined text-secondary-container">favorite</span>
+                      <span className="material-symbols-outlined text-secondary-container">star</span>
                       <span>{recipe.favoritesCount ?? 0} lượt yêu thích</span>
                     </div>
                     <div className="flex items-center gap-2">
@@ -338,7 +376,7 @@ export default function RecipeDetail() {
                       })}
                     </ul>
                     <button
-                      onClick={addMissingToShoppingList}
+                      onClick={openShoppingListModal}
                       disabled={working}
                       className="w-full mt-6 bg-primary text-on-primary py-3 px-4 rounded-lg font-body-md text-body-md flex items-center justify-center gap-2 hover:bg-primary/90 transition-colors disabled:opacity-50"
                     >
@@ -461,6 +499,86 @@ export default function RecipeDetail() {
                 className="flex-1 bg-primary text-on-primary font-label-md py-3 rounded-xl hover:opacity-90 transition-opacity font-bold shadow-sm disabled:opacity-50"
               >
                 Thêm
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showShoppingListModal && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+          <div className="bg-surface-container-lowest rounded-2xl p-6 w-full max-w-sm shadow-xl flex flex-col gap-4 animate-slide-up">
+            <h2 className="font-headline-sm text-headline-sm font-bold text-on-surface">Tạo danh sách đi chợ</h2>
+            
+            <div className="flex flex-col gap-3">
+              <label className="flex flex-col font-label-sm text-on-surface-variant gap-1">
+                Tên danh sách
+                <input
+                  type="text"
+                  value={slName}
+                  onChange={(e) => setSlName(e.target.value)}
+                  className="px-4 py-3 bg-surface-container border border-outline-variant rounded-lg text-on-surface font-body-md"
+                  placeholder="Ví dụ: Nguyên liệu Canh chua..."
+                />
+              </label>
+
+              <label className="flex flex-col font-label-sm text-on-surface-variant gap-1">
+                Lặp lại định kỳ
+                <select
+                  value={slScheduleMode}
+                  onChange={(e) => setSlScheduleMode(e.target.value)}
+                  className="px-4 py-3 bg-surface-container border border-outline-variant rounded-lg text-on-surface font-body-md"
+                >
+                  <option value="one_time">Không lặp lại</option>
+                  <option value="daily">Hàng ngày</option>
+                  <option value="weekly">Hàng tuần</option>
+                  <option value="monthly">Hàng tháng</option>
+                </select>
+              </label>
+
+              {slScheduleMode === 'one_time' ? (
+                <label className="flex flex-col font-label-sm text-on-surface-variant gap-1">
+                  Ngày đi chợ
+                  <input
+                    type="date"
+                    value={slDate}
+                    onChange={(e) => setSlDate(e.target.value)}
+                    className="px-4 py-3 bg-surface-container border border-outline-variant rounded-lg text-on-surface font-body-md"
+                  />
+                </label>
+              ) : (
+                <>
+                  <label className="flex flex-col font-label-sm text-on-surface-variant gap-1">
+                    Bắt đầu từ ngày
+                    <input
+                      type="date"
+                      value={slStartDate}
+                      onChange={(e) => setSlStartDate(e.target.value)}
+                      className="px-4 py-3 bg-surface-container border border-outline-variant rounded-lg text-on-surface font-body-md"
+                    />
+                  </label>
+                  <label className="flex flex-col font-label-sm text-on-surface-variant gap-1">
+                    Kết thúc vào ngày
+                    <input
+                      type="date"
+                      value={slEndDate}
+                      min={slStartDate}
+                      onChange={(e) => setSlEndDate(e.target.value)}
+                      className="px-4 py-3 bg-surface-container border border-outline-variant rounded-lg text-on-surface font-body-md"
+                    />
+                  </label>
+                </>
+              )}
+            </div>
+
+            <div className="flex justify-end gap-2 mt-2">
+              <button onClick={() => setShowShoppingListModal(false)} className="px-4 py-2 font-label-md text-primary hover:bg-primary/10 rounded-full transition-colors">Hủy</button>
+              <button 
+                onClick={addMissingToShoppingList} 
+                disabled={working || !slName.trim()} 
+                className="px-6 py-2 font-label-md bg-primary text-on-primary hover:bg-primary/90 rounded-full transition-colors disabled:opacity-50"
+              >
+                {working ? 'Đang tạo...' : 'Tạo danh sách'}
               </button>
             </div>
           </div>

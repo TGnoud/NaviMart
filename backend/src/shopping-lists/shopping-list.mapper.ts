@@ -19,6 +19,7 @@ export function toShoppingListResponse(
     status: list.status,
     plannedFor: list.plannedFor,
     completedAt: list.completedAt,
+    recurrenceGroupId: list.recurrenceGroupId,
     createdBy: list.createdBy.toString(),
     progress: {
       bought: list.items.filter((item) => item.status === 'bought').length,

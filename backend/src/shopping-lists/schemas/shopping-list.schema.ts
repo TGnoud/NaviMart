@@ -8,7 +8,8 @@ export const SHOPPING_LIST_STATUSES = [
   'completed',
   'archived',
 ] as const;
-export const SHOPPING_LIST_TYPES = ['daily', 'weekly', 'custom'] as const;
+export const SHOPPING_LIST_TYPES = ['daily', 'weekly', 'monthly', 'custom'] as const;
+export type ShoppingListType = (typeof SHOPPING_LIST_TYPES)[number];
 export const SHOPPING_ITEM_STATUSES = ['pending', 'bought', 'skipped'] as const;
 
 @Schema({ timestamps: true })
@@ -76,6 +77,9 @@ export class ShoppingList {
 
   @Prop({ type: Date })
   completedAt?: Date;
+
+  @Prop({ type: String, trim: true })
+  recurrenceGroupId?: string;
 }
 
 export const ShoppingListSchema = SchemaFactory.createForClass(ShoppingList);

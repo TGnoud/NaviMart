@@ -1,8 +1,13 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsInt, IsOptional, IsString, Length, Max, Min } from 'class-validator';
+import { IsInt, IsMongoId, IsOptional, IsString, Length, Max, Min } from 'class-validator';
 
 export class ListFoodsQueryDto {
+  @ApiPropertyOptional({ description: 'Only foods in this category.' })
+  @IsOptional()
+  @IsMongoId()
+  categoryId?: string;
+
   @ApiPropertyOptional({
     example: 'thit bo',
     description: 'Case-insensitive search on name, normalized name, and aliases.',

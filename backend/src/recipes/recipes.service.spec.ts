@@ -173,6 +173,7 @@ describe('RecipesService', () => {
 
       expect(recipeModel.find).toHaveBeenCalledWith({
         status: 'approved',
+        visibility: { $ne: 'personal' },
         $and: [
           { name: { $regex: new RegExp('gà', 'i') } },
           { name: { $regex: new RegExp('rán', 'i') } },
@@ -190,7 +191,10 @@ describe('RecipesService', () => {
 
       await service.findAll(user, {});
 
-      expect(recipeModel.find).toHaveBeenCalledWith({ status: 'approved' });
+      expect(recipeModel.find).toHaveBeenCalledWith({
+        status: 'approved',
+        visibility: { $ne: 'personal' },
+      });
       expect(query.sort).toHaveBeenCalledWith({ createdAt: -1 });
       expect(query.limit).toHaveBeenCalledWith(30);
     });
@@ -205,6 +209,7 @@ describe('RecipesService', () => {
 
       expect(recipeModel.find).toHaveBeenCalledWith({
         status: 'approved',
+        visibility: { $ne: 'personal' },
         $and: [
           { name: { $regex: new RegExp('pho', 'i') } },
         ],
@@ -305,8 +310,8 @@ describe('RecipesService', () => {
   });
 
   describe('create', () => {
-    it('defaults a non-admin recipe to pending status', async () => {
-      const created = makeRecipe({ status: 'pending' });
+    it('defaults a non-admin recipe to personal and approved', async () => {
+      const created = makeRecipe({ status: 'approved' });
       recipeModel.create.mockResolvedValue(created);
 
       await service.create(makeUser({ role: 'user' }), {
@@ -317,8 +322,26 @@ describe('RecipesService', () => {
       } as never);
 
       const createArg = recipeModel.create.mock.calls[0][0];
-      expect(createArg.status).toBe('pending');
+      expect(createArg.status).toBe('approved');
+      expect(createArg.visibility).toBe('personal');
       expect(createArg.normalizedName).toBe('new dish');
+    });
+
+    it('sends a shared non-admin recipe to moderation', async () => {
+      recipeModel.create.mockResolvedValue(makeRecipe({ status: 'pending' }));
+
+      await service.create(makeUser({ role: 'user' }), {
+        name: 'Shared dish',
+        visibility: 'shared',
+        cookTimeMinutes: 10,
+        ingredients: [{ name: 'Salt', quantity: 1, unit: 'g' }],
+        steps: ['mix'],
+      } as never);
+
+      expect(recipeModel.create.mock.calls[0][0]).toMatchObject({
+        visibility: 'shared',
+        status: 'pending',
+      });
     });
 
     it('auto-approves a recipe created by an admin', async () => {

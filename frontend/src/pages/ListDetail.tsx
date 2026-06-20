@@ -2,12 +2,31 @@ import { useCallback, useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import BottomNav from '../components/BottomNav';
 import NotificationDropdown from '../components/NotificationDropdown';
-import { shoppingListsApi } from '../api';
-import type { CatalogFood, ShoppingList } from '../api';
+import { catalogApi, shoppingListsApi } from '../api';
+import type { CatalogCategory, CatalogFood, ShoppingList } from '../api';
 import { onSocketEvent } from '../api/socket';
 import { useDialog } from '../contexts/DialogContext';
 import FoodAutocomplete from '../components/FoodAutocomplete';
+import CustomSelect from '../components/CustomSelect';
 import { ListRowsSkeleton, Skeleton } from '../components/Skeleton';
+
+function parseShoppingItemInput(input: string, defaultUnit: string = 'cái') {
+  const str = input.trim();
+  const match = str.match(/^([\d.,]+)\s*([a-zA-ZáàảãạăắằẳẵặâấầẩẫậéèẻẽẹêếềểễệíìỉĩịóòỏõọôốồổỗộơớờởỡợúùủũụưứừửữựýỳỷỹỵđĐ]+)?\s*(.*)$/i);
+  
+  if (match) {
+    const qtyStr = match[1].replace(',', '.');
+    const quantity = parseFloat(qtyStr);
+    if (!isNaN(quantity) && quantity > 0) {
+       const unit = match[2] ? match[2].toLowerCase() : defaultUnit;
+       const name = match[3] ? match[3].trim() : '';
+       if (name) {
+           return { quantity, unit, name };
+       }
+    }
+  }
+  return { quantity: 1, unit: defaultUnit, name: str };
+}
 
 export default function ListDetail() {
   const { listId } = useParams<{ listId: string }>();
@@ -16,7 +35,24 @@ export default function ListDetail() {
   const [list, setList] = useState<ShoppingList | null>(null);
   const [loading, setLoading] = useState(true);
   const [newItem, setNewItem] = useState('');
+  const [categories, setCategories] = useState<CatalogCategory[]>([]);
+  const [newItemCategoryId, setNewItemCategoryId] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('all');
   const [completing, setCompleting] = useState(false);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  
+  const [recurringAddConfirmOpen, setRecurringAddConfirmOpen] = useState(false);
+  const [pendingAddPayload, setPendingAddPayload] = useState<any>(null);
+  const [adding, setAdding] = useState(false);
+
+  const [isAddItemModalOpen, setIsAddItemModalOpen] = useState(false);
+  const [modalItemName, setModalItemName] = useState('');
+  const [modalCategoryId, setModalCategoryId] = useState('');
+  const [modalQuantity, setModalQuantity] = useState('1');
+  const [modalUnit, setModalUnit] = useState('cái');
+  const [modalFoodId, setModalFoodId] = useState<string | undefined>(undefined);
+  const [modalAddAll, setModalAddAll] = useState(false);
 
   const handleError = useCallback(
     (err: unknown, fallback: string) => {
@@ -28,10 +64,12 @@ export default function ListDetail() {
   useEffect(() => {
     if (!listId) return;
     let cancelled = false;
-    shoppingListsApi
-      .get(listId)
-      .then((data) => {
-        if (!cancelled) setList(data);
+    Promise.all([shoppingListsApi.get(listId), catalogApi.categories()])
+      .then(([data, categoryData]) => {
+        if (!cancelled) {
+          setList(data);
+          setCategories(categoryData);
+        }
       })
       .catch((err) => handleError(err, 'Không tải được danh sách.'))
       .finally(() => {
@@ -102,34 +140,98 @@ export default function ListDetail() {
   };
 
   const handleAddItem = async () => {
-    if (!newItem.trim() || !listId || isCompleted) return;
-    try {
-      setList(
-        await shoppingListsApi.addItem(listId, {
-          name: newItem.trim(),
-          quantity: 1,
-          unit: 'cái',
-        }),
-      );
-      setNewItem('');
-    } catch (err) {
-      handleError(err, 'Không thêm được món đồ.');
+    if (!newItem.trim() || !listId || isCompleted || adding) return;
+    if (!newItemCategoryId) {
+      showAlert('Vui lòng chọn danh mục thực phẩm trước khi thêm.');
+      return;
     }
+    
+    const parsed = parseShoppingItemInput(newItem.trim(), 'cái');
+    const payload = {
+      name: parsed.name,
+      categoryId: newItemCategoryId,
+      quantity: parsed.quantity,
+      unit: parsed.unit,
+    };
+    
+    triggerAddPayload(payload);
   };
 
-  // Picking a catalog suggestion links the item to the food (better pantry defaults + recipe matching).
   const handleAddFood = async (food: CatalogFood) => {
-    if (!listId || isCompleted) return;
+    if (!listId || isCompleted || adding) return;
+    
+    // Parse the current input string to grab quantity/unit even if they select a food
+    const parsed = parseShoppingItemInput(newItem.trim(), food.defaultUnit);
+    
+    const payload = {
+      foodId: food.id,
+      categoryId: food.categoryId,
+      quantity: parsed.quantity,
+      unit: parsed.unit !== 'cái' ? parsed.unit : food.defaultUnit, // Prefer user unit if parsed, else food default
+    };
+    
+    triggerAddPayload(payload);
+  };
+  
+  const handleModalAddFood = (food: CatalogFood) => {
+    setModalItemName(food.name);
+    setModalCategoryId(food.categoryId);
+    setModalUnit(food.defaultUnit || 'cái');
+    setModalFoodId(food.id);
+  };
+  
+  const handleModalSubmit = () => {
+    if (!modalItemName.trim() || !modalCategoryId || adding) {
+      showAlert('Vui lòng nhập tên và chọn danh mục.');
+      return;
+    }
+    
+    const qty = parseFloat(modalQuantity.replace(',', '.'));
+    if (isNaN(qty) || qty <= 0) {
+      showAlert('Số lượng không hợp lệ.');
+      return;
+    }
+    
+    const payload = {
+      name: modalItemName.trim(),
+      categoryId: modalCategoryId,
+      quantity: qty,
+      unit: modalUnit.trim() || 'cái',
+      foodId: modalFoodId,
+    };
+    
+    executeAddItem(payload, modalAddAll);
+    setIsAddItemModalOpen(false);
+    setModalItemName('');
+    setModalCategoryId('');
+    setModalQuantity('1');
+    setModalUnit('cái');
+    setModalFoodId(undefined);
+    setModalAddAll(false);
+  };
+  
+  const triggerAddPayload = (payload: any) => {
+    if (list?.recurrenceGroupId) {
+       setPendingAddPayload(payload);
+       setRecurringAddConfirmOpen(true);
+    } else {
+       executeAddItem(payload, false);
+    }
+  };
+  
+  const executeAddItem = async (payload: any, addAll: boolean) => {
+    if (!listId) return;
+    setAdding(true);
     try {
-      setList(
-        await shoppingListsApi.addItem(listId, {
-          foodId: food.id,
-          quantity: 1,
-        }),
-      );
+      setList(await shoppingListsApi.addItem(listId, payload, addAll));
       setNewItem('');
+      setNewItemCategoryId('');
+      setRecurringAddConfirmOpen(false);
+      setPendingAddPayload(null);
     } catch (err) {
       handleError(err, 'Không thêm được món đồ.');
+    } finally {
+      setAdding(false);
     }
   };
 
@@ -158,9 +260,27 @@ export default function ListDetail() {
     );
   };
 
+  const handleDelete = async (deleteAll = false) => {
+    if (!listId || !list || deleting) return;
+    setDeleting(true);
+    try {
+      await shoppingListsApi.remove(listId, deleteAll);
+      showAlert('Đã xóa danh sách.');
+      navigate('/lists');
+    } catch (err) {
+      handleError(err, 'Không xóa được danh sách.');
+    } finally {
+      setDeleting(false);
+      setDeleteConfirmOpen(false);
+    }
+  };
+
   const items = list?.items ?? [];
-  const pendingItems = items.filter((item) => !item.checked);
-  const boughtItems = items.filter((item) => item.checked);
+  const visibleItems = categoryFilter === 'all'
+    ? items
+    : items.filter((item) => item.categoryId === categoryFilter);
+  const pendingItems = visibleItems.filter((item) => !item.checked);
+  const boughtItems = visibleItems.filter((item) => item.checked);
 
   return (
     <div className="bg-background text-on-background h-screen overflow-hidden font-body-md antialiased flex flex-col">
@@ -209,14 +329,23 @@ export default function ListDetail() {
                     </p>
                   </div>
                   {!isCompleted && (
-                    <button
-                      onClick={handleComplete}
-                      disabled={completing}
-                      className="flex items-center gap-2 bg-primary text-on-primary font-label-md px-4 py-2.5 rounded-full shadow-sm hover:opacity-90 transition-opacity disabled:opacity-50"
-                    >
-                      <span className="material-symbols-outlined text-[20px]">task_alt</span>
-                      <span className="hidden sm:inline">{completing ? 'Đang xử lý...' : 'Hoàn thành & nhập kho'}</span>
-                    </button>
+                    <div className="flex flex-col sm:flex-row gap-2">
+                      <button
+                        onClick={() => setDeleteConfirmOpen(true)}
+                        className="flex justify-center items-center gap-2 bg-error-container text-on-error-container font-label-md px-4 py-2.5 rounded-full shadow-sm hover:opacity-90 transition-opacity"
+                      >
+                        <span className="material-symbols-outlined text-[20px]">delete</span>
+                        <span className="hidden sm:inline">Xóa</span>
+                      </button>
+                      <button
+                        onClick={handleComplete}
+                        disabled={completing}
+                        className="flex justify-center items-center gap-2 bg-primary text-on-primary font-label-md px-4 py-2.5 rounded-full shadow-sm hover:opacity-90 transition-opacity disabled:opacity-50"
+                      >
+                        <span className="material-symbols-outlined text-[20px]">task_alt</span>
+                        <span className="hidden sm:inline">{completing ? 'Đang xử lý...' : 'Hoàn thành & nhập kho'}</span>
+                      </button>
+                    </div>
                   )}
                 </div>
 
@@ -228,19 +357,55 @@ export default function ListDetail() {
                 )}
 
                 {!isCompleted && (
-                  <div className="mt-stack-md">
-                    <FoodAutocomplete
-                      value={newItem}
-                      onChange={setNewItem}
-                      onSelectFood={handleAddFood}
-                      onSubmit={handleAddItem}
-                      icon="add_shopping_cart"
-                      placeholder="Thêm món đồ nhanh (gõ để tìm, Enter để thêm)..."
-                      className="w-full pl-10 pr-4 py-3 rounded-none border border-[#c1c1c1] bg-surface-container-lowest font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container shadow-sm transition-all"
-                    />
+                  <div className="mt-stack-md flex flex-col gap-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-[minmax(0,1fr)_240px] gap-2">
+                      <FoodAutocomplete
+                        value={newItem}
+                        onChange={setNewItem}
+                        onSelectFood={handleAddFood}
+                        onSubmit={handleAddItem}
+                        categoryId={newItemCategoryId}
+                        icon="add_shopping_cart"
+                        placeholder="Thêm món đồ nhanh (gõ để tìm, Enter để thêm)..."
+                        className="w-full pl-10 pr-4 py-3 rounded-none border border-[#c1c1c1] bg-surface-container-lowest font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container shadow-sm transition-all"
+                      />
+                      <div className="w-full h-full min-h-[48px] bg-surface-container-lowest border border-[#c1c1c1] focus-within:border-primary-container focus-within:ring-1 focus-within:ring-primary-container transition-all">
+                        <CustomSelect
+                          value={newItemCategoryId}
+                          onChange={setNewItemCategoryId}
+                          options={[
+                            { value: '', label: 'Chọn danh mục *' },
+                            ...categories.map(category => ({ value: category.id, label: category.name }))
+                          ]}
+                          className="w-full h-[48px]"
+                        />
+                      </div>
+                    </div>
+                    <div className="flex justify-end">
+                      <button onClick={() => setIsAddItemModalOpen(true)} className="text-primary font-label-md flex items-center gap-1 hover:opacity-80 transition-opacity">
+                         <span className="material-symbols-outlined text-[20px]">add_circle</span>
+                         Thêm chi tiết
+                      </button>
+                    </div>
                   </div>
                 )}
               </section>
+
+              <div className="px-margin-mobile mb-stack-md flex gap-2 overflow-x-auto pb-1">
+                <button
+                  type="button"
+                  onClick={() => setCategoryFilter('all')}
+                  className={`whitespace-nowrap px-4 py-2 rounded-full ${categoryFilter === 'all' ? 'bg-primary-container text-on-primary-container' : 'bg-surface-container-high text-on-surface-variant'}`}
+                >Tất cả</button>
+                {categories.map((category) => (
+                  <button
+                    key={category.id}
+                    type="button"
+                    onClick={() => setCategoryFilter(category.id)}
+                    className={`whitespace-nowrap px-4 py-2 rounded-full ${categoryFilter === category.id ? 'bg-primary-container text-on-primary-container' : 'bg-surface-container-high text-on-surface-variant'}`}
+                  >{category.name}</button>
+                ))}
+              </div>
 
               {[
                 { title: 'Cần mua', icon: 'shopping_cart', groupItems: pendingItems },
@@ -315,6 +480,131 @@ export default function ListDetail() {
       </main>
 
       <BottomNav />
+
+      {deleteConfirmOpen && list && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+          <div className="bg-surface-container-lowest rounded-2xl p-6 w-full max-w-sm shadow-xl flex flex-col gap-4 animate-slide-up">
+            <h2 className="font-headline-sm text-headline-sm font-bold text-on-surface">Xác nhận xóa</h2>
+            <p className="font-body-md text-on-surface-variant">Bạn có chắc chắn muốn xóa danh sách "{list.name}" không?</p>
+            <div className="flex justify-end gap-2 mt-2">
+              <button onClick={() => setDeleteConfirmOpen(false)} className="px-4 py-2 font-label-md text-primary hover:bg-primary/10 rounded-full transition-colors">Hủy</button>
+              <button onClick={() => handleDelete(false)} disabled={deleting} className="px-4 py-2 font-label-md bg-error text-on-error hover:bg-error/90 rounded-full transition-colors disabled:opacity-50">Xóa</button>
+            </div>
+            
+            {list.recurrenceGroupId && (
+              <div className="mt-2 pt-4 border-t border-outline-variant flex flex-col gap-2">
+                 <p className="font-label-sm text-on-surface-variant">Danh sách này thuộc một chuỗi định kỳ.</p>
+                 <button onClick={() => handleDelete(true)} disabled={deleting} className="px-4 py-2 font-label-md border border-error text-error hover:bg-error-container rounded-full transition-colors w-full disabled:opacity-50">Xóa toàn bộ chuỗi định kỳ</button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+      
+      {recurringAddConfirmOpen && pendingAddPayload && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+          <div className="bg-surface-container-lowest rounded-2xl p-6 w-full max-w-sm shadow-xl flex flex-col gap-4 animate-slide-up">
+            <h2 className="font-headline-sm text-headline-sm font-bold text-on-surface">Thêm món đồ định kỳ</h2>
+            <p className="font-body-md text-on-surface-variant">Danh sách này lặp lại định kỳ. Bạn muốn thêm "{pendingAddPayload.name || 'món đồ này'}" vào đâu?</p>
+            <div className="flex flex-col gap-2 mt-2">
+              <button onClick={() => executeAddItem(pendingAddPayload, false)} disabled={adding} className="px-4 py-3 font-label-md bg-surface-container hover:bg-surface-container-high rounded-xl transition-colors disabled:opacity-50 text-on-surface w-full">Chỉ danh sách này</button>
+              <button onClick={() => executeAddItem(pendingAddPayload, true)} disabled={adding} className="px-4 py-3 font-label-md bg-primary text-on-primary hover:bg-primary/90 rounded-xl transition-colors w-full disabled:opacity-50">Tất cả danh sách lặp lại</button>
+              <button onClick={() => { setRecurringAddConfirmOpen(false); setPendingAddPayload(null); }} className="px-4 py-2 font-label-md text-primary hover:bg-primary/10 rounded-full transition-colors w-full mt-2">Hủy</button>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {!isCompleted && (
+        <button className="md:hidden fixed bottom-[85px] right-margin-mobile z-40 bg-primary text-on-primary rounded-[16px] shadow-lg flex items-center gap-2 px-4 py-4 hover:shadow-xl hover:-translate-y-1 transition-all active:scale-95 group" onClick={() => setIsAddItemModalOpen(true)}>
+          <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>add</span>
+          <span className="font-label-sm text-label-sm font-semibold whitespace-nowrap pr-1">Thêm chi tiết</span>
+        </button>
+      )}
+
+      {/* Add Item Modal */}
+      {isAddItemModalOpen && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+          <div className="bg-surface-container-lowest rounded-2xl p-6 w-full max-w-md shadow-xl flex flex-col gap-4 animate-slide-up">
+            <h2 className="font-headline-sm text-headline-sm font-bold text-on-surface">Thêm món chi tiết</h2>
+            
+            <div className="flex flex-col gap-3">
+              <label className="flex flex-col font-label-sm text-on-surface-variant gap-1">
+                Tên món đồ *
+                <FoodAutocomplete
+                  value={modalItemName}
+                  onChange={(val) => { setModalItemName(val); setModalFoodId(undefined); }}
+                  onSelectFood={handleModalAddFood}
+                  categoryId={modalCategoryId}
+                  placeholder="Nhập tên món..."
+                  className="w-full px-4 py-3 bg-surface-container border border-outline-variant rounded-lg text-on-surface font-body-md"
+                />
+              </label>
+
+              <label className="flex flex-col font-label-sm text-on-surface-variant gap-1">
+                Danh mục *
+                <CustomSelect
+                  value={modalCategoryId}
+                  onChange={setModalCategoryId}
+                  options={[
+                    { value: '', label: 'Chọn danh mục' },
+                    ...categories.map(c => ({ value: c.id, label: c.name }))
+                  ]}
+                  className="w-full h-[48px] bg-surface-container border border-outline-variant rounded-lg text-on-surface font-body-md"
+                />
+              </label>
+
+              <div className="grid grid-cols-2 gap-3">
+                <label className="flex flex-col font-label-sm text-on-surface-variant gap-1">
+                  Số lượng *
+                  <input
+                    type="number"
+                    step="0.1"
+                    min="0.1"
+                    value={modalQuantity}
+                    onChange={e => setModalQuantity(e.target.value)}
+                    className="w-full h-[48px] px-3 bg-surface-container border border-outline-variant rounded-lg text-on-surface font-body-md focus:outline-none focus:border-primary-container"
+                  />
+                </label>
+                <label className="flex flex-col font-label-sm text-on-surface-variant gap-1">
+                  Đơn vị *
+                  <input
+                    type="text"
+                    value={modalUnit}
+                    onChange={e => setModalUnit(e.target.value)}
+                    className="w-full h-[48px] px-3 bg-surface-container border border-outline-variant rounded-lg text-on-surface font-body-md focus:outline-none focus:border-primary-container"
+                  />
+                </label>
+              </div>
+
+              {list?.recurrenceGroupId && (
+                <div className="mt-2 bg-surface-container-low p-3 rounded-lg border border-outline-variant">
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <input 
+                      type="checkbox" 
+                      className="w-5 h-5 rounded border-outline-variant text-primary focus:ring-primary"
+                      checked={modalAddAll}
+                      onChange={(e) => setModalAddAll(e.target.checked)}
+                    />
+                    <span className="font-label-md text-on-surface">Áp dụng cho toàn bộ danh sách lặp lại</span>
+                  </label>
+                </div>
+              )}
+            </div>
+
+            <div className="flex justify-end gap-2 mt-4">
+              <button onClick={() => setIsAddItemModalOpen(false)} className="px-4 py-2 font-label-md text-primary hover:bg-primary/10 rounded-full transition-colors">Hủy</button>
+              <button 
+                onClick={handleModalSubmit} 
+                disabled={adding || !modalItemName.trim() || !modalCategoryId} 
+                className="px-6 py-2 font-label-md bg-primary text-on-primary hover:bg-primary/90 rounded-full transition-colors disabled:opacity-50"
+              >
+                {adding ? 'Đang thêm...' : 'Lưu món đồ'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

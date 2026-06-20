@@ -1,0 +1,10 @@
+- Trang tạo danh sách cần theo ngày theo tuần thì chuyển thành dạng lịch, nếu thêm danh sách thì sẽ thêm danh sách vào lịch đó 
+- Thêm master data danh mục thực phẩm
+- Thêm thực phẩm trong danh sách cần thêm danh mục thực phẩm để thực hiện chức năng lọc phân loại thực phẩm trong danh sách
+- Phần tham gia nhóm gia đình, sẽ là 1 danh sách các nhóm tham gia có thể chỉnh sửa rõ ràng
+- Danh sách lịch trình xem đc cả tháng
+- Thông báo thực phẩm hết hạn trc 3 ngày
+- tạo công thức thì thêm 1 lựa chọn là công thức cá nhân hay chia sẻ, nếu là cá nhân lưu vào công thức của tôi, còn chia sẻ thì chờ admin duyệt,
+- Tạo thêm chức năng yêu thích công thức (Dấu sao chẳng hạn rồi thêm 1 tab nữa là công thức yêu thích) 
+- Tạo công thức dùng drop list
+- Chuyển data thành tiếng Việt có dấu

@@ -38,9 +38,11 @@ const SAMPLE_FOODS: CatalogFood[] = [
 function Wrapper({
   onSelectFood,
   onSubmit,
+  categoryId,
 }: {
   onSelectFood: (food: CatalogFood) => void;
   onSubmit?: () => void;
+  categoryId?: string;
 }) {
   const [value, setValue] = useState('');
   return (
@@ -49,6 +51,7 @@ function Wrapper({
       onChange={setValue}
       onSelectFood={onSelectFood}
       onSubmit={onSubmit}
+      categoryId={categoryId}
       placeholder="Tim thuc pham..."
       className="input"
     />
@@ -69,7 +72,7 @@ describe('FoodAutocomplete', () => {
     await user.type(screen.getByPlaceholderText('Tim thuc pham...'), 'sua');
 
     await waitFor(() => expect(searchFoodsMock).toHaveBeenCalled());
-    expect(searchFoodsMock).toHaveBeenCalledWith({ q: 'sua', limit: 6 });
+    expect(searchFoodsMock).toHaveBeenCalledWith({ q: 'sua', categoryId: undefined, limit: 6 });
 
     const option = await screen.findByText('Sua tuoi');
     await user.click(option);
@@ -79,6 +82,18 @@ describe('FoodAutocomplete', () => {
     expect(screen.getByPlaceholderText('Tim thuc pham...')).toHaveValue('Sua tuoi');
     // dropdown closes
     expect(screen.queryByText('Sua chua')).not.toBeInTheDocument();
+  });
+
+  it('forwards the selected category when searching', async () => {
+    searchFoodsMock.mockResolvedValue([]);
+    const user = userEvent.setup();
+
+    render(<Wrapper onSelectFood={vi.fn()} categoryId="c1" />);
+    await user.type(screen.getByPlaceholderText('Tim thuc pham...'), 'sua');
+
+    await waitFor(() =>
+      expect(searchFoodsMock).toHaveBeenCalledWith({ q: 'sua', categoryId: 'c1', limit: 6 }),
+    );
   });
 
   it('calls onSubmit on Enter for free-text input', async () => {

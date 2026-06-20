@@ -21,7 +21,6 @@ Hệ thống được thiết kế để phục vụ nhiều nhóm đối tượ
 
 ## 3. Một số chức năng chính
 
-> *(Sinh viên có thể khảo sát thêm các hệ thống hoặc sản phẩm tương tự nhằm đề xuất thêm các chức năng bổ sung nếu có)*
 
 ### 3.1 Quản lý danh sách mua sắm
 

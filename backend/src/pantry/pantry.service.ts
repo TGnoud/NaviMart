@@ -113,6 +113,9 @@ export class PantryService {
       if (dto.quantity > 0 && item.status === 'used_up') {
         item.status = 'active';
         item.consumedAt = undefined;
+      } else if (dto.quantity === 0) {
+        item.status = 'used_up';
+        item.consumedAt = new Date();
       }
     }
     if (dto.unit !== undefined) {
@@ -270,8 +273,10 @@ export class PantryService {
 
   async markWasted(user: AuthenticatedUser, itemId: string) {
     const item = await this.findItemForUser(user, itemId);
+    const wastedQuantity = item.quantity;
     item.status = 'wasted';
     item.wastedAt = new Date();
+    item.quantity = 0;
     await item.save();
     await this.inventoryEventsService.create({
       familyId: item.familyId,
@@ -279,8 +284,8 @@ export class PantryService {
       foodId: item.foodId,
       categoryId: item.categoryId,
       name: item.name,
-      quantityDelta: -item.quantity,
-      quantityAfter: item.quantity,
+      quantityDelta: -wastedQuantity,
+      quantityAfter: 0,
       unit: item.unit,
       type: 'wasted',
       source: 'manual',

@@ -55,6 +55,16 @@ describe('CatalogService', () => {
       );
     });
 
+    it('filters foods by categoryId when provided', async () => {
+      foodModel.find.mockReturnValue(mockQuery([]));
+      const categoryId = oid().toString();
+
+      await service.findAllFoods({ categoryId } as never);
+
+      const filter = foodModel.find.mock.calls[0][0];
+      expect(filter.categoryId.toString()).toBe(categoryId);
+    });
+
     it('builds a case-insensitive escaped regex $or for the search term', async () => {
       foodModel.find.mockReturnValue(mockQuery([]));
 
@@ -109,7 +119,7 @@ describe('CatalogService', () => {
 
       expect(unitModel.find).toHaveBeenCalledWith({ status: 'active' });
       expect(query.sort).toHaveBeenCalledWith({ code: 1 });
-      expect(result[0]).toMatchObject({ code: 'g', name: 'gram' });
+      expect(result[0]).toMatchObject({ code: 'g', name: 'Gam' });
     });
   });
 });

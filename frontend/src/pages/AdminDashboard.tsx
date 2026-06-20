@@ -162,7 +162,6 @@ export default function AdminDashboard() {
       handleError(err, 'Không cập nhật được trạng thái công thức.');
     }
   };
-
   const addCategory = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newCategory.trim()) return;

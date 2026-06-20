@@ -38,5 +38,6 @@ import { AdminUsersService } from './admin-users.service';
     AdminRecipesService,
     AdminStatsService,
   ],
+  exports: [MongooseModule],
 })
 export class AdminModule {}

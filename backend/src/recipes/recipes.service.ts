@@ -42,7 +42,7 @@ export class RecipesService {
   ) {}
 
   async findAll(user: AuthenticatedUser, query: ListRecipesQueryDto) {
-    const filter = this.buildRecipeFilter(query);
+    const filter = this.buildRecipeFilter(user, query);
     const recipes = await this.recipeModel
       .find(filter)
       .sort(this.buildRecipeSort(query))
@@ -64,6 +64,14 @@ export class RecipesService {
     const recipe = await this.recipeModel.findById(recipeId).exec();
 
     if (!recipe || recipe.status === 'archived') {
+      throw new NotFoundException('Recipe not found');
+    }
+
+    if (
+      (recipe.visibility === 'personal' || recipe.status !== 'approved') &&
+      user.role !== 'admin' &&
+      recipe.authorId?.toString() !== user.userId
+    ) {
       throw new NotFoundException('Recipe not found');
     }
 
@@ -96,7 +104,10 @@ export class RecipesService {
       .lean()
       .exec();
 
-    const filter: Record<string, any> = { status: 'approved' };
+    const filter: Record<string, any> = {
+      status: 'approved',
+      visibility: { $ne: 'personal' },
+    };
     if (query.q) {
       const words = query.q.trim().split(/\s+/).filter(Boolean);
       if (words.length > 0) {
@@ -129,7 +140,18 @@ export class RecipesService {
       )
       .slice(0, limit);
 
-    return suggestions;
+    const favoriteRecipeIds = await this.getFavoriteRecipeIdSet(
+      user,
+      suggestions.map((suggestion) => new Types.ObjectId(suggestion.recipe.id)),
+    );
+
+    return suggestions.map((suggestion) => ({
+      ...suggestion,
+      recipe: {
+        ...suggestion.recipe,
+        isFavorite: favoriteRecipeIds.has(suggestion.recipe.id),
+      },
+    }));
   }
 
   async addFavorite(user: AuthenticatedUser, recipeId: string) {
@@ -218,6 +240,7 @@ export class RecipesService {
 
   async create(user: AuthenticatedUser, dto: CreateRecipeDto) {
     const ingredients = await this.buildIngredients(dto.ingredients);
+    const visibility = dto.visibility ?? 'personal';
     const recipe = await this.recipeModel.create({
       name: dto.name,
       normalizedName: this.normalizeName(dto.name),
@@ -231,7 +254,11 @@ export class RecipesService {
       nutrition: dto.nutrition ?? {},
       tags: dto.tags ?? [],
       authorId: new Types.ObjectId(user.userId),
-      status: dto.status ?? (user.role === 'admin' ? 'approved' : 'pending'),
+      visibility,
+      status:
+        visibility === 'personal' || user.role === 'admin'
+          ? 'approved'
+          : 'pending',
     });
 
     return this.toRecipeDetail(recipe);
@@ -260,9 +287,8 @@ export class RecipesService {
     if (dto.difficulty !== undefined) recipe.difficulty = dto.difficulty;
     if (dto.servings !== undefined) recipe.servings = dto.servings;
     if (dto.ingredients !== undefined) {
-      recipe.ingredients = (await this.buildIngredients(
-        dto.ingredients,
-      )) as RecipeIngredient[];
+      const ingredients = await this.buildIngredients(dto.ingredients);
+      recipe.ingredients = ingredients as RecipeIngredient[];
     }
     if (dto.steps !== undefined) recipe.steps = dto.steps;
     if (dto.nutrition !== undefined) recipe.nutrition = dto.nutrition;
@@ -437,14 +463,20 @@ export class RecipesService {
     return resolveActiveFamilyId(this.familyModel, user);
   }
 
-  private buildRecipeFilter(query: ListRecipesQueryDto) {
+  private buildRecipeFilter(user: AuthenticatedUser, query: ListRecipesQueryDto) {
     const filter: Record<string, any> = {};
 
     if (query.authorId) {
       filter.authorId = new Types.ObjectId(query.authorId);
-      filter.status = query.status ?? { $ne: 'archived' };
+      if (query.authorId === user.userId || user.role === 'admin') {
+        filter.status = query.status ?? { $ne: 'archived' };
+      } else {
+        filter.status = 'approved';
+        filter.visibility = { $ne: 'personal' };
+      }
     } else {
       filter.status = query.status ?? 'approved';
+      filter.visibility = { $ne: 'personal' };
     }
 
     if (query.q) {
@@ -548,6 +580,7 @@ export class RecipesService {
       difficulty: recipe.difficulty,
       servings: recipe.servings,
       status: recipe.status,
+      visibility: recipe.visibility ?? 'shared',
       tags: recipe.tags,
       ingredientCount: recipe.ingredients.length,
       favoritesCount: recipe.favoritesCount ?? 0,

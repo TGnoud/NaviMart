@@ -26,7 +26,10 @@ describe('ExpiryNotificationsService', () => {
   let pantryItemModel: MockModel;
   let familyModel: MockModel;
   let userModel: MockModel;
-  let notificationsService: { createManyDeduped: jest.Mock };
+  let notificationsService: {
+    createManyDeduped: jest.Mock;
+    normalizeLegacyVietnameseText: jest.Mock;
+  };
   let realtimeService: { emitToUser: jest.Mock };
 
   const memberId = oid();
@@ -37,6 +40,7 @@ describe('ExpiryNotificationsService', () => {
     userModel = createMockModel();
     notificationsService = {
       createManyDeduped: jest.fn().mockResolvedValue({ createdCount: 0, created: [] }),
+      normalizeLegacyVietnameseText: jest.fn().mockResolvedValue({ modifiedCount: 0 }),
     };
     realtimeService = { emitToUser: jest.fn() };
 
@@ -137,5 +141,14 @@ describe('ExpiryNotificationsService', () => {
       'notification:new',
       expect.objectContaining({ id: 'n1' }),
     );
+  });
+
+  it('chuẩn hóa thông báo cũ trước khi quét lúc khởi động', async () => {
+    pantryItemModel.find.mockReturnValue(mockQuery([]));
+
+    await service.createExpiryNotificationsOnStartup();
+
+    expect(notificationsService.normalizeLegacyVietnameseText).toHaveBeenCalledTimes(1);
+    expect(notificationsService.createManyDeduped).toHaveBeenCalledWith([]);
   });
 });

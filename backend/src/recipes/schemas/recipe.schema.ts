@@ -5,6 +5,7 @@ export type RecipeDocument = HydratedDocument<Recipe>;
 
 export const RECIPE_DIFFICULTIES = ['easy', 'medium', 'hard'] as const;
 export const RECIPE_STATUSES = ['pending', 'approved', 'rejected', 'archived'] as const;
+export const RECIPE_VISIBILITIES = ['personal', 'shared'] as const;
 
 @Schema({ _id: false })
 export class RecipeIngredient {
@@ -94,6 +95,9 @@ export class Recipe {
   @Prop({ type: String, enum: RECIPE_STATUSES, default: 'pending' })
   status!: (typeof RECIPE_STATUSES)[number];
 
+  @Prop({ type: String, enum: RECIPE_VISIBILITIES, default: 'shared' })
+  visibility!: (typeof RECIPE_VISIBILITIES)[number];
+
   @Prop({ type: String, trim: true, maxlength: 300 })
   moderationNote?: string;
 
@@ -104,6 +108,7 @@ export class Recipe {
 export const RecipeSchema = SchemaFactory.createForClass(Recipe);
 
 RecipeSchema.index({ status: 1, difficulty: 1, cookTimeMinutes: 1 });
+RecipeSchema.index({ visibility: 1, status: 1 });
 RecipeSchema.index({ status: 1, favoritesCount: -1 });
 RecipeSchema.index({ 'ingredients.foodId': 1 });
 RecipeSchema.index({ 'ingredients.categoryId': 1 });

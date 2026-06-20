@@ -5,8 +5,8 @@ import NotificationDropdown from '../components/NotificationDropdown';
 import PaginationControls from '../components/PaginationControls';
 import SideNav from '../components/SideNav';
 import { CardGridSkeleton } from '../components/Skeleton';
-import { pantryApi } from '../api';
-import type { PantryItem, StorageLocation } from '../api';
+import { pantryApi, catalogApi } from '../api';
+import type { PantryItem, StorageLocation, CatalogCategory, CatalogFood } from '../api';
 import { useDialog } from '../contexts/DialogContext';
 import { daysLeft, daysOverdue } from '../utils/expiry';
 
@@ -53,6 +53,14 @@ export default function PantryDashboard() {
   const [showUndo, setShowUndo] = useState(false);
   const undoTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  const [categories, setCategories] = useState<CatalogCategory[]>([]);
+  const [foods, setFoods] = useState<CatalogFood[]>([]);
+
+  useEffect(() => {
+    catalogApi.categories().then(setCategories).catch(console.error);
+    catalogApi.searchFoods().then(setFoods).catch(console.error);
+  }, []);
+
   const handleError = useCallback(
     (err: unknown, fallback: string) => {
       showAlert(err instanceof Error ? err.message : fallback);
@@ -96,6 +104,24 @@ export default function PantryDashboard() {
       ),
     [currentPage, pantryItems],
   );
+
+  const groupedItems = useMemo(() => {
+    return pagedPantryItems.reduce((acc, item) => {
+      const catId = item.categoryId || 'other';
+      if (!acc[catId]) acc[catId] = [];
+      acc[catId].push(item);
+      return acc;
+    }, {} as Record<string, PantryItem[]>);
+  }, [pagedPantryItems]);
+
+  const getStorageTip = (item: PantryItem) => {
+    if (item.foodId) {
+      const food = foods.find(f => f.id === item.foodId);
+      if (food?.storageTips) return food.storageTips;
+    }
+    const cat = categories.find(c => c.id === item.categoryId);
+    return cat?.description;
+  };
 
   const stats = {
     total: pantryItems.length,
@@ -262,62 +288,85 @@ export default function PantryDashboard() {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-gutter-mobile md:gap-4">
+        <div className="flex flex-col gap-8">
           {loading ? (
-            <CardGridSkeleton count={8} />
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-gutter-mobile md:gap-4">
+              <CardGridSkeleton count={8} />
+            </div>
           ) : pantryItems.length > 0 ? (
-            pagedPantryItems.map(item => {
-              const badge = expiryBadge(item);
+            Object.entries(groupedItems).map(([catId, items]) => {
+              const category = categories.find(c => c.id === catId);
+              const catName = category ? category.name : 'Khác';
               return (
-              <div key={item.id} className={`bg-surface-container-lowest rounded-lg shadow-sm border ${badge.border} overflow-visible flex flex-col relative`}>
-                <div className="relative h-32 md:h-40 bg-surface-container rounded-t-lg overflow-hidden flex items-center justify-center">
-                  {item.imageUrl ? (
-                    <img
-                      src={item.imageUrl}
-                      alt={item.name}
-                      className="h-full w-full object-cover"
-                    />
-                  ) : (
-                    <span className="material-symbols-outlined text-6xl text-outline">grocery</span>
-                  )}
-                  <div className={`absolute top-2 right-2 bg-surface/90 backdrop-blur-sm px-2 py-1 rounded-full flex items-center gap-1 shadow-sm border border-${badge.color}/20`}>
-                    <span className={`w-2 h-2 rounded-full bg-${badge.color}`}></span>
-                    <span className={`font-label-sm text-label-sm text-${badge.color} font-semibold`}>{badge.status}</span>
+                <div key={catId} className="flex flex-col gap-4">
+                  <h2 className="font-headline-sm text-headline-sm text-on-surface font-bold border-b border-outline-variant pb-2">{catName}</h2>
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-gutter-mobile md:gap-4">
+                    {items.map(item => {
+                      const badge = expiryBadge(item);
+                      const tip = getStorageTip(item);
+                      return (
+                        <div key={item.id} className={`bg-surface-container-lowest rounded-lg shadow-sm border ${badge.border} overflow-visible flex flex-col relative`}>
+                          <div className="relative h-32 md:h-40 bg-surface-container rounded-t-lg overflow-hidden flex items-center justify-center">
+                            {item.imageUrl ? (
+                              <img
+                                src={item.imageUrl}
+                                alt={item.name}
+                                className="h-full w-full object-cover"
+                              />
+                            ) : (
+                              <span className="material-symbols-outlined text-6xl text-outline">grocery</span>
+                            )}
+                            <div className={`absolute top-2 right-2 bg-surface/90 backdrop-blur-sm px-2 py-1 rounded-full flex items-center gap-1 shadow-sm border border-${badge.color}/20`}>
+                              <span className={`w-2 h-2 rounded-full bg-${badge.color}`}></span>
+                              <span className={`font-label-sm text-label-sm text-${badge.color} font-semibold`}>{badge.status}</span>
+                            </div>
+                          </div>
+                          <div className="p-3 flex-1 flex flex-col">
+                            <div className="flex justify-between items-start gap-2">
+                              <h3 className="font-headline-sm text-[16px] leading-[24px] text-on-surface font-semibold line-clamp-1">{item.name}</h3>
+                              <button
+                                onClick={() => setActiveMenu(activeMenu === item.id ? null : item.id)}
+                                className="text-on-surface-variant hover:text-primary transition-colors p-1 -mr-1 -mt-1 rounded-full hover:bg-surface-container-high"
+                              >
+                                <span className="material-symbols-outlined text-lg">more_vert</span>
+                              </button>
+                              {activeMenu === item.id && (
+                                <div className="absolute top-10 right-2 w-48 bg-surface-container-lowest border border-outline-variant rounded-xl shadow-lg z-50 overflow-hidden">
+                                  <button onClick={() => openEditModal(item)} className="w-full text-left px-4 py-3 hover:bg-surface-container-low transition-colors font-body-md text-on-surface flex items-center gap-2">
+                                    <span className="material-symbols-outlined text-lg">edit</span> Cập nhật số lượng
+                                  </button>
+                                  <button onClick={() => handleWaste(item.id)} className="w-full text-left px-4 py-3 hover:bg-surface-container-low transition-colors font-body-md text-secondary flex items-center gap-2">
+                                    <span className="material-symbols-outlined text-lg">delete_sweep</span> Bỏ đi (lãng phí)
+                                  </button>
+                                  <button onClick={() => handleDelete(item.id)} className="w-full text-left px-4 py-3 hover:bg-error-container/50 transition-colors font-body-md text-error flex items-center gap-2">
+                                    <span className="material-symbols-outlined text-lg">delete</span> Đã dùng hết (Xoá)
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                            <p className="font-body-md text-body-md text-on-surface-variant mt-1">{LOCATION_LABELS[item.location]}</p>
+                            
+                            {tip && (
+                              <div className="mt-2 bg-tertiary-container/20 p-2 rounded text-[12px] text-tertiary font-body-sm flex items-start gap-1">
+                                <span className="material-symbols-outlined text-[14px]">lightbulb</span>
+                                <span className="line-clamp-2" title={tip}>{tip}</span>
+                              </div>
+                            )}
+
+                            <div className="mt-auto pt-3 flex justify-between items-center border-t border-outline-variant/30">
+                              <span className="font-body-md text-body-md font-bold text-on-surface">{item.quantity} {item.unit}</span>
+                              <span className={`font-label-sm text-label-sm text-${badge.color} font-medium`}>{badge.text}</span>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
-                <div className="p-3 flex-1 flex flex-col">
-                  <div className="flex justify-between items-start gap-2">
-                    <h3 className="font-headline-sm text-[16px] leading-[24px] text-on-surface font-semibold line-clamp-1">{item.name}</h3>
-                    <button
-                      onClick={() => setActiveMenu(activeMenu === item.id ? null : item.id)}
-                      className="text-on-surface-variant hover:text-primary transition-colors p-1 -mr-1 -mt-1 rounded-full hover:bg-surface-container-high"
-                    >
-                      <span className="material-symbols-outlined text-lg">more_vert</span>
-                    </button>
-                    {activeMenu === item.id && (
-                      <div className="absolute top-10 right-2 w-48 bg-surface-container-lowest border border-outline-variant rounded-xl shadow-lg z-50 overflow-hidden">
-                        <button onClick={() => openEditModal(item)} className="w-full text-left px-4 py-3 hover:bg-surface-container-low transition-colors font-body-md text-on-surface flex items-center gap-2">
-                          <span className="material-symbols-outlined text-lg">edit</span> Cập nhật số lượng
-                        </button>
-                        <button onClick={() => handleWaste(item.id)} className="w-full text-left px-4 py-3 hover:bg-surface-container-low transition-colors font-body-md text-secondary flex items-center gap-2">
-                          <span className="material-symbols-outlined text-lg">delete_sweep</span> Bỏ đi (lãng phí)
-                        </button>
-                        <button onClick={() => handleDelete(item.id)} className="w-full text-left px-4 py-3 hover:bg-error-container/50 transition-colors font-body-md text-error flex items-center gap-2">
-                          <span className="material-symbols-outlined text-lg">delete</span> Đã dùng hết (Xoá)
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                  <p className="font-body-md text-body-md text-on-surface-variant mt-1">{LOCATION_LABELS[item.location]}</p>
-                  <div className="mt-auto pt-3 flex justify-between items-center border-t border-outline-variant/30">
-                    <span className="font-body-md text-body-md font-bold text-on-surface">{item.quantity} {item.unit}</span>
-                    <span className={`font-label-sm text-label-sm text-${badge.color} font-medium`}>{badge.text}</span>
-                  </div>
-                </div>
-              </div>
-            );})
+              );
+            })
           ) : (
-            <div className="col-span-2 md:col-span-3 lg:col-span-4 py-12 flex flex-col items-center justify-center text-center">
+            <div className="py-12 flex flex-col items-center justify-center text-center">
               <span className="material-symbols-outlined text-6xl text-surface-variant mb-4">kitchen</span>
               <h3 className="font-headline-sm text-headline-sm text-on-surface mb-2">Tủ lạnh đang trống</h3>
               <p className="font-body-md text-body-md text-on-surface-variant mb-6">Hãy thêm thực phẩm để bắt đầu quản lý nhé.</p>

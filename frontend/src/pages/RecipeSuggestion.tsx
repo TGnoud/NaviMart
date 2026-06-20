@@ -44,7 +44,7 @@ function RecipeImage({ recipe, className }: { recipe: RecipeSummary; className: 
 
 export default function RecipeSuggestion() {
   const { showAlert } = useDialog();
-  const [activeTab, setActiveTab] = useState<'suggestion' | 'my-recipes'>('suggestion');
+  const [activeTab, setActiveTab] = useState<'suggestion' | 'my-recipes' | 'favorites'>('suggestion');
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [search, setSearch] = useState('');
   const [suggestionPage, setSuggestionPage] = useState(1);
@@ -55,6 +55,9 @@ export default function RecipeSuggestion() {
   const [myRecipes, setMyRecipes] = useState<RecipeSummary[]>([]);
   const [myRecipesPage, setMyRecipesPage] = useState(1);
   const [loadingMyRecipes, setLoadingMyRecipes] = useState(false);
+  const [favoriteRecipes, setFavoriteRecipes] = useState<RecipeSummary[]>([]);
+  const [favoriteRecipesPage, setFavoriteRecipesPage] = useState(1);
+  const [loadingFavorites, setLoadingFavorites] = useState(false);
 
   const handleError = useCallback(
     (err: unknown, fallback: string) => {
@@ -142,6 +145,44 @@ export default function RecipeSuggestion() {
     };
   }, [activeTab, profile?.id, search, handleError]);
 
+  useEffect(() => {
+    if (activeTab !== 'favorites') return;
+
+    let cancelled = false;
+    const term = search.trim().toLowerCase();
+
+    const fetchFavorites = () => {
+      recipesApi
+        .favorites()
+        .then((data) => {
+          if (!cancelled) {
+            setFavoriteRecipes(
+              term
+                ? data.filter((recipe) =>
+                    recipe.name.toLowerCase().includes(term),
+                  )
+                : data,
+            );
+            setFavoriteRecipesPage(1);
+          }
+        })
+        .catch((err) => handleError(err, 'Không tải được công thức yêu thích.'))
+        .finally(() => {
+          if (!cancelled) setLoadingFavorites(false);
+        });
+    };
+
+    const timer = setTimeout(() => {
+      setLoadingFavorites(true);
+      fetchFavorites();
+    }, term ? 300 : 0);
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [activeTab, search, handleError]);
+
   const featured = suggestions[0];
   const secondFeatured = suggestions[1];
   const others = suggestions;
@@ -163,6 +204,68 @@ export default function RecipeSuggestion() {
     [myRecipes, myRecipesPage],
   );
 
+  const pagedFavoriteRecipes = useMemo(
+    () =>
+      favoriteRecipes.slice(
+        (favoriteRecipesPage - 1) * RECIPE_PAGE_SIZE,
+        favoriteRecipesPage * RECIPE_PAGE_SIZE,
+      ),
+    [favoriteRecipes, favoriteRecipesPage],
+  );
+
+  const toggleFavorite = async (recipe: RecipeSummary) => {
+    try {
+      if (recipe.isFavorite) {
+        await recipesApi.removeFavorite(recipe.id);
+      } else {
+        await recipesApi.addFavorite(recipe.id);
+      }
+
+      const nextFavorite = !recipe.isFavorite;
+      const updateRecipe = (item: RecipeSummary) =>
+        item.id === recipe.id
+          ? {
+              ...item,
+              isFavorite: nextFavorite,
+              favoritesCount: Math.max(
+                0,
+                (item.favoritesCount ?? 0) + (nextFavorite ? 1 : -1),
+              ),
+            }
+          : item;
+
+      setSuggestions((items) =>
+        items.map((item) => ({ ...item, recipe: updateRecipe(item.recipe) })),
+      );
+      setMyRecipes((items) => items.map(updateRecipe));
+      setFavoriteRecipes((items) =>
+        nextFavorite ? items.map(updateRecipe) : items.filter((item) => item.id !== recipe.id),
+      );
+    } catch (err) {
+      handleError(err, 'Không cập nhật được yêu thích.');
+    }
+  };
+
+  const FavoriteButton = ({ recipe }: { recipe: RecipeSummary }) => (
+    <button
+      type="button"
+      onClick={(event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        void toggleFavorite(recipe);
+      }}
+      className="absolute top-3 right-3 w-10 h-10 rounded-full bg-surface/90 backdrop-blur-sm shadow-sm flex items-center justify-center hover:bg-surface transition-colors"
+      aria-label={recipe.isFavorite ? 'Bỏ yêu thích' : 'Yêu thích công thức'}
+    >
+      <span
+        className={`material-symbols-outlined ${recipe.isFavorite ? 'text-amber-500' : 'text-on-surface-variant'}`}
+        style={recipe.isFavorite ? { fontVariationSettings: "'FILL' 1" } : undefined}
+      >
+        star
+      </span>
+    </button>
+  );
+
   useEffect(() => {
     const totalPages = Math.max(1, Math.ceil(others.length / RECIPE_PAGE_SIZE));
     if (suggestionPage > totalPages) {
@@ -176,6 +279,13 @@ export default function RecipeSuggestion() {
       setTimeout(() => setMyRecipesPage(totalPages), 0);
     }
   }, [myRecipes.length, myRecipesPage]);
+
+  useEffect(() => {
+    const totalPages = Math.max(1, Math.ceil(favoriteRecipes.length / RECIPE_PAGE_SIZE));
+    if (favoriteRecipesPage > totalPages) {
+      setTimeout(() => setFavoriteRecipesPage(totalPages), 0);
+    }
+  }, [favoriteRecipes.length, favoriteRecipesPage]);
 
   return (
     <div className="bg-surface text-on-surface h-screen overflow-hidden flex flex-col md:flex-row">
@@ -248,6 +358,16 @@ export default function RecipeSuggestion() {
               >
                 Công thức của tôi
               </button>
+              <button
+                onClick={() => setActiveTab('favorites')}
+                className={`px-6 py-3 font-label-md font-bold transition-all relative ${
+                  activeTab === 'favorites'
+                    ? 'text-primary border-b-2 border-primary'
+                    : 'text-on-surface-variant hover:text-on-surface'
+                }`}
+              >
+                Công thức yêu thích
+              </button>
             </div>
 
             {activeTab === 'suggestion' ? (
@@ -282,6 +402,7 @@ export default function RecipeSuggestion() {
                         <Link to={`/recipe-detail/${featured.recipe.id}`} className="lg:col-span-2 bg-surface-container-lowest rounded-lg border border-outline-variant shadow-sm overflow-hidden flex flex-col sm:flex-row group cursor-pointer hover:shadow-md transition-all">
                           <div className="relative sm:w-1/2 h-56 sm:h-auto overflow-hidden">
                             <RecipeImage recipe={featured.recipe} className="w-full h-full" />
+                            <FavoriteButton recipe={featured.recipe} />
                             <div className="absolute top-4 left-4 flex gap-2">
                               <span className="bg-error text-on-error font-label-sm text-label-sm px-3 py-1.5 rounded-full flex items-center gap-1 shadow-sm font-medium">
                                 <span className="material-symbols-outlined text-[16px]">priority_high</span> Ưu tiên
@@ -326,6 +447,7 @@ export default function RecipeSuggestion() {
                         <Link to={`/recipe-detail/${secondFeatured.recipe.id}`} className="bg-surface-container-lowest rounded-lg border border-outline-variant shadow-sm overflow-hidden flex flex-col group cursor-pointer hover:shadow-md transition-all">
                           <div className="relative h-48 overflow-hidden">
                             <RecipeImage recipe={secondFeatured.recipe} className="w-full h-full" />
+                            <FavoriteButton recipe={secondFeatured.recipe} />
                             <div className="absolute top-4 left-4">
                               <span className="bg-secondary-container text-on-secondary-container font-label-sm text-label-sm px-3 py-1.5 rounded-full flex items-center gap-1 shadow-sm font-medium">
                                 <span className="material-symbols-outlined text-[16px]">event_busy</span> Tận dụng tủ lạnh
@@ -371,6 +493,7 @@ export default function RecipeSuggestion() {
                             <Link key={suggestion.recipe.id} to={`/recipe-detail/${suggestion.recipe.id}`} className="bg-surface-container-lowest rounded-lg border border-outline-variant shadow-sm overflow-hidden flex flex-col group cursor-pointer hover:shadow-md transition-all">
                               <div className="relative h-40 overflow-hidden">
                                 <RecipeImage recipe={suggestion.recipe} className="w-full h-full" />
+                                <FavoriteButton recipe={suggestion.recipe} />
                               </div>
                               <div className="p-4 flex flex-col flex-1">
                                 <h4 className="font-headline-sm text-headline-sm text-on-surface mb-1">{suggestion.recipe.name}</h4>
@@ -402,7 +525,7 @@ export default function RecipeSuggestion() {
                   )}
                 </>
               )
-            ) : (
+            ) : activeTab === 'my-recipes' ? (
               loadingMyRecipes ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                   <CardGridSkeleton count={8} />
@@ -423,10 +546,14 @@ export default function RecipeSuggestion() {
                 <section>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                     {pagedMyRecipes.map((recipe) => {
-                      const statusInfo = STATUS_LABELS[recipe.status] || {
-                        label: 'Chờ duyệt',
-                        className: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300',
-                      };
+                      const statusInfo = recipe.visibility === 'personal'
+                        ? { label: 'Cá nhân', className: 'bg-surface-container-high text-on-surface-variant' }
+                        : recipe.status === 'approved'
+                          ? { label: 'Đã chia sẻ', className: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' }
+                          : STATUS_LABELS[recipe.status] || {
+                            label: 'Chờ duyệt',
+                            className: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300',
+                          };
                       return (
                         <Link
                           key={recipe.id}
@@ -435,6 +562,7 @@ export default function RecipeSuggestion() {
                         >
                           <div className="relative h-40 overflow-hidden">
                             <RecipeImage recipe={recipe} className="w-full h-full" />
+                            <FavoriteButton recipe={recipe} />
                             <div className="absolute top-3 left-3">
                               <span className={`${statusInfo.className} font-label-sm text-label-sm px-2.5 py-1 rounded-full flex items-center gap-1 shadow-sm font-medium`}>
                                 {recipe.status === 'pending' && <span className="material-symbols-outlined text-[14px]">pending</span>}
@@ -465,6 +593,59 @@ export default function RecipeSuggestion() {
                     pageSize={RECIPE_PAGE_SIZE}
                     totalItems={myRecipes.length}
                     onPageChange={setMyRecipesPage}
+                  />
+                </section>
+              )
+            ) : (
+              loadingFavorites ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  <CardGridSkeleton count={8} />
+                </div>
+              ) : favoriteRecipes.length === 0 ? (
+                search.trim() ? (
+                  <div className="py-16 text-on-surface-variant text-center">
+                    <p className="font-body-md">Không tìm thấy công thức yêu thích phù hợp.</p>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-16 text-on-surface-variant text-center">
+                    <span className="material-symbols-outlined text-6xl mb-4 text-outline">star</span>
+                    <h3 className="font-headline-sm text-headline-sm text-on-surface mb-2">Chưa có công thức yêu thích</h3>
+                    <p className="font-body-md text-body-md">Nhấn dấu sao trên công thức để lưu vào tab này.</p>
+                  </div>
+                )
+              ) : (
+                <section>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    {pagedFavoriteRecipes.map((recipe) => (
+                      <Link
+                        key={recipe.id}
+                        to={`/recipe-detail/${recipe.id}`}
+                        className="bg-surface-container-lowest rounded-lg border border-outline-variant shadow-sm overflow-hidden flex flex-col group cursor-pointer hover:shadow-md transition-all"
+                      >
+                        <div className="relative h-40 overflow-hidden">
+                          <RecipeImage recipe={recipe} className="w-full h-full" />
+                          <FavoriteButton recipe={recipe} />
+                        </div>
+                        <div className="p-4 flex flex-col flex-1">
+                          <h4 className="font-headline-sm text-headline-sm text-on-surface mb-1 truncate">{recipe.name}</h4>
+                          <p className="font-body-md text-body-md text-on-surface-variant line-clamp-2 mb-3 h-10">{recipe.description || 'Không có mô tả'}</p>
+                          <div className="mt-auto flex items-center justify-between gap-3 text-on-surface-variant font-body-md text-body-md">
+                            <span className="flex items-center gap-1">
+                              <span className="material-symbols-outlined text-[16px]">schedule</span> {recipe.cookTimeMinutes} phút
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <span className="material-symbols-outlined text-[16px]">star</span> {recipe.favoritesCount ?? 0}
+                            </span>
+                          </div>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                  <PaginationControls
+                    page={favoriteRecipesPage}
+                    pageSize={RECIPE_PAGE_SIZE}
+                    totalItems={favoriteRecipes.length}
+                    onPageChange={setFavoriteRecipesPage}
                   />
                 </section>
               )

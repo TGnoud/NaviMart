@@ -6,6 +6,42 @@ export type UnitDocument = HydratedDocument<Unit>;
 export const UNIT_TYPES = ['weight', 'volume', 'count', 'package'] as const;
 export const UNIT_STATUSES = ['active', 'archived'] as const;
 
+const UNIT_CODE_DISPLAY_MAP: Record<string, string> = {
+  bo: 'bó',
+  cai: 'cái',
+  chai: 'chai',
+  g: 'g',
+  goi: 'gói',
+  hop: 'hộp',
+  kg: 'kg',
+  l: 'l',
+  ml: 'ml',
+  muong: 'muỗng',
+  qua: 'quả',
+};
+
+const UNIT_NAME_DISPLAY_MAP: Record<string, string> = {
+  bó: 'Bó',
+  cái: 'Cái',
+  chai: 'Chai',
+  g: 'Gam',
+  gói: 'Gói',
+  hộp: 'Hộp',
+  kg: 'Kilôgam',
+  l: 'Lít',
+  ml: 'Mililít',
+  muỗng: 'Muỗng',
+  quả: 'Quả',
+};
+
+export function toVietnameseUnitCode(code: string) {
+  return UNIT_CODE_DISPLAY_MAP[code] ?? code;
+}
+
+export function toVietnameseUnitName(code: string, name: string) {
+  return UNIT_NAME_DISPLAY_MAP[toVietnameseUnitCode(code)] ?? name;
+}
+
 @Schema({
   collection: 'units',
   timestamps: true,

@@ -1,0 +1,83 @@
+\section{Mục tiêu và phạm vi kiểm thử}
+Kiểm thử nhằm xác minh hệ thống NaviMart thực hiện đúng các chức năng nghiệp vụ cốt lõi (xác thực, nhóm gia đình, kho thực phẩm, công thức, kế hoạch bữa ăn, danh sách mua sắm, báo cáo), đảm bảo đúng hợp đồng API và an toàn phân quyền. Phạm vi bao gồm \textbf{backend} (NestJS + Jest) và \textbf{frontend} (React + Vitest). Các hạng mục E2E trình duyệt tự động (Playwright) và kiểm thử bảo mật chuyên sâu (DAST/OWASP ZAP) hiện nằm ngoài phạm vi.
+
+\section{Chiến lược và công cụ}
+Kiểm thử được phân tầng theo nguyên tắc kim tự tháp, mỗi tầng có mục tiêu và công cụ riêng:
+
+\begingroup
+\renewcommand{\arraystretch}{1.5}
+\begin{longtable}{|p{3.5cm}|p{6cm}|p{4.5cm}|}
+\hline
+\cellcolor[HTML]{D5F5E3}\textbf{Tầng kiểm thử} & \cellcolor[HTML]{D5F5E3}\textbf{Mục tiêu} & \cellcolor[HTML]{D5F5E3}\textbf{Công cụ} \\ \hline
+Unit Test & Logic nghiệp vụ ở service, util, mapper (mock model/dependency). & Jest, ts-jest \\ \hline
+API/Controller Test & Route, HTTP status, validation DTO, response, exception mapping. & supertest, ValidationPipe \\ \hline
+Security Test & Phân quyền 401/403, JWT âm tính, truy cập cấp đối tượng. & guard thật + JWT (e2e) \\ \hline
+Integration/E2E & Persistence và luồng nghiệp vụ xuyên module, realtime. & @nestjs/testing, mongodb-memory-server, socket.io-client \\ \hline
+Frontend & Hàm thuần, context, component, lớp gọi API. & Vitest, @testing-library, jsdom \\ \hline
+\end{longtable}
+\endgroup
+
+Kỹ thuật thiết kế testcase áp dụng: phân hoạch tương đương, phân tích giá trị biên (biên ngày hết hạn, số lượng), kiểm thử chuyển trạng thái, kiểm thử âm tính, ma trận RBAC và kiểm thử tương tranh (concurrency). Mã testcase được chuẩn hóa theo tiền tố: \texttt{UT-} (unit), \texttt{API-} (API/controller), \texttt{SEC-} (bảo mật), \texttt{E2E-}/\texttt{INT-} (tích hợp), \texttt{FE-} (frontend).
+
+\section{Unit Test}
+Unit test kiểm chứng logic nghiệp vụ ở tầng service và util, với model Mongoose và service phụ thuộc được mock (mặc định trả về rỗng để fail-loud khi quên cấu hình). Phân bố testcase và trọng tâm nghiệp vụ theo module:
+
+\begingroup
+\renewcommand{\arraystretch}{1.5}
+\begin{longtable}{|p{3cm}|p{1.8cm}|p{8.5cm}|}
+\hline
+\cellcolor[HTML]{D5F5E3}\textbf{Module} & \cellcolor[HTML]{D5F5E3}\textbf{Số case} & \cellcolor[HTML]{D5F5E3}\textbf{Trọng tâm kiểm chứng} \\ \hline
+auth (P0) & 21 & Phát hành/xoay vòng token, sai credential/tài khoản khóa $\rightarrow$ Unauthorized, reset/verify email, không lộ tồn tại tài khoản khi quên mật khẩu. \\ \hline
+pantry & 15 + 11 & Lọc theo family, từ chối consume vượt tồn, đánh dấu used\_up + ghi event; util phân loại expired/expiring/safe theo cửa sổ cảnh báo (gồm biên \texttt{warningDays=0}). \\ \hline
+recipes & 19 & Xếp hạng theo match ratio + lọc dưới minMatch, ưu tiên nguyên liệu sắp hết hạn, favorites, auto-approve khi admin, cấm non-admin sửa của người khác. \\ \hline
+meals & 11+9+4 & Lọc theo family + khoảng ngày, match nguyên liệu theo foodId/đơn vị/tên, scale theo khẩu phần, sinh shopping-list từ phần còn thiếu. \\ \hline
+shopping-lists & 12 & CRUD list/item, từ chối hoàn tất list đã completed / không có item checked, đẩy item đã mua vào pantry. \\ \hline
+families & 13 + 4 & Tạo owner family + set active, join theo invite (hash code), cấm tự sửa quyền mình / sửa owner. \\ \hline
+reports & 3 & Tổng hợp aggregate theo ngày/loại, gộp wasted-event với item đang hết hạn. \\ \hline
+catalog / users / notifications / admin-stats & 6 / 7 / 8 / 2 & Bổ sung phủ các service phụ trợ (danh mục, hồ sơ, thông báo, thống kê quản trị). \\ \hline
+\end{longtable}
+\endgroup
+
+Ngoài ra có 15 controller unit test (auth, families, pantry, recipes) kiểm tra việc chuyển tiếp DTO và inject ngữ cảnh user/family.
+
+\section{API/Controller Test}
+API test kiểm tra hợp đồng HTTP ở tầng controller bằng \texttt{createApiTestApp} (supertest) với \texttt{ValidationPipe} thật (whitelist + forbidNonWhitelisted + transform) và guard mock cấu hình được trạng thái xác thực/quyền. Tổng cộng 38 testcase cho 5 module rủi ro cao:
+
+\begingroup
+\renewcommand{\arraystretch}{1.5}
+\begin{longtable}{|p{2.5cm}|p{3.2cm}|p{1.3cm}|p{6cm}|}
+\hline
+\cellcolor[HTML]{D5F5E3}\textbf{Module} & \cellcolor[HTML]{D5F5E3}\textbf{Mã} & \cellcolor[HTML]{D5F5E3}\textbf{Số} & \cellcolor[HTML]{D5F5E3}\textbf{Kịch bản chính} \\ \hline
+auth & API-AUTH-001…010 & 10 & register 201; thiếu password/field lạ 400; trùng email/phone 409; login 200; sai credential 401; logout không token 401; verify token sai 400. \\ \hline
+families & API-FAM-001…007 & 7 & family hiện tại 200 / không có 404; invite thiếu quyền 403; join sai/hết hạn 404; join khi đã member 409; tự sửa quyền 400. \\ \hline
+pantry & API-PAN-001…008 & 8 & list 200; chưa auth 401; tạo thiếu quyền 403; quantity âm / consume $\leq$ 0 / vượt tồn 400; không tồn tại 404. \\ \hline
+recipes & API-RCP-001…007 & 7 & tìm kiếm/gợi ý 200; archived 404; tạo sai role 403; thiếu name 400; addFavorite 201. \\ \hline
+shopping-lists & API-SL-001…006 & 6 & tạo 201; thiếu quyền 403; thiếu quantity 400; list không tồn tại 404; hoàn tất list đã completed 400; hoàn tất hợp lệ 200 kèm pantryItems. \\ \hline
+\end{longtable}
+\endgroup
+
+\section{Integration/E2E và Frontend}
+Kiểm thử E2E dùng app NestJS thật + \texttt{mongodb-memory-server} + \texttt{socket.io-client} (32 testcase): các luồng register/refresh, invite/join, hoàn tất list $\rightarrow$ pantry, recipe/meal $\rightarrow$ missing $\rightarrow$ shopping-list $\rightarrow$ reports, promote admin, realtime WebSocket; cùng nhóm bảo mật (SEC-JWT, SEC-OBJ) và tương tranh (INT-CONC-001). Frontend có 61 testcase (Vitest) phủ util (expiry), context (Auth/Dialog), component (ProtectedRoute, FoodAutocomplete), lớp gọi API và trang Login.
+
+\section{Kết quả thực thi và độ phủ}
+Toàn bộ bộ test chạy thành công, không có lỗi:
+
+\begingroup
+\renewcommand{\arraystretch}{1.5}
+\begin{longtable}{|p{6cm}|p{4cm}|}
+\hline
+\cellcolor[HTML]{D5F5E3}\textbf{Chỉ số} & \cellcolor[HTML]{D5F5E3}\textbf{Kết quả} \\ \hline
+Backend Unit/API (test suites) & 34 / 34 pass \\ \hline
+Backend Unit/API (testcase) & 264 / 264 pass \\ \hline
+Backend E2E (testcase) & 32 / 32 pass \\ \hline
+Frontend (Vitest) & 61 / 61 pass \\ \hline
+Lỗi (failure/error) & 0 / 0 \\ \hline
+\end{longtable}
+\endgroup
+
+Độ phủ backend (Jest, trên toàn bộ \texttt{src}): Statements 68,03\%; Branch 57,97\%; Functions 55,99\%; Lines 56,89\%. Các module nghiệp vụ cốt lõi đạt độ phủ cao hơn rõ rệt: families 84,76\%, pantry 83,04\%, recipes 78,81\%, shopping-lists 76,81\%, meals 72,68\%, auth 71,05\%. Tỷ lệ tổng bị kéo xuống do các module chưa kiểm thử đơn vị (ai-chef, uploads, realtime gateway, một phần admin) bị tính 0\%.
+
+\section{Lỗi phát hiện và kết luận}
+Quá trình kiểm thử tương tranh đã phát hiện và sửa lỗi nghiêm trọng \textbf{BUG-CONC-001}: hàm \texttt{pantry.consume()} ban đầu dùng cơ chế read-modify-write nên 5 request trừ kho đồng thời đều thành công, gây trừ kho vượt mức (oversell). Lỗi đã được sửa bằng thao tác \texttt{findOneAndUpdate} nguyên tử kèm điều kiện \texttt{quantity \(\geq\)} số lượng yêu cầu, và được kiểm chứng bởi testcase INT-CONC-001 (chỉ 1 request thành công, tồn kho cuối = 0). Bộ test bảo mật cũng đã bổ sung đầy đủ kịch bản JWT âm tính (SEC-JWT-001…005) và truy cập cấp đối tượng (SEC-OBJ), đảm bảo dữ liệu của một gia đình không bị gia đình khác truy cập.
+
+Kết luận: bộ test NaviMart có nền tảng vững cho hồi quy ở tầng service/controller và đã có E2E thật với MongoDB cô lập. Các hạng mục cần cải tiến tiếp theo (Giai đoạn 2) gồm: thiết lập CI tự động chạy test, bật coverage gate và đo độ phủ cho frontend.

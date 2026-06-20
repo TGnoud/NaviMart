@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocation as useRouterLocation, useNavigate } from 'react-router-dom';
 import { useDialog } from '../contexts/DialogContext';
-import { pantryApi, uploadsApi } from '../api';
-import type { CatalogFood, StorageLocation } from '../api';
+import { pantryApi, uploadsApi, catalogApi } from '../api';
+import type { CatalogFood, StorageLocation, CatalogCategory } from '../api';
 import FoodAutocomplete from '../components/FoodAutocomplete';
 
 const LOCATION_VALUES: Record<string, StorageLocation> = {
@@ -38,12 +38,23 @@ export default function AddItem() {
   const [imageUrl, setImageUrl] = useState('');
   const [uploadingImage, setUploadingImage] = useState(false);
 
+  const [categories, setCategories] = useState<CatalogCategory[]>([]);
+  const [categoryId, setCategoryId] = useState('');
+
+  // Fetch categories on mount
+  useEffect(() => {
+    catalogApi.categories().then(setCategories).catch(console.error);
+  }, []);
+
   // Catalog defaults: unit, storage location, shelf life and storage tips.
   const applyFood = (food: CatalogFood) => {
     setSelectedFood(food);
     setItemName(food.name);
     setUnit(food.defaultUnit);
     setLocation(LOCATION_LABELS[food.defaultStorageLocation] ?? 'Tủ mát');
+    if (food.categoryId) {
+      setCategoryId(food.categoryId);
+    }
     if (food.defaultShelfLifeDays) {
       setExpiryDate(dateAfterDays(food.defaultShelfLifeDays));
     }
@@ -94,6 +105,7 @@ export default function AddItem() {
       await pantryApi.create({
         foodId: selectedFood?.id,
         name: selectedFood ? undefined : itemName.trim(),
+        categoryId: categoryId || undefined,
         quantity: parsedQuantity,
         unit,
         expiryDate: new Date(expiryDate).toISOString(),
@@ -169,6 +181,21 @@ export default function AddItem() {
               </div>
             </div>
           )}
+
+          <div className="flex flex-col gap-1">
+            <label className="font-body-md text-body-md font-bold text-on-surface" htmlFor="categoryId">Danh mục thực phẩm</label>
+            <select
+              id="categoryId"
+              value={categoryId}
+              onChange={(e) => setCategoryId(e.target.value)}
+              className="w-full px-4 py-3 bg-surface-container-lowest border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all appearance-none"
+            >
+              <option value="">Không có danh mục</option>
+              {categories.map(cat => (
+                <option key={cat.id} value={cat.id}>{cat.name}</option>
+              ))}
+            </select>
+          </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="flex flex-col gap-1">

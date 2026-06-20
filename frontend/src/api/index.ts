@@ -214,11 +214,8 @@ export const shoppingListsApi = {
   addItem: (
     listId: string,
     input: { name?: string; foodId?: string; categoryId?: string; quantity: number; unit?: string; note?: string },
-  ) =>
-    apiRequest<ShoppingList>(`/shopping-lists/${listId}/items`, {
-      method: 'POST',
-      body: input,
-    }),
+    addAll?: boolean,
+  ) => apiRequest<ShoppingList>(`/shopping-lists/${listId}/items`, { method: 'POST', body: input, query: { addAll } }),
 
   updateItem: (
     listId: string,

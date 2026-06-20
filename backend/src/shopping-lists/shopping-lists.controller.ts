@@ -116,11 +116,13 @@ export class ShoppingListsController {
     @CurrentUser() user: AuthenticatedUser,
     @Param('listId') listId: string,
     @Body() createShoppingListItemDto: CreateShoppingListItemDto,
+    @Query('addAll') addAll?: string,
   ) {
     return this.shoppingListsService.addItem(
       user,
       listId,
       createShoppingListItemDto,
+      addAll === 'true',
     );
   }
 

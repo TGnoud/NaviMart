@@ -10,6 +10,24 @@ import FoodAutocomplete from '../components/FoodAutocomplete';
 import CustomSelect from '../components/CustomSelect';
 import { ListRowsSkeleton, Skeleton } from '../components/Skeleton';
 
+function parseShoppingItemInput(input: string, defaultUnit: string = 'cái') {
+  const str = input.trim();
+  const match = str.match(/^([\d.,]+)\s*([a-zA-ZáàảãạăắằẳẵặâấầẩẫậéèẻẽẹêếềểễệíìỉĩịóòỏõọôốồổỗộơớờởỡợúùủũụưứừửữựýỳỷỹỵđĐ]+)?\s*(.*)$/i);
+  
+  if (match) {
+    const qtyStr = match[1].replace(',', '.');
+    const quantity = parseFloat(qtyStr);
+    if (!isNaN(quantity) && quantity > 0) {
+       const unit = match[2] ? match[2].toLowerCase() : defaultUnit;
+       const name = match[3] ? match[3].trim() : '';
+       if (name) {
+           return { quantity, unit, name };
+       }
+    }
+  }
+  return { quantity: 1, unit: defaultUnit, name: str };
+}
+
 export default function ListDetail() {
   const { listId } = useParams<{ listId: string }>();
   const navigate = useNavigate();
@@ -23,6 +41,10 @@ export default function ListDetail() {
   const [completing, setCompleting] = useState(false);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  
+  const [recurringAddConfirmOpen, setRecurringAddConfirmOpen] = useState(false);
+  const [pendingAddPayload, setPendingAddPayload] = useState<any>(null);
+  const [adding, setAdding] = useState(false);
 
   const handleError = useCallback(
     (err: unknown, fallback: string) => {
@@ -110,42 +132,61 @@ export default function ListDetail() {
   };
 
   const handleAddItem = async () => {
-    if (!newItem.trim() || !listId || isCompleted) return;
+    if (!newItem.trim() || !listId || isCompleted || adding) return;
     if (!newItemCategoryId) {
       showAlert('Vui lòng chọn danh mục thực phẩm trước khi thêm.');
       return;
     }
-    try {
-      setList(
-        await shoppingListsApi.addItem(listId, {
-          name: newItem.trim(),
-          categoryId: newItemCategoryId,
-          quantity: 1,
-          unit: 'cái',
-        }),
-      );
-      setNewItem('');
-      setNewItemCategoryId('');
-    } catch (err) {
-      handleError(err, 'Không thêm được món đồ.');
-    }
+    
+    const parsed = parseShoppingItemInput(newItem.trim(), 'cái');
+    const payload = {
+      name: parsed.name,
+      categoryId: newItemCategoryId,
+      quantity: parsed.quantity,
+      unit: parsed.unit,
+    };
+    
+    triggerAddPayload(payload);
   };
 
-  // Picking a catalog suggestion links the item to the food (better pantry defaults + recipe matching).
   const handleAddFood = async (food: CatalogFood) => {
-    if (!listId || isCompleted) return;
+    if (!listId || isCompleted || adding) return;
+    
+    // Parse the current input string to grab quantity/unit even if they select a food
+    const parsed = parseShoppingItemInput(newItem.trim(), food.defaultUnit);
+    
+    const payload = {
+      foodId: food.id,
+      categoryId: food.categoryId,
+      quantity: parsed.quantity,
+      unit: parsed.unit !== 'cái' ? parsed.unit : food.defaultUnit, // Prefer user unit if parsed, else food default
+    };
+    
+    triggerAddPayload(payload);
+  };
+  
+  const triggerAddPayload = (payload: any) => {
+    if (list?.recurrenceGroupId) {
+       setPendingAddPayload(payload);
+       setRecurringAddConfirmOpen(true);
+    } else {
+       executeAddItem(payload, false);
+    }
+  };
+  
+  const executeAddItem = async (payload: any, addAll: boolean) => {
+    if (!listId) return;
+    setAdding(true);
     try {
-      setList(
-        await shoppingListsApi.addItem(listId, {
-          foodId: food.id,
-          categoryId: food.categoryId,
-          quantity: 1,
-        }),
-      );
+      setList(await shoppingListsApi.addItem(listId, payload, addAll));
       setNewItem('');
       setNewItemCategoryId('');
+      setRecurringAddConfirmOpen(false);
+      setPendingAddPayload(null);
     } catch (err) {
       handleError(err, 'Không thêm được món đồ.');
+    } finally {
+      setAdding(false);
     }
   };
 
@@ -403,6 +444,20 @@ export default function ListDetail() {
                  <button onClick={() => handleDelete(true)} disabled={deleting} className="px-4 py-2 font-label-md border border-error text-error hover:bg-error-container rounded-full transition-colors w-full disabled:opacity-50">Xóa toàn bộ chuỗi định kỳ</button>
               </div>
             )}
+          </div>
+        </div>
+      )}
+      
+      {recurringAddConfirmOpen && pendingAddPayload && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+          <div className="bg-surface-container-lowest rounded-2xl p-6 w-full max-w-sm shadow-xl flex flex-col gap-4 animate-slide-up">
+            <h2 className="font-headline-sm text-headline-sm font-bold text-on-surface">Thêm món đồ định kỳ</h2>
+            <p className="font-body-md text-on-surface-variant">Danh sách này lặp lại định kỳ. Bạn muốn thêm "{pendingAddPayload.name || 'món đồ này'}" vào đâu?</p>
+            <div className="flex flex-col gap-2 mt-2">
+              <button onClick={() => executeAddItem(pendingAddPayload, false)} disabled={adding} className="px-4 py-3 font-label-md bg-surface-container hover:bg-surface-container-high rounded-xl transition-colors disabled:opacity-50 text-on-surface w-full">Chỉ danh sách này</button>
+              <button onClick={() => executeAddItem(pendingAddPayload, true)} disabled={adding} className="px-4 py-3 font-label-md bg-primary text-on-primary hover:bg-primary/90 rounded-xl transition-colors w-full disabled:opacity-50">Tất cả danh sách lặp lại</button>
+              <button onClick={() => { setRecurringAddConfirmOpen(false); setPendingAddPayload(null); }} className="px-4 py-2 font-label-md text-primary hover:bg-primary/10 rounded-full transition-colors w-full mt-2">Hủy</button>
+            </div>
           </div>
         </div>
       )}

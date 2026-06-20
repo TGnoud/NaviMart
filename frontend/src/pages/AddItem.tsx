@@ -4,6 +4,8 @@ import { useDialog } from '../contexts/DialogContext';
 import { pantryApi, uploadsApi, catalogApi } from '../api';
 import type { CatalogFood, StorageLocation, CatalogCategory } from '../api';
 import FoodAutocomplete from '../components/FoodAutocomplete';
+import CustomSelect from '../components/CustomSelect';
+import CustomDatePicker from '../components/CustomDatePicker';
 
 const LOCATION_VALUES: Record<string, StorageLocation> = {
   'Tủ đông': 'freezer',
@@ -184,22 +186,15 @@ export default function AddItem() {
 
           <div className="flex flex-col gap-1">
             <label className="font-body-md text-body-md font-bold text-on-surface" htmlFor="categoryId">Danh mục</label>
-            <div className="relative">
-              <select
-                id="categoryId"
-                value={categoryId}
-                onChange={(e) => setCategoryId(e.target.value)}
-                className="w-full px-4 py-3 pr-10 bg-surface-container-lowest border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all appearance-none cursor-pointer"
-              >
-                <option value="">Không có danh mục</option>
-                {categories.map(cat => (
-                  <option key={cat.id} value={cat.id}>{cat.name}</option>
-                ))}
-              </select>
-              <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none">
-                expand_more
-              </span>
-            </div>
+            <CustomSelect
+              value={categoryId}
+              onChange={setCategoryId}
+              options={[
+                { value: '', label: 'Không có danh mục' },
+                ...categories.map(cat => ({ value: cat.id, label: cat.name }))
+              ]}
+              className="w-full h-[50px] bg-surface-container-lowest border border-outline-variant rounded-lg focus-within:ring-2 focus-within:ring-primary focus-within:border-primary transition-all"
+            />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -216,38 +211,33 @@ export default function AddItem() {
                   value={quantity}
                   onChange={(e) => setQuantity(e.target.value)}
                 />
-                <div className="relative border-l border-outline-variant bg-surface-container hover:bg-surface-container-high transition-colors flex items-center shrink-0">
-                  <select
-                    className="h-full bg-transparent border-none outline-none pl-3 pr-8 font-body-md text-body-md cursor-pointer appearance-none"
+                <div className="relative border-l border-outline-variant bg-surface-container hover:bg-surface-container-high transition-colors flex items-center shrink-0 w-[120px]">
+                  <CustomSelect
                     value={unit}
-                    onChange={(e) => setUnit(e.target.value)}
-                  >
-                    {!['cái', 'kg', 'g', 'lít', 'ml', 'bó', 'quả'].includes(unit) && (
-                      <option value={unit}>{unit}</option>
-                    )}
-                    <option value="cái">Cái/Hộp</option>
-                    <option value="kg">Kg</option>
-                    <option value="g">Gram</option>
-                    <option value="lít">Lít</option>
-                    <option value="ml">ml</option>
-                    <option value="bó">Bó</option>
-                    <option value="quả">Quả</option>
-                  </select>
-                  <span className="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none text-[20px]">
-                    expand_more
-                  </span>
+                    onChange={setUnit}
+                    options={[
+                      ...(!['cái', 'kg', 'g', 'lít', 'ml', 'bó', 'quả'].includes(unit) ? [{ value: unit, label: unit }] : []),
+                      { value: 'cái', label: 'Cái/Hộp' },
+                      { value: 'kg', label: 'Kg' },
+                      { value: 'g', label: 'Gram' },
+                      { value: 'lít', label: 'Lít' },
+                      { value: 'ml', label: 'ml' },
+                      { value: 'bó', label: 'Bó' },
+                      { value: 'quả', label: 'Quả' },
+                    ]}
+                    className="w-full h-full font-body-md text-body-md"
+                    menuClassName="w-[150px] right-0"
+                  />
                 </div>
               </div>
             </div>
 
             <div className="flex flex-col gap-1">
               <label className="font-body-md text-body-md font-bold text-on-surface" htmlFor="expiryDate">Hạn sử dụng</label>
-              <input
-                className="w-full px-4 py-3 bg-surface-container-lowest border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
-                id="expiryDate"
-                type="date"
+              <CustomDatePicker
                 value={expiryDate}
-                onChange={(e) => setExpiryDate(e.target.value)}
+                onChange={setExpiryDate}
+                className="w-full h-[50px] bg-surface-container-lowest border border-outline-variant rounded-lg focus-within:ring-2 focus-within:ring-primary focus-within:border-primary outline-none transition-all"
               />
             </div>
           </div>

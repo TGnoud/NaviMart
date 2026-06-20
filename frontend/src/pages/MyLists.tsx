@@ -9,6 +9,8 @@ import { shoppingListsApi } from '../api';
 import type { ShoppingList, ShoppingListType } from '../api';
 import { onSocketEvent } from '../api/socket';
 import { useDialog } from '../contexts/DialogContext';
+import CustomSelect from '../components/CustomSelect';
+import CustomDatePicker from '../components/CustomDatePicker';
 
 function formatDate(value?: string) {
   if (!value) return 'N/A';
@@ -425,35 +427,30 @@ export default function MyLists() {
             />
             {modalMode === 'create' && (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <label className="font-label-sm text-on-surface-variant">
+                <label className="flex flex-col font-label-sm text-on-surface-variant gap-1">
                   Loại danh sách
-                  <div className="relative mt-1">
-                    <select
-                      value={listTypeInput}
-                      onChange={(event) => {
-                        const type = event.target.value as ShoppingListType;
-                        setListTypeInput(type);
-                        if (type === 'weekly') {
-                          setPlannedForInput(toDateInput(startOfWeek(new Date(`${plannedForInput}T12:00:00`))));
-                        }
-                      }}
-                      className="w-full px-3 py-3 bg-surface-container border border-outline-variant rounded-lg text-on-surface appearance-none pr-10 cursor-pointer"
-                    >
-                      <option value="daily">Theo ngày</option>
-                      <option value="weekly">Theo tuần</option>
-                    </select>
-                    <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none">
-                      expand_more
-                    </span>
-                  </div>
+                  <CustomSelect
+                    value={listTypeInput}
+                    onChange={(value) => {
+                      const type = value as ShoppingListType;
+                      setListTypeInput(type);
+                      if (type === 'weekly') {
+                        setPlannedForInput(toDateInput(startOfWeek(new Date(`${plannedForInput}T12:00:00`))));
+                      }
+                    }}
+                    options={[
+                      { value: 'daily', label: 'Theo ngày' },
+                      { value: 'weekly', label: 'Theo tuần' }
+                    ]}
+                    className="w-full h-[48px] bg-surface-container border border-outline-variant rounded-lg text-on-surface font-body-md"
+                  />
                 </label>
-                <label className="font-label-sm text-on-surface-variant">
+                <label className="flex flex-col font-label-sm text-on-surface-variant gap-1">
                   {listTypeInput === 'weekly' ? 'Tuần bắt đầu' : 'Ngày dự kiến'}
-                  <input
-                    type="date"
+                  <CustomDatePicker
                     value={plannedForInput}
-                    onChange={(event) => setPlannedForInput(event.target.value)}
-                    className="mt-1 w-full px-3 py-3 bg-surface-container border border-outline-variant rounded-lg text-on-surface"
+                    onChange={setPlannedForInput}
+                    className="w-full h-[48px] bg-surface-container border border-outline-variant rounded-lg text-on-surface font-body-md"
                   />
                 </label>
               </div>

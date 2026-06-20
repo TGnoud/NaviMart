@@ -5,6 +5,7 @@ import { catalogApi, recipesApi, uploadsApi } from '../api';
 import type { CatalogUnit, RecipeEditorInput } from '../api';
 import { useDialog } from '../contexts/DialogContext';
 import { useAuth } from '../contexts/AuthContext';
+import CustomSelect from '../components/CustomSelect';
 
 type IngredientRow = { name: string; quantity: string; unit: string; optional: boolean };
 
@@ -263,16 +264,16 @@ export default function RecipeEditor() {
                     </div>
                     <div>
                       <label className="block font-label-md text-on-surface mb-1.5">Độ khó</label>
-                      <div className="relative">
-                        <select value={difficulty} onChange={(e) => setDifficulty(e.target.value as typeof difficulty)} className={`${inputClass} appearance-none pr-10 cursor-pointer`}>
-                          <option value="easy">Dễ</option>
-                          <option value="medium">Trung bình</option>
-                          <option value="hard">Khó</option>
-                        </select>
-                        <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none">
-                          expand_more
-                        </span>
-                      </div>
+                      <CustomSelect
+                        value={difficulty}
+                        onChange={(val) => setDifficulty(val as typeof difficulty)}
+                        options={[
+                          { value: 'easy', label: 'Dễ' },
+                          { value: 'medium', label: 'Trung bình' },
+                          { value: 'hard', label: 'Khó' }
+                        ]}
+                        className={inputClass}
+                      />
                     </div>
                     <div>
                       <label className="block font-label-md text-on-surface mb-1.5">Khẩu phần</label>
@@ -317,25 +318,18 @@ export default function RecipeEditor() {
                         placeholder="SL"
                         className={`${inputClass} w-20`}
                       />
-                      <div className="relative shrink-0">
-                        <select
+                      <div className="shrink-0 w-24">
+                        <CustomSelect
                           value={row.unit}
-                          onChange={(e) => updateIngredient(index, { unit: e.target.value })}
-                          className={`${inputClass} w-24 appearance-none pr-8 pl-3 cursor-pointer`}
-                        >
-                          {units.length === 0 && <option value={row.unit}>{row.unit || 'g'}</option>}
-                          {units.length > 0 && row.unit && !units.some((unit) => unit.code === row.unit) && (
-                            <option value={row.unit}>{row.unit}</option>
-                          )}
-                          {units.map((unit) => (
-                            <option key={unit.id} value={unit.code}>
-                              {unit.code}
-                            </option>
-                          ))}
-                        </select>
-                        <span className="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none">
-                          expand_more
-                        </span>
+                          onChange={(val) => updateIngredient(index, { unit: val })}
+                          options={[
+                            ...(units.length === 0 ? [{ value: row.unit, label: row.unit || 'g' }] : []),
+                            ...(units.length > 0 && row.unit && !units.some((unit) => unit.code === row.unit) ? [{ value: row.unit, label: row.unit }] : []),
+                            ...units.map((unit) => ({ value: unit.code, label: unit.code }))
+                          ]}
+                          className={inputClass}
+                          menuClassName="w-[120px]"
+                        />
                       </div>
                       <label className="flex items-center gap-1.5 font-label-sm text-on-surface-variant whitespace-nowrap cursor-pointer">
                         <input

@@ -181,7 +181,7 @@ export const shoppingListsApi = {
   list: (status?: ShoppingListStatus) =>
     apiRequest<ShoppingList[]>('/shopping-lists', { query: { status } }),
 
-  create: (input: { name: string; type?: ShoppingListType; plannedFor?: string }) =>
+  create: (input: { name: string; type?: ShoppingListType; plannedFor?: string; recurrenceEndDate?: string }) =>
     apiRequest<ShoppingList>('/shopping-lists', { method: 'POST', body: input }),
 
   get: (listId: string) => apiRequest<ShoppingList>(`/shopping-lists/${listId}`),
@@ -196,8 +196,8 @@ export const shoppingListsApi = {
     },
   ) => apiRequest<ShoppingList>(`/shopping-lists/${listId}`, { method: 'PATCH', body: input }),
 
-  remove: (listId: string) =>
-    apiRequest<{ success: boolean }>(`/shopping-lists/${listId}`, { method: 'DELETE' }),
+  remove: (listId: string, deleteAll?: boolean) =>
+    apiRequest<{ success: boolean }>(`/shopping-lists/${listId}`, { method: 'DELETE', query: { deleteAll } }),
 
   complete: (
     listId: string,

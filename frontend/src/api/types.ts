@@ -21,7 +21,7 @@ export type AuthResponse = {
   };
 };
 
-export type ShoppingListType = 'daily' | 'weekly' | 'custom';
+export type ShoppingListType = 'daily' | 'weekly' | 'monthly' | 'custom';
 export type ShoppingListStatus = 'active' | 'completed' | 'archived';
 export type ShoppingItemStatus = 'pending' | 'bought';
 
@@ -46,6 +46,7 @@ export type ShoppingList = {
   status: ShoppingListStatus;
   plannedFor?: string;
   completedAt?: string;
+  recurrenceGroupId?: string;
   createdBy: string;
   progress: { bought: number; total: number };
   items: ShoppingListItem[];

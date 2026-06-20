@@ -21,6 +21,8 @@ export default function ListDetail() {
   const [newItemCategoryId, setNewItemCategoryId] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [completing, setCompleting] = useState(false);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const handleError = useCallback(
     (err: unknown, fallback: string) => {
@@ -172,6 +174,21 @@ export default function ListDetail() {
     );
   };
 
+  const handleDelete = async (deleteAll = false) => {
+    if (!listId || !list || deleting) return;
+    setDeleting(true);
+    try {
+      await shoppingListsApi.remove(listId, deleteAll);
+      showAlert('Đã xóa danh sách.');
+      navigate('/lists');
+    } catch (err) {
+      handleError(err, 'Không xóa được danh sách.');
+    } finally {
+      setDeleting(false);
+      setDeleteConfirmOpen(false);
+    }
+  };
+
   const items = list?.items ?? [];
   const visibleItems = categoryFilter === 'all'
     ? items
@@ -226,14 +243,23 @@ export default function ListDetail() {
                     </p>
                   </div>
                   {!isCompleted && (
-                    <button
-                      onClick={handleComplete}
-                      disabled={completing}
-                      className="flex items-center gap-2 bg-primary text-on-primary font-label-md px-4 py-2.5 rounded-full shadow-sm hover:opacity-90 transition-opacity disabled:opacity-50"
-                    >
-                      <span className="material-symbols-outlined text-[20px]">task_alt</span>
-                      <span className="hidden sm:inline">{completing ? 'Đang xử lý...' : 'Hoàn thành & nhập kho'}</span>
-                    </button>
+                    <div className="flex flex-col sm:flex-row gap-2">
+                      <button
+                        onClick={() => setDeleteConfirmOpen(true)}
+                        className="flex justify-center items-center gap-2 bg-error-container text-on-error-container font-label-md px-4 py-2.5 rounded-full shadow-sm hover:opacity-90 transition-opacity"
+                      >
+                        <span className="material-symbols-outlined text-[20px]">delete</span>
+                        <span className="hidden sm:inline">Xóa</span>
+                      </button>
+                      <button
+                        onClick={handleComplete}
+                        disabled={completing}
+                        className="flex justify-center items-center gap-2 bg-primary text-on-primary font-label-md px-4 py-2.5 rounded-full shadow-sm hover:opacity-90 transition-opacity disabled:opacity-50"
+                      >
+                        <span className="material-symbols-outlined text-[20px]">task_alt</span>
+                        <span className="hidden sm:inline">{completing ? 'Đang xử lý...' : 'Hoàn thành & nhập kho'}</span>
+                      </button>
+                    </div>
                   )}
                 </div>
 
@@ -360,6 +386,26 @@ export default function ListDetail() {
       </main>
 
       <BottomNav />
+
+      {deleteConfirmOpen && list && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+          <div className="bg-surface-container-lowest rounded-2xl p-6 w-full max-w-sm shadow-xl flex flex-col gap-4 animate-slide-up">
+            <h2 className="font-headline-sm text-headline-sm font-bold text-on-surface">Xác nhận xóa</h2>
+            <p className="font-body-md text-on-surface-variant">Bạn có chắc chắn muốn xóa danh sách "{list.name}" không?</p>
+            <div className="flex justify-end gap-2 mt-2">
+              <button onClick={() => setDeleteConfirmOpen(false)} className="px-4 py-2 font-label-md text-primary hover:bg-primary/10 rounded-full transition-colors">Hủy</button>
+              <button onClick={() => handleDelete(false)} disabled={deleting} className="px-4 py-2 font-label-md bg-error text-on-error hover:bg-error/90 rounded-full transition-colors disabled:opacity-50">Xóa</button>
+            </div>
+            
+            {list.recurrenceGroupId && (
+              <div className="mt-2 pt-4 border-t border-outline-variant flex flex-col gap-2">
+                 <p className="font-label-sm text-on-surface-variant">Danh sách này thuộc một chuỗi định kỳ.</p>
+                 <button onClick={() => handleDelete(true)} disabled={deleting} className="px-4 py-2 font-label-md border border-error text-error hover:bg-error-container rounded-full transition-colors w-full disabled:opacity-50">Xóa toàn bộ chuỗi định kỳ</button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

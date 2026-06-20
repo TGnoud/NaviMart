@@ -78,12 +78,13 @@ export default function MyLists() {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [listNameInput, setListNameInput] = useState('');
-  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [scheduleMode, setScheduleMode] = useState<'weekly' | 'monthly'>('monthly');
   const [currentDate, setCurrentDate] = useState(() => new Date());
   const [plannedForInput, setPlannedForInput] = useState(() => toDateInput(new Date()));
   const [listTypeInput, setListTypeInput] = useState<ShoppingListType>('daily');
+  const [isRecurring, setIsRecurring] = useState(false);
+  const [recurrenceEndDateInput, setRecurrenceEndDateInput] = useState(() => toDateInput(new Date()));
 
   const currentWeekStart = useMemo(() => startOfWeek(currentDate), [currentDate]);
   
@@ -146,6 +147,12 @@ export default function MyLists() {
     setListNameInput('');
     setListTypeInput(type);
     setPlannedForInput(toDateInput(type === 'weekly' ? startOfWeek(date) : date));
+    setIsRecurring(false);
+    
+    const end = new Date(date);
+    end.setMonth(end.getMonth() + 1);
+    setRecurrenceEndDateInput(toDateInput(end));
+
     setIsModalOpen(true);
   };
 
@@ -156,29 +163,25 @@ export default function MyLists() {
     try {
         const selectedDate = new Date(`${plannedForInput}T12:00:00`);
         const plannedFor = (listTypeInput === 'weekly' ? startOfWeek(selectedDate) : selectedDate).toISOString();
-        const created = await shoppingListsApi.create({
+        
+        let recurrenceEndDate: string | undefined = undefined;
+        if (isRecurring && ['daily', 'weekly', 'monthly'].includes(listTypeInput)) {
+            recurrenceEndDate = new Date(`${recurrenceEndDateInput}T12:00:00`).toISOString();
+        }
+
+        await shoppingListsApi.create({
           name: listNameInput.trim(),
           type: listTypeInput,
           plannedFor,
+          recurrenceEndDate,
         });
-        setActiveLists((lists) => [created, ...lists.filter((list) => list.id !== created.id)]);
-      setIsModalOpen(false);
+        
+        loadLists();
+        setIsModalOpen(false);
     } catch (err) {
       showAlert(err instanceof Error ? err.message : 'Không lưu được danh sách.');
     } finally {
       setSaving(false);
-    }
-  };
-
-  const confirmDelete = async () => {
-    if (!deleteConfirmId) return;
-    try {
-      await shoppingListsApi.remove(deleteConfirmId);
-      setActiveLists((lists) => lists.filter((list) => list.id !== deleteConfirmId));
-    } catch (err) {
-      showAlert(err instanceof Error ? err.message : 'Không xóa được danh sách.');
-    } finally {
-      setDeleteConfirmId(null);
     }
   };
 
@@ -242,6 +245,12 @@ export default function MyLists() {
                         : `Tháng ${currentDate.getMonth() + 1}, ${currentDate.getFullYear()}`}
                     </span>
                     <button aria-label="Sau" onClick={() => setCurrentDate((date) => { const next = new Date(date); scheduleMode === 'weekly' ? next.setDate(next.getDate() + 7) : next.setMonth(next.getMonth() + 1); return next; })} className="p-2 rounded-full hover:bg-surface-container-high active:bg-surface-container transition-colors"><span className="material-symbols-outlined">chevron_right</span></button>
+                    
+                    {/* Nút Tạo danh sách trên header của lịch */}
+                    <button onClick={() => openCreateModal(currentDate)} className="ml-2 px-4 py-2 bg-primary text-on-primary rounded-full font-label-md flex items-center gap-2 hover:bg-primary/90 transition-colors shadow-sm">
+                      <span className="material-symbols-outlined text-[20px]">add</span>
+                      <span className="hidden sm:inline">Tạo danh sách</span>
+                    </button>
                   </div>
                 </div>
 
@@ -316,7 +325,7 @@ export default function MyLists() {
         </div>
       </main>
 
-      <button className="md:hidden fixed bottom-[85px] right-margin-mobile z-40 bg-primary text-on-primary rounded-[16px] shadow-lg flex items-center gap-2 px-4 py-4 hover:shadow-xl hover:-translate-y-1 transition-all active:scale-95 group" onClick={() => openCreateModal()}>
+      <button className="md:hidden fixed bottom-[85px] right-margin-mobile z-40 bg-primary text-on-primary rounded-[16px] shadow-lg flex items-center gap-2 px-4 py-4 hover:shadow-xl hover:-translate-y-1 transition-all active:scale-95 group" onClick={() => openCreateModal(currentDate)}>
         <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>add</span>
         <span className="font-label-sm text-label-sm font-semibold whitespace-nowrap pr-1">Tạo danh sách</span>
       </button>
@@ -353,13 +362,14 @@ export default function MyLists() {
                     }}
                     options={[
                       { value: 'daily', label: 'Theo ngày' },
-                      { value: 'weekly', label: 'Theo tuần' }
+                      { value: 'weekly', label: 'Theo tuần' },
+                      { value: 'monthly', label: 'Theo tháng' }
                     ]}
                     className="w-full h-[48px] bg-surface-container border border-outline-variant rounded-lg text-on-surface font-body-md"
                   />
                 </label>
                 <label className="flex flex-col font-label-sm text-on-surface-variant gap-1">
-                  {listTypeInput === 'weekly' ? 'Tuần bắt đầu' : 'Ngày dự kiến'}
+                  {listTypeInput === 'weekly' ? 'Tuần bắt đầu' : listTypeInput === 'monthly' ? 'Tháng bắt đầu' : 'Ngày dự kiến'}
                   <CustomDatePicker
                     value={plannedForInput}
                     onChange={setPlannedForInput}
@@ -367,6 +377,32 @@ export default function MyLists() {
                   />
                 </label>
               </div>
+
+              {['daily', 'weekly', 'monthly'].includes(listTypeInput) && (
+                <div className="flex flex-col gap-2 mt-2 bg-surface-container-low p-3 rounded-lg border border-outline-variant">
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <input 
+                      type="checkbox" 
+                      className="w-5 h-5 rounded border-outline-variant text-primary focus:ring-primary"
+                      checked={isRecurring}
+                      onChange={(e) => setIsRecurring(e.target.checked)}
+                    />
+                    <span className="font-label-md text-on-surface">Lặp lại định kỳ</span>
+                  </label>
+                  
+                  {isRecurring && (
+                    <div className="mt-2 pl-8 flex items-center gap-3">
+                      <span className="font-label-sm text-on-surface-variant">Đến ngày:</span>
+                      <CustomDatePicker
+                        value={recurrenceEndDateInput}
+                        onChange={setRecurrenceEndDateInput}
+                        className="flex-1 h-[40px] bg-surface-container border border-outline-variant rounded-lg text-on-surface font-body-md"
+                      />
+                    </div>
+                  )}
+                </div>
+              )}
+
             <div className="flex justify-end gap-2 mt-2">
               <button onClick={() => setIsModalOpen(false)} className="px-4 py-2 font-label-md text-primary hover:bg-primary/10 rounded-full transition-colors">Hủy</button>
               <button 
@@ -381,19 +417,7 @@ export default function MyLists() {
         </div>
       )}
 
-      {/* Modal Xác nhận Xóa */}
-      {deleteConfirmId !== null && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
-          <div className="bg-surface-container-lowest rounded-2xl p-6 w-full max-w-sm shadow-xl flex flex-col gap-4 animate-slide-up">
-            <h2 className="font-headline-sm text-headline-sm font-bold text-on-surface">Xác nhận xóa</h2>
-            <p className="font-body-md text-on-surface-variant">Bạn có chắc chắn muốn xóa danh sách này không? Tất cả các món đồ bên trong sẽ bị xóa và không thể khôi phục.</p>
-            <div className="flex justify-end gap-2 mt-2">
-              <button onClick={() => setDeleteConfirmId(null)} className="px-4 py-2 font-label-md text-primary hover:bg-primary/10 rounded-full transition-colors">Hủy</button>
-              <button onClick={confirmDelete} className="px-4 py-2 font-label-md bg-error text-on-error hover:bg-error/90 rounded-full transition-colors">Xóa danh sách</button>
-            </div>
-          </div>
-        </div>
-      )}
+
     </div>
   );
 }

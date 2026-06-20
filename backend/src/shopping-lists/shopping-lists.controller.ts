@@ -84,8 +84,9 @@ export class ShoppingListsController {
   remove(
     @CurrentUser() user: AuthenticatedUser,
     @Param('listId') listId: string,
+    @Query('deleteAll') deleteAll?: string,
   ) {
-    return this.shoppingListsService.remove(user, listId);
+    return this.shoppingListsService.remove(user, listId, deleteAll === 'true');
   }
 
   @Post(':listId/complete')

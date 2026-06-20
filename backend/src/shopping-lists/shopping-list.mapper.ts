@@ -36,6 +36,7 @@ export function toShoppingListResponse(
       status: item.status,
       note: item.note,
       boughtAt: item.boughtAt,
+      boughtBy: item.boughtBy?.toString(),
     })),
   };
 }

@@ -36,6 +36,7 @@ export type ShoppingListItem = {
   status: ShoppingItemStatus;
   note?: string;
   boughtAt?: string;
+  boughtBy?: string;
 };
 
 export type ShoppingList = {

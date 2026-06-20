@@ -2,10 +2,10 @@ import { useCallback, useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import BottomNav from '../components/BottomNav';
 import NotificationDropdown from '../components/NotificationDropdown';
-import { catalogApi, shoppingListsApi } from '../api';
-import type { CatalogCategory, CatalogFood, ShoppingList } from '../api';
-import { onSocketEvent } from '../api/socket';
 import { useDialog } from '../contexts/DialogContext';
+import { catalogApi, shoppingListsApi, familyApi } from '../api';
+import type { CatalogCategory, CatalogFood, ShoppingList, Family } from '../api';
+import { onSocketEvent } from '../api/socket';
 import FoodAutocomplete from '../components/FoodAutocomplete';
 import CustomSelect from '../components/CustomSelect';
 import { ListRowsSkeleton, Skeleton } from '../components/Skeleton';
@@ -32,6 +32,7 @@ export default function ListDetail() {
   const { listId } = useParams<{ listId: string }>();
   const navigate = useNavigate();
   const { showAlert, showConfirm } = useDialog();
+  const [family, setFamily] = useState<Family | null>(null);
   const [list, setList] = useState<ShoppingList | null>(null);
   const [loading, setLoading] = useState(true);
   const [newItem, setNewItem] = useState('');
@@ -139,6 +140,13 @@ export default function ListDetail() {
     }
   };
 
+  const getBoughtByName = (userId?: string) => {
+    if (!userId || !family) return null;
+    const member = family.members.find((m) => m.userId === userId);
+    if (!member || !member.user) return null;
+    return member.user.displayName || `${member.user.firstName || ''} ${member.user.lastName || ''}`.trim() || 'Thành viên';
+  };
+
   const handleAddItem = async () => {
     if (!newItem.trim() || !listId || isCompleted || adding) return;
     if (!newItemCategoryId) {
@@ -210,6 +218,10 @@ export default function ListDetail() {
     setModalAddAll(false);
   };
   
+  useEffect(() => {
+    familyApi.current().then(setFamily).catch(console.error);
+  }, []);
+
   const triggerAddPayload = (payload: any) => {
     if (list?.recurrenceGroupId) {
        setPendingAddPayload(payload);
@@ -433,8 +445,13 @@ export default function ListDetail() {
                             <span className={`font-label-sm text-label-sm text-on-surface-variant mt-0.5 ${item.checked ? 'line-through' : ''}`}>{item.quantity} {item.unit}{item.note ? ` • ${item.note}` : ''}</span>
                           </div>
                           {item.checked ? (
-                            <div className="flex items-center opacity-50 pointer-events-none">
+                            <div className="flex flex-col items-end opacity-80 pointer-events-none">
                               <span className="font-body-md text-body-md text-on-surface font-bold">Đã mua</span>
+                              {item.boughtBy && getBoughtByName(item.boughtBy) && (
+                                <span className="font-label-sm text-label-sm text-on-surface-variant">
+                                  bởi {getBoughtByName(item.boughtBy)}
+                                </span>
+                              )}
                             </div>
                           ) : (
                             <div className="flex items-center bg-surface-container rounded-full p-1 border border-outline-variant shrink-0">

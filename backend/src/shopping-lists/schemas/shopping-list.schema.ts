@@ -42,6 +42,9 @@ export class ShoppingListItem {
 
   @Prop({ type: Date })
   boughtAt?: Date;
+
+  @Prop({ type: Types.ObjectId, ref: 'User' })
+  boughtBy?: Types.ObjectId;
 }
 
 export const ShoppingListItemSchema =

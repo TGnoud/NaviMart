@@ -7,7 +7,7 @@ import { ListRowsSkeleton } from '../components/Skeleton';
 import { useDialog } from '../contexts/DialogContext';
 import { mealsApi, recipesApi } from '../api';
 import { onSocketEvent } from '../api/socket';
-import type { MealPlan, MealSession as MealSessionType, RecipeSuggestion } from '../api';
+import type { MealPlan, MealSession as MealSessionType, RecipeSuggestion, RecipeSummary } from '../api';
 
 interface SessionDef {
   id: string;
@@ -82,7 +82,11 @@ export default function MealPlanner() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingMeal, setEditingMeal] = useState<MealPlan | null>(null);
   const [targetSession, setTargetSession] = useState<SessionDef>(MAIN_SESSIONS[0]);
-  const [formData, setFormData] = useState({ name: '', servings: '1' });
+  const [formData, setFormData] = useState({ servings: '1' });
+  const [searchQuery, setSearchQuery] = useState('');
+  const [recipeResults, setRecipeResults] = useState<RecipeSummary[]>([]);
+  const [selectedRecipe, setSelectedRecipe] = useState<RecipeSummary | null>(null);
+  const [isSearching, setIsSearching] = useState(false);
 
   // Modal states for New Session
   const [isSessionModalOpen, setIsSessionModalOpen] = useState(false);
@@ -127,6 +131,25 @@ export default function MealPlanner() {
     const off = onSocketEvent('shoppingList:updated', () => loadMeals());
     return () => off();
   }, [loadMeals]);
+
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setRecipeResults([]);
+      return;
+    }
+    const delay = setTimeout(async () => {
+      setIsSearching(true);
+      try {
+        const results = await recipesApi.list({ q: searchQuery, limit: 5 });
+        setRecipeResults(results);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setIsSearching(false);
+      }
+    }, 300);
+    return () => clearTimeout(delay);
+  }, [searchQuery]);
 
   const selectedDate = weekDays[activeDay];
   const dayMeals = meals.filter((meal) => sameDay(new Date(meal.date), selectedDate));
@@ -196,25 +219,32 @@ export default function MealPlanner() {
   const openAddModal = (session: SessionDef) => {
     setEditingMeal(null);
     setTargetSession(session);
-    setFormData({ name: '', servings: '1' });
+    setFormData({ servings: '1' });
+    setSearchQuery('');
+    setRecipeResults([]);
+    setSelectedRecipe(null);
     setIsModalOpen(true);
   };
 
   const openEditModal = (meal: MealPlan, session: SessionDef) => {
     setEditingMeal(meal);
     setTargetSession(session);
-    setFormData({ name: mealName(meal), servings: String(meal.servings) });
+    setFormData({ servings: String(meal.servings) });
+    setSearchQuery('');
+    setRecipeResults([]);
+    setSelectedRecipe(meal.recipeId ? { id: meal.recipeId, name: mealName(meal) } as RecipeSummary : null);
     setIsModalOpen(true);
   };
 
   const handleSaveMeal = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.name.trim()) return;
+    if (!selectedRecipe && !editingMeal?.recipeId && !editingMeal?.customName) return;
     const servings = Math.max(1, parseInt(formData.servings) || 1);
     try {
       if (editingMeal) {
         const updated = await mealsApi.update(editingMeal.id, {
-          customName: formData.name.trim(),
+          customName: selectedRecipe ? selectedRecipe.name : editingMeal.customName,
+          recipeId: selectedRecipe ? selectedRecipe.id : editingMeal.recipeId,
           servings,
         });
         setMeals((items) => items.map((m) => (m.id === editingMeal.id ? updated : m)));
@@ -223,7 +253,8 @@ export default function MealPlanner() {
           date: selectedDate.toISOString(),
           session: targetSession.session,
           customSessionName: targetSession.customSessionName,
-          customName: formData.name.trim(),
+          customName: selectedRecipe!.name,
+          recipeId: selectedRecipe!.id,
           servings,
         });
         setMeals((items) => [...items, created]);
@@ -544,17 +575,67 @@ export default function MealPlanner() {
               </div>
 
               <form onSubmit={handleSaveMeal}>
-                <div className="space-y-4 mb-6">
+                <div className="space-y-4 mb-6 relative">
                   <div>
-                    <label className="block font-label-md text-on-surface mb-1">Tên món ăn</label>
-                    <input
-                      type="text"
-                      required
-                      value={formData.name}
-                      onChange={e => setFormData({...formData, name: e.target.value})}
-                      placeholder="Nhập tên món ăn..."
-                      className="w-full bg-surface-container-lowest border border-outline-variant rounded-xl px-4 py-3 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
-                    />
+                    <label className="block font-label-md text-on-surface mb-1">Chọn công thức</label>
+                    {selectedRecipe ? (
+                      <div className="w-full bg-surface-container-highest border border-outline-variant rounded-xl px-4 py-3 flex items-center justify-between">
+                        <span className="font-body-md text-on-surface font-semibold">{selectedRecipe.name}</span>
+                        <button
+                          type="button"
+                          onClick={() => { setSelectedRecipe(null); setSearchQuery(''); }}
+                          className="text-on-surface-variant hover:text-error transition-colors"
+                        >
+                          <span className="material-symbols-outlined text-[20px]">close</span>
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="relative">
+                        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">
+                          <span className="material-symbols-outlined text-[20px]">search</span>
+                        </div>
+                        <input
+                          type="text"
+                          value={searchQuery}
+                          onChange={e => setSearchQuery(e.target.value)}
+                          placeholder="Tìm kiếm công thức..."
+                          className="w-full bg-surface-container-lowest border border-outline-variant rounded-xl pl-10 pr-4 py-3 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
+                        />
+                        {searchQuery.trim() && (
+                          <div className="absolute top-full left-0 right-0 mt-2 bg-surface-container-lowest border border-outline-variant rounded-xl shadow-lg z-50 max-h-60 overflow-y-auto">
+                            {isSearching ? (
+                              <div className="p-4 text-center text-on-surface-variant font-label-sm">Đang tìm...</div>
+                            ) : recipeResults.length > 0 ? (
+                              <ul className="py-2">
+                                {recipeResults.map(recipe => (
+                                  <li key={recipe.id}>
+                                    <button
+                                      type="button"
+                                      onClick={() => setSelectedRecipe(recipe)}
+                                      className="w-full text-left px-4 py-3 hover:bg-surface-container-high transition-colors flex items-center gap-3"
+                                    >
+                                      <div className="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center shrink-0 overflow-hidden">
+                                        {recipe.imageUrl ? (
+                                          <img src={recipe.imageUrl} alt={recipe.name} className="w-full h-full object-cover" />
+                                        ) : (
+                                          <span className="material-symbols-outlined text-outline">restaurant</span>
+                                        )}
+                                      </div>
+                                      <div>
+                                        <div className="font-body-md text-on-surface font-semibold">{recipe.name}</div>
+                                        <div className="font-label-sm text-on-surface-variant">{recipe.cookTimeMinutes} phút</div>
+                                      </div>
+                                    </button>
+                                  </li>
+                                ))}
+                              </ul>
+                            ) : (
+                              <div className="p-4 text-center text-on-surface-variant font-label-sm">Không tìm thấy công thức nào.</div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                   <div>
                     <label className="block font-label-md text-on-surface mb-1">Khẩu phần (người ăn)</label>
@@ -580,7 +661,8 @@ export default function MealPlanner() {
                   </button>
                   <button
                     type="submit"
-                    className="px-5 py-2.5 rounded-lg font-label-md font-bold bg-primary text-on-primary hover:opacity-90 transition-opacity shadow-sm"
+                    disabled={!selectedRecipe}
+                    className="px-5 py-2.5 rounded-lg font-label-md font-bold bg-primary text-on-primary hover:opacity-90 transition-opacity shadow-sm disabled:opacity-50"
                   >
                     Lưu
                   </button>

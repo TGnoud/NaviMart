@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import SideNav from '../components/SideNav';
+import NotificationDropdown from '../components/NotificationDropdown';
 import { ListRowsSkeleton, Skeleton } from '../components/Skeleton';
 import { useDialog } from '../contexts/DialogContext';
 import { useAuth } from '../contexts/AuthContext';
@@ -223,9 +224,9 @@ export default function RecipeDetail() {
 
       <div className="flex-1 flex flex-col md:ml-64 w-full h-full relative">
         <header className="md:hidden shrink-0 w-full z-50 flex justify-between items-center px-margin-mobile h-nav-height bg-surface dark:bg-surface-dim text-primary dark:text-primary-fixed-dim border-b border-outline-variant dark:border-outline">
-          <Link to="/recipe-suggestion" className="p-2 -ml-2 rounded-full hover:bg-surface-container-high transition-colors active:opacity-80">
+          <button onClick={() => navigate(-1)} className="p-2 -ml-2 rounded-full hover:bg-surface-container-high transition-colors active:opacity-80">
             <span className="material-symbols-outlined text-on-surface-variant">arrow_back</span>
-          </Link>
+          </button>
           <h1 className="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed truncate">Chi tiết công thức</h1>
           <div className="flex gap-2">
             <button onClick={toggleFavorite} className="p-2 -mr-2 rounded-full hover:bg-surface-container-high transition-colors active:opacity-80">
@@ -236,9 +237,27 @@ export default function RecipeDetail() {
           </div>
         </header>
 
+        <header className="hidden md:flex bg-surface dark:bg-surface-dim border-b border-outline-variant w-full shrink-0 z-30">
+          <div className="flex justify-between items-center w-full h-nav-height px-margin-mobile max-w-7xl mx-auto">
+            <div className="flex items-center gap-2 text-on-surface-variant">
+              <button onClick={() => navigate(-1)} className="hover:text-primary transition-colors flex items-center">
+                <span className="material-symbols-outlined text-[20px]">arrow_back</span>
+              </button>
+              <span className="text-sm">/</span>
+              <span className="font-bold text-primary text-sm">Chi tiết công thức</span>
+            </div>
+            <div className="flex gap-4">
+              <NotificationDropdown />
+              <Link to="/profile" className="text-on-surface-variant font-medium hover:bg-surface-container-high dark:hover:bg-surface-container transition-colors p-2 rounded-full flex items-center justify-center active:opacity-80 active:scale-95 duration-150">
+                <span className="material-symbols-outlined">account_circle</span>
+              </Link>
+            </div>
+          </div>
+        </header>
+
         <main className="flex-1 overflow-y-auto w-full">
           {loading ? (
-            <div className="max-w-4xl mx-auto p-4 md:p-8 space-y-6">
+            <div className="w-full max-w-7xl mx-auto p-4 md:p-8 space-y-6">
               <Skeleton className="w-full h-64 md:h-96" />
               <Skeleton className="h-10 w-2/3" />
               <ListRowsSkeleton count={4} />
@@ -249,9 +268,9 @@ export default function RecipeDetail() {
               <p className="font-body-lg text-body-lg">Không tìm thấy công thức.</p>
             </div>
           ) : (
-            <div className="max-w-4xl mx-auto p-4 md:p-8 space-y-8 pb-[100px] md:pb-8">
+            <div className="w-full max-w-7xl mx-auto p-4 md:p-8 space-y-8 pb-[100px] md:pb-8">
               <section className="space-y-6">
-                <div className="relative w-full h-64 md:h-96 rounded-xl overflow-hidden shadow-sm bg-surface-container">
+                <div className="relative w-full h-[50vh] md:h-[60vh] rounded-3xl overflow-hidden shadow-sm bg-surface-container">
                   {recipe.imageUrl ? (
                     <img alt={recipe.name} className="object-cover w-full h-full" src={recipe.imageUrl}/>
                   ) : (

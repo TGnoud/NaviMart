@@ -255,17 +255,22 @@ export default function ListDetail() {
                       placeholder="Thêm món đồ nhanh (gõ để tìm, Enter để thêm)..."
                       className="w-full pl-10 pr-4 py-3 rounded-none border border-[#c1c1c1] bg-surface-container-lowest font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container shadow-sm transition-all"
                     />
-                    <select
-                      value={newItemCategoryId}
-                      onChange={(event) => setNewItemCategoryId(event.target.value)}
-                      aria-label="Danh mục thực phẩm"
-                      className="w-full px-3 py-3 border border-[#c1c1c1] bg-surface-container-lowest text-on-surface focus:outline-none focus:border-primary-container"
-                    >
-                      <option value="">Chọn danh mục *</option>
-                      {categories.map((category) => (
-                        <option key={category.id} value={category.id}>{category.name}</option>
-                      ))}
-                    </select>
+                    <div className="relative">
+                      <select
+                        value={newItemCategoryId}
+                        onChange={(event) => setNewItemCategoryId(event.target.value)}
+                        aria-label="Danh mục thực phẩm"
+                        className="w-full px-3 py-3 border border-[#c1c1c1] bg-surface-container-lowest text-on-surface focus:outline-none focus:border-primary-container appearance-none pr-10 cursor-pointer h-full"
+                      >
+                        <option value="">Chọn danh mục *</option>
+                        {categories.map((category) => (
+                          <option key={category.id} value={category.id}>{category.name}</option>
+                        ))}
+                      </select>
+                      <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none">
+                        expand_more
+                      </span>
+                    </div>
                   </div>
                 )}
               </section>

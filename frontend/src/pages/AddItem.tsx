@@ -183,18 +183,23 @@ export default function AddItem() {
           )}
 
           <div className="flex flex-col gap-1">
-            <label className="font-body-md text-body-md font-bold text-on-surface" htmlFor="categoryId">Danh mục thực phẩm</label>
-            <select
-              id="categoryId"
-              value={categoryId}
-              onChange={(e) => setCategoryId(e.target.value)}
-              className="w-full px-4 py-3 bg-surface-container-lowest border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all appearance-none"
-            >
-              <option value="">Không có danh mục</option>
-              {categories.map(cat => (
-                <option key={cat.id} value={cat.id}>{cat.name}</option>
-              ))}
-            </select>
+            <label className="font-body-md text-body-md font-bold text-on-surface" htmlFor="categoryId">Danh mục</label>
+            <div className="relative">
+              <select
+                id="categoryId"
+                value={categoryId}
+                onChange={(e) => setCategoryId(e.target.value)}
+                className="w-full px-4 py-3 pr-10 bg-surface-container-lowest border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all appearance-none cursor-pointer"
+              >
+                <option value="">Không có danh mục</option>
+                {categories.map(cat => (
+                  <option key={cat.id} value={cat.id}>{cat.name}</option>
+                ))}
+              </select>
+              <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none">
+                expand_more
+              </span>
+            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -211,22 +216,27 @@ export default function AddItem() {
                   value={quantity}
                   onChange={(e) => setQuantity(e.target.value)}
                 />
-                <select
-                  className="bg-surface-container border-none outline-none px-2 font-body-md text-body-md cursor-pointer border-l border-outline-variant"
-                  value={unit}
-                  onChange={(e) => setUnit(e.target.value)}
-                >
-                  {!['cái', 'kg', 'g', 'lít', 'ml', 'bó', 'quả'].includes(unit) && (
-                    <option value={unit}>{unit}</option>
-                  )}
-                  <option value="cái">Cái/Hộp</option>
-                  <option value="kg">Kg</option>
-                  <option value="g">Gram</option>
-                  <option value="lít">Lít</option>
-                  <option value="ml">ml</option>
-                  <option value="bó">Bó</option>
-                  <option value="quả">Quả</option>
-                </select>
+                <div className="relative border-l border-outline-variant bg-surface-container hover:bg-surface-container-high transition-colors flex items-center shrink-0">
+                  <select
+                    className="h-full bg-transparent border-none outline-none pl-3 pr-8 font-body-md text-body-md cursor-pointer appearance-none"
+                    value={unit}
+                    onChange={(e) => setUnit(e.target.value)}
+                  >
+                    {!['cái', 'kg', 'g', 'lít', 'ml', 'bó', 'quả'].includes(unit) && (
+                      <option value={unit}>{unit}</option>
+                    )}
+                    <option value="cái">Cái/Hộp</option>
+                    <option value="kg">Kg</option>
+                    <option value="g">Gram</option>
+                    <option value="lít">Lít</option>
+                    <option value="ml">ml</option>
+                    <option value="bó">Bó</option>
+                    <option value="quả">Quả</option>
+                  </select>
+                  <span className="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none text-[20px]">
+                    expand_more
+                  </span>
+                </div>
               </div>
             </div>
 

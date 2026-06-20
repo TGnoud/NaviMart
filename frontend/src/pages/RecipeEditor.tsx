@@ -263,11 +263,16 @@ export default function RecipeEditor() {
                     </div>
                     <div>
                       <label className="block font-label-md text-on-surface mb-1.5">Độ khó</label>
-                      <select value={difficulty} onChange={(e) => setDifficulty(e.target.value as typeof difficulty)} className={inputClass}>
-                        <option value="easy">Dễ</option>
-                        <option value="medium">Trung bình</option>
-                        <option value="hard">Khó</option>
-                      </select>
+                      <div className="relative">
+                        <select value={difficulty} onChange={(e) => setDifficulty(e.target.value as typeof difficulty)} className={`${inputClass} appearance-none pr-10 cursor-pointer`}>
+                          <option value="easy">Dễ</option>
+                          <option value="medium">Trung bình</option>
+                          <option value="hard">Khó</option>
+                        </select>
+                        <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none">
+                          expand_more
+                        </span>
+                      </div>
                     </div>
                     <div>
                       <label className="block font-label-md text-on-surface mb-1.5">Khẩu phần</label>
@@ -312,21 +317,26 @@ export default function RecipeEditor() {
                         placeholder="SL"
                         className={`${inputClass} w-20`}
                       />
-                      <select
-                        value={row.unit}
-                        onChange={(e) => updateIngredient(index, { unit: e.target.value })}
-                        className={`${inputClass} w-24`}
-                      >
-                        {units.length === 0 && <option value={row.unit}>{row.unit || 'g'}</option>}
-                        {units.length > 0 && row.unit && !units.some((unit) => unit.code === row.unit) && (
-                          <option value={row.unit}>{row.unit}</option>
-                        )}
-                        {units.map((unit) => (
-                          <option key={unit.id} value={unit.code}>
-                            {unit.code}
-                          </option>
-                        ))}
-                      </select>
+                      <div className="relative shrink-0">
+                        <select
+                          value={row.unit}
+                          onChange={(e) => updateIngredient(index, { unit: e.target.value })}
+                          className={`${inputClass} w-24 appearance-none pr-8 pl-3 cursor-pointer`}
+                        >
+                          {units.length === 0 && <option value={row.unit}>{row.unit || 'g'}</option>}
+                          {units.length > 0 && row.unit && !units.some((unit) => unit.code === row.unit) && (
+                            <option value={row.unit}>{row.unit}</option>
+                          )}
+                          {units.map((unit) => (
+                            <option key={unit.id} value={unit.code}>
+                              {unit.code}
+                            </option>
+                          ))}
+                        </select>
+                        <span className="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none">
+                          expand_more
+                        </span>
+                      </div>
                       <label className="flex items-center gap-1.5 font-label-sm text-on-surface-variant whitespace-nowrap cursor-pointer">
                         <input
                           type="checkbox"

@@ -270,6 +270,8 @@ export const pantryApi = {
     itemId: string,
     input: {
       name?: string;
+      foodId?: string;
+      categoryId?: string;
       quantity?: number;
       unit?: string;
       expiryDate?: string;

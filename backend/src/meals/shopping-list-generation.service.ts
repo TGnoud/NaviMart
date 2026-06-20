@@ -149,24 +149,72 @@ export class ShoppingListGenerationService {
       throw new BadRequestException('Recipe has no missing ingredients');
     }
 
+    const items = missingSummary.missingIngredients.map((ingredient) => ({
+      foodId: ingredient.foodId
+        ? new Types.ObjectId(ingredient.foodId)
+        : undefined,
+      categoryId: ingredient.categoryId
+        ? new Types.ObjectId(ingredient.categoryId)
+        : undefined,
+      name: ingredient.name,
+      quantity: ingredient.missingQuantity,
+      unit: ingredient.unit,
+      note: `Generated from recipe: ${recipe.name}`,
+    })) as ShoppingListItem[];
+
+    const type = dto.type ?? 'custom';
+    
+    if (dto.recurrenceEndDate && dto.plannedFor && ['daily', 'weekly', 'monthly'].includes(type)) {
+      const recurrenceGroupId = new Types.ObjectId().toString();
+      const listsToCreate: Partial<ShoppingList>[] = [];
+      let currentDate = new Date(dto.plannedFor);
+      const endDate = new Date(dto.recurrenceEndDate);
+
+      while (currentDate <= endDate) {
+        listsToCreate.push({
+          familyId,
+          name: dto.name ?? `Nguyen lieu cho ${recipe.name}`,
+          type,
+          plannedFor: new Date(currentDate),
+          createdBy: new Types.ObjectId(user.userId),
+          recurrenceGroupId,
+          items,
+        });
+
+        if (type === 'daily') {
+          currentDate.setDate(currentDate.getDate() + 1);
+        } else if (type === 'weekly') {
+          currentDate.setDate(currentDate.getDate() + 7);
+        } else if (type === 'monthly') {
+          currentDate.setMonth(currentDate.getMonth() + 1);
+        }
+      }
+
+      if (listsToCreate.length > 0) {
+        const createdLists = await this.shoppingListModel.insertMany(listsToCreate);
+        
+        createdLists.forEach((list) => {
+           this.realtimeService.emitToFamily(
+             familyId.toString(),
+             'shoppingList:updated',
+             this.toShoppingListResponse(list as any)
+           );
+        });
+
+        return {
+          shoppingList: this.toShoppingListResponse(createdLists[0] as any),
+          missingSummary,
+        };
+      }
+    }
+
     const list = await this.shoppingListModel.create({
       familyId,
       name: dto.name ?? `Nguyen lieu cho ${recipe.name}`,
-      type: 'custom',
+      type,
       plannedFor: dto.plannedFor,
       createdBy: new Types.ObjectId(user.userId),
-      items: missingSummary.missingIngredients.map((ingredient) => ({
-        foodId: ingredient.foodId
-          ? new Types.ObjectId(ingredient.foodId)
-          : undefined,
-        categoryId: ingredient.categoryId
-          ? new Types.ObjectId(ingredient.categoryId)
-          : undefined,
-        name: ingredient.name,
-        quantity: ingredient.missingQuantity,
-        unit: ingredient.unit,
-        note: `Generated from recipe: ${recipe.name}`,
-      })) as ShoppingListItem[],
+      items,
     });
 
     const shoppingList = this.toShoppingListResponse(list);

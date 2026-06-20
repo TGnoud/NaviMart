@@ -377,7 +377,7 @@ export const recipesApi = {
 
   generateShoppingList: (
     recipeId: string,
-    input: { name?: string; plannedFor?: string; servings?: number } = {},
+    input: { name?: string; plannedFor?: string; servings?: number; type?: string; recurrenceEndDate?: string } = {},
   ) =>
     apiRequest<GeneratedShoppingListResult>(`/recipes/${recipeId}/generate-shopping-list`, {
       method: 'POST',

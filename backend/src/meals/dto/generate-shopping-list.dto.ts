@@ -2,6 +2,7 @@ import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   IsDate,
+  IsEnum,
   IsInt,
   IsOptional,
   IsString,
@@ -9,6 +10,7 @@ import {
   Max,
   Min,
 } from 'class-validator';
+import { SHOPPING_LIST_TYPES, ShoppingListType } from '../../shopping-lists/schemas/shopping-list.schema';
 
 export class GenerateShoppingListDto {
   @ApiPropertyOptional({ example: 'Nguyen lieu bua toi' })
@@ -33,4 +35,15 @@ export class GenerateShoppingListDto {
   @Min(1)
   @Max(50)
   servings?: number;
+
+  @ApiPropertyOptional({ enum: SHOPPING_LIST_TYPES })
+  @IsOptional()
+  @IsEnum(SHOPPING_LIST_TYPES)
+  type?: ShoppingListType;
+
+  @ApiPropertyOptional({ example: '2026-12-31T00:00:00.000Z' })
+  @IsOptional()
+  @Type(() => Date)
+  @IsDate()
+  recurrenceEndDate?: Date;
 }

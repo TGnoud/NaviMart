@@ -88,7 +88,7 @@ export class ShoppingListGenerationService {
 
     const list = await this.shoppingListModel.create({
       familyId,
-      name: `Con thieu cho ${recipeName}`,
+      name: `Còn thiếu cho ${recipeName}`,
       type: 'custom',
       plannedFor,
       createdBy: new Types.ObjectId(user.userId),
@@ -98,7 +98,7 @@ export class ShoppingListGenerationService {
         name: item.name,
         quantity: item.quantity,
         unit: item.unit,
-        note: `Thieu khi nau: ${recipeName}`,
+        note: `Thiếu khi nấu: ${recipeName}`,
       })) as ShoppingListItem[],
     });
 
@@ -159,7 +159,7 @@ export class ShoppingListGenerationService {
       name: ingredient.name,
       quantity: ingredient.missingQuantity,
       unit: ingredient.unit,
-      note: `Generated from recipe: ${recipe.name}`,
+      note: `Tạo từ công thức: ${recipe.name}`,
     })) as ShoppingListItem[];
 
     const type = dto.type ?? 'custom';
@@ -173,7 +173,7 @@ export class ShoppingListGenerationService {
       while (currentDate <= endDate) {
         listsToCreate.push({
           familyId,
-          name: dto.name ?? `Nguyen lieu cho ${recipe.name}`,
+          name: dto.name ?? `Nguyên liệu cho ${recipe.name}`,
           type,
           plannedFor: new Date(currentDate),
           createdBy: new Types.ObjectId(user.userId),
@@ -210,7 +210,7 @@ export class ShoppingListGenerationService {
 
     const list = await this.shoppingListModel.create({
       familyId,
-      name: dto.name ?? `Nguyen lieu cho ${recipe.name}`,
+      name: dto.name ?? `Nguyên liệu cho ${recipe.name}`,
       type,
       plannedFor: dto.plannedFor,
       createdBy: new Types.ObjectId(user.userId),

@@ -1756,6 +1756,15 @@ function normalizeName(name: string) {
     .trim();
 }
 
+function stripAccents(name: string) {
+  return name
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .replace(/[đĐ]/g, (c) => (c === 'đ' ? 'd' : 'D'))
+    .toLowerCase()
+    .trim();
+}
+
 function daysFromNow(days: number) {
   const date = new Date();
   date.setHours(9, 0, 0, 0);
@@ -1850,7 +1859,24 @@ async function upsertFoods(
       throw new Error(`Missing category for food: ${food.name}`);
     }
 
-    const document = await foodModel
+    const payload = {
+      name: food.name,
+      normalizedName: normalizeName(food.name),
+      categoryId: category._id,
+      defaultUnit: food.defaultUnit,
+      aliases: food.aliases ?? [],
+      defaultStorageLocation: food.defaultStorageLocation,
+      defaultShelfLifeDays: food.defaultShelfLifeDays,
+      storageTips: food.storageTips,
+      imageUrl: food.imageUrl,
+      ...(food.barcode ? { barcode: food.barcode } : {}),
+      isSystem: true,
+      status: 'active',
+    };
+
+    // First try exact match, then fall back to accent-stripped match so that
+    // records seeded without Vietnamese diacritics are updated in place.
+    let document = await foodModel
       .findOneAndUpdate(
         {
           $or: [
@@ -1858,25 +1884,20 @@ async function upsertFoods(
             { normalizedName: food.name.trim().toLowerCase() },
           ],
         },
-        {
-          $set: {
-            name: food.name,
-            normalizedName: normalizeName(food.name),
-            categoryId: category._id,
-            defaultUnit: food.defaultUnit,
-            aliases: food.aliases ?? [],
-            defaultStorageLocation: food.defaultStorageLocation,
-            defaultShelfLifeDays: food.defaultShelfLifeDays,
-            storageTips: food.storageTips,
-            imageUrl: food.imageUrl,
-            ...(food.barcode ? { barcode: food.barcode } : {}),
-            isSystem: true,
-            status: 'active',
-          },
-        },
+        { $set: payload },
         { returnDocument: 'after', upsert: true },
       )
       .exec();
+
+    if (!document) {
+      document = await foodModel
+        .findOneAndUpdate(
+          { normalizedName: stripAccents(food.name) },
+          { $set: payload },
+          { returnDocument: 'after', upsert: true },
+        )
+        .exec();
+    }
 
     result.set(food.name, document);
     result.set(normalizeName(food.name), document);

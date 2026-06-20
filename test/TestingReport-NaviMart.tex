@@ -135,7 +135,7 @@ frontend (\code{frontend/src}, \code{frontend/test}), cùng các báo cáo độ
 Đây là điểm mở rộng so với khung tham chiếu thông thường vốn chỉ giới hạn ở backend. Một số hạng mục nằm
 ngoài phạm vi hiện tại do chưa có hạ tầng hoặc artifact: kiểm thử đầu-cuối tự động trên trình duyệt
 (Playwright/Cypress), kiểm thử bảo mật động chuyên sâu (DAST/OWASP ZAP) và kiểm thử tải. Các hạng mục này
-được ghi nhận trong lộ trình ở Mục~14.
+được ghi nhận trong lộ trình ở Mục~11.
 
 % =====================================================================
 \section{Định hướng ITSS và quy trình kiểm thử}
@@ -162,7 +162,7 @@ Tự động hóa & Jest, ts-jest, @nestjs/testing, supertest, mongodb-memory-se
 \hline
 Thực thi \& bằng chứng & Kết quả chạy \code{npm run test}, \code{npm run test:e2e}, \code{vitest run}; báo cáo độ phủ; nhật ký lỗi. \\
 \hline
-Đánh giá chất lượng & Kết luận theo từng tầng kiểm thử, sổ rủi ro và tiêu chí đóng (Mục 12--13). \\
+Đánh giá chất lượng & Kết luận theo từng tầng kiểm thử, sổ rủi ro và tiêu chí đóng (Mục 10--11). \\
 \hline
 \end{tabularx}
 \end{table}
@@ -278,7 +278,7 @@ API dùng supertest, các luồng đầu-cuối dùng mongodb-memory-server đ�
 trong tiến trình, và socket.io-client cho phần realtime. Frontend dùng Vitest 4.1 trên môi trường jsdom
 cùng Testing Library. Độ phủ backend được thu thập bằng Jest; độ phủ frontend hiện chưa được cấu hình và
 được xếp vào công việc của Giai đoạn~2. Tại thời điểm lập tài liệu, dự án \emph{chưa} có pipeline tích hợp
-liên tục (CI) chạy test tự động --- đây là rủi ro được ghi nhận ở Mục~12.
+liên tục (CI) chạy test tự động --- đây là rủi ro được ghi nhận ở Mục~10.
 
 Các lệnh chạy kiểm thử được chuẩn hóa như sau:
 
@@ -393,7 +393,7 @@ Nhóm \textbf{kho thực phẩm} kết hợp mười lăm testcase cho service v
 hạn dùng. Phần service kiểm tra việc lọc theo gia đình, từ chối tiêu thụ item không hoạt động hoặc vượt tồn,
 chuyển sang trạng thái đã dùng hết khi tiêu thụ hết kèm ghi sự kiện, tái kích hoạt khi số lượng dương trở
 lại, thay thế thuộc tính từ danh mục khi đổi loại thực phẩm, và đặc biệt là \emph{trừ kho nguyên tử} để
-chống điều kiện đua (trình bày chi tiết tại Mục~10.4). Phần hàm tiện ích kiểm tra việc chuẩn hóa thời gian
+chống điều kiện đua. Phần hàm tiện ích kiểm tra việc chuẩn hóa thời gian
 về nửa đêm, cộng ngày mà không làm thay đổi đầu vào, và phân loại trạng thái an toàn/sắp hết hạn/đã hết hạn
 theo cửa sổ cảnh báo, bao gồm cả giá trị biên.
 
@@ -452,100 +452,6 @@ notifications & API-NTF-001..005 & Liệt kê 200; chưa đăng nhập 401; limi
 Một điểm đáng chú ý về mặt phương pháp: trong mọi kịch bản tiêu cực, kiểm thử không chỉ khẳng định mã trạng
 thái trả về đúng, mà còn khẳng định service \emph{không} được gọi khi yêu cầu bị từ chối. Điều này bảo đảm
 lớp kiểm tra dữ liệu và phân quyền chặn yêu cầu sai \emph{trước khi} chạm tới logic nghiệp vụ.
-
-% =====================================================================
-\section{Kiểm thử bảo mật}
-
-Kiểm thử bảo mật tập trung vào xác thực và phân quyền tại các endpoint rủi ro cao. Ở tầng API, guard được
-mock để xác minh việc ánh xạ 401/403 và nguyên tắc ``service không được gọi khi bị từ chối''. Tuy nhiên, để
-chứng minh chuỗi bảo mật thực sự hoạt động, đợt kiểm thử này bổ sung một bộ kiểm thử đầu-cuối chạy qua
-\textbf{chiến lược Passport JWT và guard thật} --- không mock --- trong tệp \code{test/security.e2e-spec.ts}.
-Các token âm tính (sai chữ ký, hết hạn) được tạo trực tiếp bằng thư viện \code{jsonwebtoken} ngay trong test.
-
-\begin{table}[h]
-\centering
-\caption{Danh mục kiểm thử bảo mật}
-\label{tab:sec}
-\begin{tabularx}{\linewidth}{|l|Y|c|}
-\hline
-\rowcolor{headerblue}
-\thead{Mã} & \thead{Mục tiêu} & \thead{Trạng thái} \\
-\hline
-SEC-JWT-001 & Không có header xác thực $\to$ 401 (guard thật). & Pass \\
-\hline
-SEC-JWT-002 & Token dị dạng $\to$ 401. & Pass \\
-\hline
-SEC-JWT-003 & Token ký sai khóa bí mật $\to$ 401. & Pass \\
-\hline
-SEC-JWT-004 & Token hết hạn (đúng khóa) $\to$ 401. & Pass \\
-\hline
-SEC-JWT-005 & Token hợp lệ nhưng người dùng không tồn tại $\to$ 401. & Pass \\
-\hline
-SEC-OBJ-000 & Chủ sở hữu đọc tài nguyên của chính mình $\to$ 200. & Pass \\
-\hline
-SEC-OBJ-001 & Gia đình B đọc \emph{item kho} của gia đình A $\to$ 404 (không lộ dữ liệu). & Pass \\
-\hline
-SEC-OBJ-002 & Gia đình B đọc \emph{danh sách mua} của gia đình A $\to$ 404. & Pass \\
-\hline
-SEC-OBJ-003 & Gia đình B đọc \emph{kế hoạch bữa ăn} của gia đình A $\to$ 404. & Pass \\
-\hline
-SEC-DAST-001 & Quét OWASP ZAP baseline. & Ngoài phạm vi \\
-\hline
-\end{tabularx}
-\end{table}
-
-Cần phân biệt hai lớp kiểm thử bảo mật để không hiểu nhầm độ sâu. Ở \emph{tầng API} (guard mock), mỗi module
-chỉ có thể chứng minh hai điều mà một guard giả lập kiểm soát được: chưa xác thực $\to$ 401 và thiếu quyền
-$\to$ 403; vì vậy cột Security của nhiều module trong ma trận chủ yếu là 401/403. Các bảo đảm sâu hơn ---
-token giả mạo/hết hạn và phân quyền cấp đối tượng --- không thể chứng minh bằng guard mock mà phải chạy qua
-\emph{guard thật} trên dữ liệu thật, nên nằm ở tầng E2E.
-
-Nhóm kiểm thử SEC-OBJ minh họa phân quyền cấp đối tượng trên ba loại tài nguyên thuộc gia đình (item kho,
-danh sách mua, kế hoạch bữa ăn): cùng một tài nguyên, chủ sở hữu truy cập được (200) nhưng người dùng thuộc
-gia đình khác nhận về 404 thay vì 403 --- nghĩa là hệ thống không những từ chối truy cập mà còn không tiết
-lộ sự tồn tại của tài nguyên, tránh rò rỉ thông tin qua mã trạng thái. Hạng mục duy nhất chưa thực hiện là
-quét bảo mật động (OWASP ZAP), được ghi nhận là nằm ngoài phạm vi hiện tại do chưa có hạ tầng triển khai.
-
-% =====================================================================
-\section{Kiểm thử tích hợp và đầu-cuối}
-
-Kiểm thử đầu-cuối nhằm xác minh những hành vi không thể chứng minh bằng mock: tính bền vững của dữ liệu, các
-luồng nghiệp vụ xuyên module, hoạt động thực của guard và JWT, cùng cập nhật realtime qua WebSocket. Toàn bộ
-chạy trên một app NestJS thật với MongoDB cô lập do mongodb-memory-server cung cấp.
-
-Hai bộ luồng chính đã được xây dựng. Bộ \code{main-flows} bao gồm khoảng mười luồng nền tảng: đăng ký và làm
-mới token, tạo mã mời và gia nhập gia đình bằng người dùng thứ hai, hoàn tất danh sách mua để đẩy hàng vào
-kho, lọc kho theo trạng thái hạn dùng, và chuỗi nghiệp vụ từ bữa ăn qua nguyên liệu thiếu đến danh sách mua
-và báo cáo. Bộ \code{extended-flows} bổ sung khoảng mười bốn luồng nâng cao như nâng quyền quản trị, truy
-vấn danh mục, đồng bộ lượt yêu thích, gợi ý theo độ phủ kho, đặt lại mật khẩu và cập nhật realtime.
-
-\subsection{Chuẩn hóa môi trường thiết lập}
-
-Các bộ test đầu-cuối đều thiết lập biến môi trường (khóa JWT, cấu hình MongoDB in-memory, lịch chạy tác vụ
-định kỳ) \emph{trước khi} nạp module ứng dụng, bởi cấu hình được chốt tại thời điểm nạp. Một trở ngại được
-phát hiện và xử lý trong đợt này: phụ thuộc \code{cloudinary} (chỉ cần lúc nạp module tải ảnh) chưa được cài
-đặt khiến toàn bộ E2E không khởi động được. Giải pháp là cung cấp một stub ngoại tuyến tại
-\code{test/stubs/cloudinary.ts} và ánh xạ qua \code{moduleNameMapper} trong cấu hình Jest E2E, nhờ đó ứng
-dụng nạp được mà không cần thư viện thật và không phụ thuộc mạng.
-
-\subsection{Case study: phát hiện và sửa lỗi trừ kho vượt mức (oversell)}
-
-Đáng chú ý nhất trong đợt kiểm thử là một lỗi tương tranh thực sự được phát hiện nhờ một testcase được thiết
-kế có chủ đích. Testcase \textbf{INT-CONC-001} bắn \emph{năm} yêu cầu tiêu thụ đồng thời vào cùng một item
-kho có tồn 2 đơn vị, rồi kiểm tra bất biến ``không trừ vượt'': chỉ đúng một yêu cầu được phép thành công,
-tồn kho cuối phải bằng 0 và không bao giờ âm.
-
-Khi chạy lần đầu, testcase thất bại với kết quả cả \emph{năm} yêu cầu đều thành công. Nguyên nhân nằm ở mẫu
-\emph{đọc--sửa--ghi} cổ điển trong hàm tiêu thụ: hàm đọc item, kiểm tra số lượng, trừ đi rồi lưu lại. Dưới
-tải đồng thời, cả năm yêu cầu cùng đọc thấy tồn kho là 2, cùng vượt qua bước kiểm tra, rồi cùng ghi đè ---
-dẫn đến trừ kho vượt mức (oversell).
-
-Lỗi đã được sửa bằng cách chuyển sang một thao tác \emph{cập nhật nguyên tử} có điều kiện: dùng
-\code{findOneAndUpdate} với bộ lọc bảo vệ ``số lượng phải lớn hơn hoặc bằng lượng cần trừ'' kết hợp một
-aggregation pipeline để vừa trừ vừa cập nhật trạng thái trong một bước. Khi tồn kho không đủ cho hai yêu cầu,
-chỉ một yêu cầu khớp bộ lọc và thắng cuộc; các yêu cầu còn lại không khớp và nhận về lỗi 400 ``vượt tồn
-kho''. Sau khi sửa, testcase cho kết quả đúng như kỳ vọng: một phản hồi 200 và bốn phản hồi 400. Lỗi này
-được ghi nhận là BUG-CONC-001 và việc khắc phục thỏa mãn tiêu chí đóng của rủi ro TEST-004.
 
 % =====================================================================
 \section{Kết quả thực thi và độ phủ}

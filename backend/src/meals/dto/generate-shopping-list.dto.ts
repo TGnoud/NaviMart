@@ -10,7 +10,8 @@ import {
   Max,
   Min,
 } from 'class-validator';
-import { SHOPPING_LIST_TYPES, ShoppingListType } from '../../shopping-lists/schemas/shopping-list.schema';
+import { SHOPPING_LIST_TYPES } from '../../shopping-lists/schemas/shopping-list.schema';
+import type { ShoppingListType } from '../../shopping-lists/schemas/shopping-list.schema';
 
 export class GenerateShoppingListDto {
   @ApiPropertyOptional({ example: 'Nguyen lieu bua toi' })

@@ -48,6 +48,8 @@ export default function RecipeDetail() {
   const [slScheduleMode, setSlScheduleMode] = useState('one_time');
   const [slStartDate, setSlStartDate] = useState(todayInputValue());
   const [slEndDate, setSlEndDate] = useState('');
+  
+  const [checkedSteps, setCheckedSteps] = useState<Set<number>>(new Set());
 
   const handleError = useCallback(
     (err: unknown, fallback: string) => {
@@ -207,6 +209,13 @@ export default function RecipeDetail() {
 
   // Drop trailing zeros so "2.00 qua" reads as "2 qua".
   const fmtQty = (value: number) => Number(value.toFixed(2)).toString();
+  
+  const toggleStep = (index: number) => {
+    const newChecked = new Set(checkedSteps);
+    if (newChecked.has(index)) newChecked.delete(index);
+    else newChecked.add(index);
+    setCheckedSteps(newChecked);
+  };
 
   return (
     <div className="bg-background text-on-background h-screen overflow-hidden antialiased flex">
@@ -349,28 +358,37 @@ export default function RecipeDetail() {
                         return (
                           <li
                             key={`${ingredient.name}-${ingredient.unit}`}
-                            className={`flex items-center justify-between p-3 rounded-lg ${available ? 'bg-surface-container-low' : 'bg-error-container/20 border border-error-container'}`}
+                            className="flex items-center justify-between p-4 rounded-2xl bg-surface-container-lowest border border-surface-container-highest hover:shadow-sm transition-all"
                           >
-                            <div className="flex items-center gap-3">
-                              <div className={`w-10 h-10 rounded-full flex items-center justify-center ${available ? 'bg-primary-container text-primary' : 'bg-secondary-fixed text-secondary'}`}>
-                                <span className="material-symbols-outlined">grocery</span>
+                            <div className="flex items-start sm:items-center gap-4">
+                              <div className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 ${available ? 'bg-tertiary-container/30 text-tertiary' : 'bg-error-container/30 text-error'}`}>
+                                <span className="material-symbols-outlined text-[24px]" style={{ fontVariationSettings: "'FILL' 1" }}>
+                                  {available ? 'check_circle' : 'error'}
+                                </span>
                               </div>
                               <div>
-                                <p className="text-on-surface">{ingredient.name}{ingredient.optional ? ' (tùy chọn)' : ''}</p>
-                                <p className="font-label-sm text-label-sm text-on-surface-variant">
-                                  Cần {fmtQty(requiredQty)} {ingredient.unit}
-                                  {line ? ` • Trong kho ${fmtQty(line.availableQuantity)} ${ingredient.unit}` : ''}
+                                <p className="font-headline-sm text-headline-sm text-on-surface">
+                                  {ingredient.name}
+                                  {ingredient.optional && <span className="text-on-surface-variant font-body-sm font-normal ml-1">(tùy chọn)</span>}
                                 </p>
+                                <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 mt-1">
+                                  <span className="font-body-md text-on-surface-variant">
+                                    Cần: <strong className="text-on-surface">{fmtQty(requiredQty)} {ingredient.unit}</strong>
+                                  </span>
+                                  {line && (
+                                     <span className="font-label-sm px-2 py-0.5 rounded-md bg-surface-container-high text-on-surface-variant w-fit">
+                                       Trong kho: {fmtQty(line.availableQuantity)}
+                                     </span>
+                                  )}
+                                </div>
                                 {line && line.missingQuantity > 0 && (
-                                  <p className="font-label-sm text-label-sm text-error font-medium">
-                                    Còn thiếu {fmtQty(line.missingQuantity)} {ingredient.unit}
+                                  <p className="font-label-sm text-error mt-1.5 flex items-center gap-1 bg-error-container/20 w-fit px-2 py-0.5 rounded-md">
+                                    <span className="material-symbols-outlined text-[14px]">warning</span>
+                                    Thiếu {fmtQty(line.missingQuantity)} {ingredient.unit}
                                   </p>
                                 )}
                               </div>
                             </div>
-                            <span className={`material-symbols-outlined ${available ? 'text-primary' : 'text-secondary-container'}`}>
-                              {available ? 'check_circle' : 'shopping_cart'}
-                            </span>
                           </li>
                         );
                       })}
@@ -405,16 +423,30 @@ export default function RecipeDetail() {
                     {recipe.steps.length === 0 ? (
                       <p className="font-body-md text-on-surface-variant">Công thức chưa có hướng dẫn chi tiết.</p>
                     ) : (
-                      <div className="space-y-8 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:ml-[2.25rem] md:before:translate-x-0 before:h-full before:w-0.5 before:bg-outline-variant">
-                        {recipe.steps.map((step, index) => (
-                          <div key={index} className="relative flex items-start gap-4 md:gap-6">
-                            <div className="relative z-10 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center bg-primary text-on-primary font-headline-sm rounded-full shrink-0 ring-4 ring-surface-container-lowest">{index + 1}</div>
-                            <div className="flex-1 bg-surface-container-low p-4 rounded-xl">
-                              <h3 className="font-headline-sm text-headline-sm text-on-surface mb-2">Bước {index + 1}</h3>
-                              <p className="font-body-md text-body-md text-on-surface-variant">{step}</p>
+                      <div className="space-y-6 relative before:absolute before:inset-0 before:ml-6 before:-translate-x-px md:before:ml-[1.75rem] md:before:translate-x-0 before:h-full before:w-0.5 before:bg-outline-variant/50">
+                        {recipe.steps.map((step, index) => {
+                          const isChecked = checkedSteps.has(index);
+                          return (
+                            <div 
+                              key={index} 
+                              className="relative flex items-start gap-4 md:gap-6 cursor-pointer group"
+                              onClick={() => toggleStep(index)}
+                            >
+                              <div className={`relative z-10 w-12 h-12 flex items-center justify-center font-headline-sm rounded-full shrink-0 ring-4 ring-surface-container-lowest transition-all duration-300 ${isChecked ? 'bg-tertiary text-on-tertiary scale-95' : 'bg-surface-container-high text-on-surface group-hover:bg-primary-container group-hover:text-on-primary-container'}`}>
+                                {isChecked ? <span className="material-symbols-outlined font-bold">check</span> : index + 1}
+                              </div>
+                              <div className={`flex-1 p-5 rounded-2xl border transition-all duration-300 ${isChecked ? 'bg-surface-container-lowest border-outline-variant opacity-60' : 'bg-surface-container-low border-transparent hover:shadow-md hover:border-outline-variant/30'}`}>
+                                <div className="flex justify-between items-center mb-2">
+                                  <h3 className={`font-headline-sm text-headline-sm transition-colors ${isChecked ? 'line-through text-on-surface-variant' : 'text-on-surface'}`}>Bước {index + 1}</h3>
+                                  <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${isChecked ? 'bg-tertiary border-tertiary' : 'border-outline-variant'}`}>
+                                    {isChecked && <span className="material-symbols-outlined text-on-tertiary text-[16px] font-bold">check</span>}
+                                  </div>
+                                </div>
+                                <p className={`font-body-md text-body-md leading-relaxed transition-colors ${isChecked ? 'text-on-surface-variant' : 'text-on-surface'}`}>{step}</p>
+                              </div>
                             </div>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     )}
                   </div>

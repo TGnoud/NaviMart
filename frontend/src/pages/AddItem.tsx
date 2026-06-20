@@ -90,8 +90,8 @@ export default function AddItem() {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (e?: React.FormEvent | React.MouseEvent) => {
+    e?.preventDefault();
     if (!itemName.trim() || saving || uploadingImage) return;
     if (!expiryDate) {
       showAlert('Vui lòng chọn hạn sử dụng.');
@@ -130,48 +130,52 @@ export default function AddItem() {
           <span className="material-symbols-outlined text-on-surface-variant">close</span>
         </Link>
         <h1 className="font-headline-sm text-headline-sm font-bold text-on-surface">Thêm thực phẩm</h1>
-        <div className="w-10 h-10"></div>
+        <button 
+          onClick={handleSubmit} 
+          disabled={!itemName.trim() || uploadingImage || saving}
+          className="bg-primary text-on-primary font-label-md font-bold px-4 py-2 rounded-full hover:opacity-90 transition-all disabled:opacity-50 disabled:bg-surface-container-high disabled:text-on-surface-variant flex items-center gap-1"
+        >
+          {saving ? 'Đang lưu...' : 'Lưu'}
+        </button>
       </header>
 
-      <main className="flex-1 overflow-y-auto w-full max-w-2xl mx-auto px-margin-mobile py-stack-md pb-[90px] hide-scrollbar">
-        <label className="mb-6 flex flex-col items-center justify-center bg-surface-container-low border-2 border-dashed border-outline-variant rounded-xl p-6 cursor-pointer hover:bg-surface-container transition-colors group overflow-hidden">
-          {imageUrl ? (
-            <div className="w-full aspect-video rounded-lg overflow-hidden bg-surface-container mb-3">
-              <img src={imageUrl} alt={itemName || 'Ảnh thực phẩm'} className="w-full h-full object-cover" />
-            </div>
-          ) : (
-            <div className="w-16 h-16 bg-primary-container text-on-primary-container rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-              <span className="material-symbols-outlined text-3xl">cloud_upload</span>
-            </div>
-          )}
-          <span className="font-body-md text-body-md font-medium text-primary">
-            {uploadingImage ? 'Đang tải ảnh lên...' : 'Tải ảnh lên'}
-          </span>
-          <input
-            type="file"
-            accept="image/*"
-            className="sr-only"
-            disabled={uploadingImage}
-            onChange={(e) => handleImageUpload(e.target.files?.[0])}
-          />
-        </label>
+      <main className="flex-1 overflow-y-auto w-full max-w-2xl mx-auto px-margin-mobile py-stack-md pb-safe hide-scrollbar">
+        <form className="flex flex-col gap-5" onSubmit={handleSubmit}>
+          <div className="flex gap-4 items-start">
+            <label className="shrink-0 flex flex-col items-center justify-center bg-surface-container-lowest border border-dashed border-outline-variant rounded-xl w-24 h-24 cursor-pointer hover:bg-surface-container-high transition-all group overflow-hidden shadow-sm">
+              {imageUrl ? (
+                <img src={imageUrl} alt={itemName || 'Ảnh'} className="w-full h-full object-cover" />
+              ) : (
+                <div className="text-on-surface-variant flex flex-col items-center gap-1 group-hover:scale-105 transition-transform">
+                  <span className="material-symbols-outlined text-[28px]">add_a_photo</span>
+                  <span className="text-[10px] font-medium text-center leading-tight px-1">Tải ảnh</span>
+                </div>
+              )}
+              <input
+                type="file"
+                accept="image/*"
+                className="sr-only"
+                disabled={uploadingImage}
+                onChange={(e) => handleImageUpload(e.target.files?.[0])}
+              />
+            </label>
 
-        <form className="flex flex-col gap-6" onSubmit={handleSubmit}>
-          <div className="flex flex-col gap-1">
-            <label className="font-body-md text-body-md font-bold text-on-surface" htmlFor="itemName">Tên thực phẩm *</label>
-            <FoodAutocomplete
-              value={itemName}
-              onChange={handleNameChange}
-              onSelectFood={applyFood}
-              placeholder="VD: Sữa tươi, Thịt bò... (gõ để tìm trong danh mục)"
-              className="w-full px-4 py-3 bg-surface-container-lowest border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
-            />
-            {selectedFood && (
-              <p className="font-label-sm text-label-sm text-primary flex items-center gap-1 mt-1">
-                <span className="material-symbols-outlined text-[16px]">check_circle</span>
-                Đã liên kết với danh mục hệ thống
-              </p>
-            )}
+            <div className="flex-1 flex flex-col gap-1 justify-center min-h-[96px]">
+              <label className="font-body-md text-body-md font-bold text-on-surface" htmlFor="itemName">Tên thực phẩm *</label>
+              <FoodAutocomplete
+                value={itemName}
+                onChange={handleNameChange}
+                onSelectFood={applyFood}
+                placeholder="VD: Sữa tươi..."
+                className="w-full px-4 py-3 bg-surface-container-lowest border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
+              />
+              {selectedFood && (
+                <p className="font-label-sm text-label-sm text-primary flex items-center gap-1 mt-1">
+                  <span className="material-symbols-outlined text-[16px]">check_circle</span>
+                  Đã liên kết với danh mục
+                </p>
+              )}
+            </div>
           </div>
 
           {selectedFood?.storageTips && (
@@ -262,18 +266,7 @@ export default function AddItem() {
         </form>
       </main>
 
-      <div className="fixed bottom-0 left-0 w-full bg-surface-container-lowest border-t border-outline-variant p-margin-mobile z-50 pb-safe shadow-[0_-4px_16px_rgba(0,0,0,0.05)]">
-        <div className="max-w-2xl mx-auto w-full">
-          <button 
-            onClick={handleSubmit} 
-            disabled={!itemName.trim() || uploadingImage}
-            className={`w-full h-14 rounded-lg font-headline-sm text-headline-sm flex items-center justify-center gap-2 transition-all shadow-sm ${itemName.trim() && !uploadingImage ? 'bg-primary text-white hover:opacity-90 active:scale-[0.98]' : 'bg-surface-container-high text-on-surface-variant opacity-50 cursor-not-allowed'}`}
-          >
-            <span className="material-symbols-outlined">save</span>
-            {saving ? 'Đang lưu...' : uploadingImage ? 'Đang tải ảnh...' : 'Lưu thực phẩm'}
-          </button>
-        </div>
-      </div>
+
     </div>
   );
 }

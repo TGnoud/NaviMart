@@ -53,6 +53,14 @@ export default function PantryDashboard() {
   const [showUndo, setShowUndo] = useState(false);
   const undoTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  const [categories, setCategories] = useState<CatalogCategory[]>([]);
+  const [foods, setFoods] = useState<CatalogFood[]>([]);
+
+  useEffect(() => {
+    catalogApi.categories().then(setCategories).catch(console.error);
+    catalogApi.searchFoods().then(setFoods).catch(console.error);
+  }, []);
+
   const handleError = useCallback(
     (err: unknown, fallback: string) => {
       showAlert(err instanceof Error ? err.message : fallback);

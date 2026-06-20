@@ -248,11 +248,13 @@ export class ShoppingListsService {
       item.checked = dto.checked;
       item.status = dto.checked ? 'bought' : 'pending';
       item.boughtAt = dto.checked ? new Date() : undefined;
+      item.boughtBy = dto.checked ? new Types.ObjectId(user.userId) : undefined;
     }
     if (dto.status !== undefined) {
       item.status = dto.status;
       item.checked = dto.status === 'bought';
       item.boughtAt = dto.status === 'bought' ? new Date() : undefined;
+      item.boughtBy = dto.status === 'bought' ? new Types.ObjectId(user.userId) : undefined;
     }
 
     await list.save();

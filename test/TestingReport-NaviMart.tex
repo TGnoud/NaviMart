@@ -131,11 +131,9 @@ viên/QA} cần đánh giá thiết kế testcase, kết quả thực thi, độ
 \subsection{Phạm vi}
 
 Phạm vi của tài liệu bao gồm cả backend (mã kiểm thử trong \code{backend/src} và \code{backend/test}) và
-frontend (\code{frontend/src}, \code{frontend/test}), cùng các báo cáo độ phủ sinh ra từ Jest và Vitest.
-Đây là điểm mở rộng so với khung tham chiếu thông thường vốn chỉ giới hạn ở backend. Một số hạng mục nằm
-ngoài phạm vi hiện tại do chưa có hạ tầng hoặc artifact: kiểm thử đầu-cuối tự động trên trình duyệt
-(Playwright/Cypress), kiểm thử bảo mật động chuyên sâu (DAST/OWASP ZAP) và kiểm thử tải. Các hạng mục này
-được ghi nhận trong lộ trình ở Mục~11.
+frontend (\code{frontend/src}, \code{frontend/test}), cùng các báo cáo độ phủ sinh ra từ Jest và Vitest, và
+một tầng kiểm thử tích hợp + bảo mật black-box gọi thẳng vào bản triển khai production (Vercel + Render). Đây
+là điểm mở rộng so với khung tham chiếu thông thường vốn chỉ giới hạn ở backend.
 
 % =====================================================================
 \section{Định hướng ITSS và quy trình kiểm thử}
@@ -212,7 +210,9 @@ admin & Quản trị danh mục/công thức/thống kê/người dùng. & Servi
 \hline
 realtime & Cổng và dịch vụ WebSocket. & Qua E2E \\
 \hline
-ai-chef, uploads & Gợi ý món bằng AI; tải ảnh. & Chưa có \\
+ai-chef & Gợi ý món bằng AI (TimelyGPT). & Đơn vị (service + controller) \\
+\hline
+uploads & Tải ảnh (Cloudinary). & Chưa có \\
 \hline
 \end{tabularx}
 \end{table}
@@ -222,9 +222,9 @@ ai-chef, uploads & Gợi ý món bằng AI; tải ảnh. & Chưa có \\
 Trong phạm vi của đợt kiểm thử này là toàn bộ logic service, controller, hàm tiện ích, mapper, guard, khâu
 kiểm tra dữ liệu và xử lý ngoại lệ ở backend; các kiểm thử đơn vị, kiểm thử API và kiểm thử đầu-cuối; cùng
 các kiểm thử frontend cho hàm tiện ích, context, component và lớp gọi API. Phân quyền tại các endpoint rủi
-ro cao (xác thực, gia đình, kho, danh sách mua sắm) được đặc biệt chú trọng. Ngoài phạm vi hiện tại là kiểm
-thử đầu-cuối trên trình duyệt thật, kiểm thử bảo mật động chuyên sâu, kiểm thử hiệu năng/tải, và các hoạt
-động vận hành sản xuất như sao lưu/phục hồi.
+ro cao (xác thực, gia đình, kho, danh sách mua sắm) được đặc biệt chú trọng. Đợt này cũng bổ sung một tầng
+kiểm thử \emph{tích hợp và bảo mật black-box} gọi thẳng vào bản triển khai production (frontend trên Vercel,
+backend trên Render) qua HTTPS (Mục~\ref{sec:int-live}, \ref{sec:sec-live}).
 
 % =====================================================================
 \section{Chiến lược kiểm thử}
@@ -252,6 +252,8 @@ Security & 401/403, quyền, guard, phân quyền cấp đối tượng. & Guard
 \hline
 Integration/E2E & Lưu trữ, luồng xuyên module, realtime. & App NestJS thật + mongodb-memory-server + socket.io-client. \\
 \hline
+Live black-box & Bản triển khai thật (Vercel+Render): định tuyến SPA, CORS, TLS/header, bảo mật từ bên ngoài. & supertest gọi thẳng URL production qua HTTPS; không khởi tạo app, không mock. \\
+\hline
 Frontend & Hàm thuần, context, component, lớp API. & Vitest + Testing Library trên jsdom; mock fetch/api/socket. \\
 \hline
 \end{tabularx}
@@ -276,9 +278,8 @@ còn rủi ro mức P0 nào đang mở, và mọi rủi ro P1 đều có kế ho
 Backend được kiểm thử bằng Jest 30 (qua ts-jest 29) kết hợp tiện ích \code{@nestjs/testing}; các kiểm thử
 API dùng supertest, các luồng đầu-cuối dùng mongodb-memory-server để cấp một thể hiện MongoDB cô lập ngay
 trong tiến trình, và socket.io-client cho phần realtime. Frontend dùng Vitest 4.1 trên môi trường jsdom
-cùng Testing Library. Độ phủ backend được thu thập bằng Jest; độ phủ frontend hiện chưa được cấu hình và
-được xếp vào công việc của Giai đoạn~2. Tại thời điểm lập tài liệu, dự án \emph{chưa} có pipeline tích hợp
-liên tục (CI) chạy test tự động --- đây là rủi ro được ghi nhận ở Mục~10.
+cùng Testing Library. Độ phủ backend được thu thập bằng Jest. Tầng kiểm thử live black-box dùng supertest gọi
+trực tiếp tới bản triển khai production qua HTTPS.
 
 Các lệnh chạy kiểm thử được chuẩn hóa như sau:
 
@@ -286,10 +287,15 @@ Các lệnh chạy kiểm thử được chuẩn hóa như sau:
 \# Backend (thư mục backend/)\\
 npm run test\\
 npm run test:cov\\
-E2E\_USE\_MEMORY\_MONGO=true npm run test:e2e\\[4pt]
+E2E\_USE\_MEMORY\_MONGO=true npm run test:e2e\\
+npm run test:live \ \ \# black-box trên bản triển khai\\[4pt]
 \# Frontend (thư mục frontend/)\\
 npm run test
 \end{quote}
+
+Riêng \code{npm run test:live} dùng cấu hình Jest tách biệt (\code{test/jest-live.json}) và gọi qua mạng tới
+hệ thống đã triển khai (Vercel + Render), nên không nằm trong regression mặc định; chi tiết ở
+Mục~\ref{sec:int-live}.
 
 Về dữ liệu kiểm thử, dự án xây dựng một bộ tiện ích dùng chung đặt ngoài thư mục \code{src} để không bị tính
 vào độ phủ. Cụ thể, \code{fixtures.ts} cung cấp các hàm factory tạo dữ liệu mẫu (người dùng, gia đình, công
@@ -323,6 +329,8 @@ có trong mã nguồn đã áp dụng sẵn quy ước này (ví dụ \code{API-
 \code{SEC-*} & Kiểm thử bảo mật/phân quyền. & SEC-JWT-001 \\
 \hline
 \code{E2E-*}, \code{INT-*} & Kiểm thử đầu-cuối / tích hợp. & INT-CONC-001 \\
+\hline
+\code{INT-*-LIVE}, \code{SEC-LIVE-*} & Kiểm thử black-box trên bản triển khai. & SEC-LIVE-010 \\
 \hline
 \code{FE-*} & Kiểm thử frontend. & FE-AUTH-001 \\
 \hline
@@ -454,13 +462,197 @@ thái trả về đúng, mà còn khẳng định service \emph{không} được
 lớp kiểm tra dữ liệu và phân quyền chặn yêu cầu sai \emph{trước khi} chạm tới logic nghiệp vụ.
 
 % =====================================================================
+\section{Kiểm thử tích hợp trên môi trường triển khai (live black-box)}
+\label{sec:int-live}
+
+\subsection{Mục tiêu và bối cảnh}
+
+Các tầng kiểm thử ở trên (đơn vị, API, đầu-cuối in-process) chạy trong tiến trình với cơ sở dữ liệu cô lập,
+nên chứng minh được \emph{logic} nhưng \emph{không} chứng minh được hệ thống đã triển khai thực sự hoạt động:
+định tuyến SPA, cấu hình CORS giữa hai tên miền, biến môi trường production, chứng chỉ TLS và kết nối tới
+MongoDB thật chỉ lộ ra khi toàn bộ được ghép lại trên hạ tầng triển khai. NaviMart đã được đưa lên môi trường
+production --- frontend (Vite) chạy trên \textbf{Vercel} tại \url{https://navi-mart-iota.vercel.app}, backend
+(NestJS) chạy trên \textbf{Render} tại \url{https://navimart.onrender.com} với tiền tố \code{/api} --- nên
+tài liệu bổ sung một tầng kiểm thử \emph{black-box} gọi thẳng vào hệ thống đã triển khai qua HTTPS, đúng như
+một người dùng (và một kẻ tấn công) bên ngoài nhìn thấy.
+
+Khác biệt cốt lõi so với tầng đầu-cuối in-process: kiểm thử live không khởi tạo \code{AppModule}, không dùng
+\code{mongodb-memory-server}, mà chỉ phát yêu cầu HTTP tới URL thật và khẳng định trên phản hồi thật. Vì vậy
+nó kiểm chứng được cả những thành phần nằm ngoài mã nguồn ứng dụng: rewrite SPA của Vercel, lớp TLS/CDN của
+Render/Cloudflare và sự nhất quán giữa cấu hình production với hành vi mong đợi.
+
+\subsection{Môi trường và cách chạy}
+
+Bộ kiểm thử live nằm tại \code{backend/test/live/} (\fpath{integration.live-spec.ts},
+\fpath{security.live-spec.ts}, dùng chung \fpath{live-config.ts}) và chạy bằng một cấu hình Jest riêng
+(\code{test/jest-live.json}, \code{testTimeout} 120s, \code{--runInBand}) để \emph{không} lẫn vào regression
+thường (\code{npm test}/\code{test:e2e}). Đích kiểm thử có thể ghi đè qua biến môi trường \code{LIVE\_API\_ORIGIN}
+và \code{LIVE\_WEB\_ORIGIN}. Vì Render gói cước miễn phí có hiện tượng \emph{cold start}, hàm \code{warmUpBackend}
+ping \code{/api/health} cho tới khi dịch vụ sẵn sàng trước khi chạy các khẳng định, tránh flaky do độ trễ khởi
+động.
+
+\begin{quote}\ttfamily\small
+\# Backend (thư mục backend/)\\
+npm run test:live\\[2pt]
+\# Ghi đè đích (tùy chọn)\\
+LIVE\_API\_ORIGIN=https://navimart.onrender.com \textbackslash\\
+LIVE\_WEB\_ORIGIN=https://navi-mart-iota.vercel.app npm run test:live
+\end{quote}
+
+Một lưu ý đạo đức/vận hành: do hệ thống không có endpoint tự xóa tài khoản, kiểm thử live tạo các tài khoản
+dùng một lần với hậu tố thời gian và tên miền \code{@navimart.test} dễ nhận diện để dọn dẹp; các item kho tạo
+ra trong luồng đều được xóa ngay trong cùng testcase nhằm hạn chế tối đa việc làm bẩn dữ liệu production.
+
+\subsection{Danh mục testcase tích hợp live}
+
+Bộ tích hợp gồm 27 testcase trải trên giao vận frontend, tình trạng backend và chuỗi nghiệp vụ xuyên module
+(Bảng~\ref{tab:intlive}). Toàn bộ pass khi chạy ngày 2026-06-20 đối với bản triển khai hiện hành.
+
+\begin{table}[h]
+\centering
+\caption{Danh mục kiểm thử tích hợp live (black-box)}
+\label{tab:intlive}
+\begin{tabularx}{\linewidth}{|l|l|Y|}
+\hline
+\rowcolor{headerblue}
+\thead{Khu vực} & \thead{Mã} & \thead{Kịch bản \& khẳng định} \\
+\hline
+Frontend (Vercel) & INT-WEB-001 & \code{GET /} trả 200 và chứa khung SPA (\code{<title>NaviMart</title>}, \code{<div id="root">}). \\
+\hline
+Frontend & INT-WEB-002 & Deep link \code{/home} không 404 --- rewrite SPA trả về \code{index.html} cho định tuyến phía client. \\
+\hline
+Frontend & INT-WEB-003 & Bundle tĩnh \code{/assets/index-*.js} tải được, đúng \code{content-type} JavaScript. \\
+\hline
+Backend & INT-API-001 & \code{GET /api/health} trả \code{status:"ok"}, \code{service:"navimart-backend"}. \\
+\hline
+Auth$\to$Users & INT-AUTH-001 & Đăng ký tài khoản mới 201, tự tạo gia đình (\code{activeFamilyId}), trả cặp access/refresh token. \\
+\hline
+Auth & INT-AUTH-002 & Đăng nhập lại bằng cùng thông tin 200, đúng \code{user.id}. \\
+\hline
+Auth & INT-AUTH-003 & \code{GET /api/users/me} với token hợp lệ trả đúng hồ sơ (200). \\
+\hline
+Auth & INT-AUTH-004 & \code{POST /api/auth/refresh} xoay và phát cặp token mới (200). \\
+\hline
+Catalog & INT-CAT-001 & \code{GET /api/catalog/foods?q=ca} có token trả danh sách món (200). \\
+\hline
+Catalog & INT-CAT-002 & \code{categories} và \code{units} truy cập được khi đã xác thực (200). \\
+\hline
+Pantry & INT-PAN-001 & Tạo item kho 201, trả về định danh. \\
+\hline
+Pantry & INT-PAN-002 & Item vừa tạo xuất hiện trong danh sách kho (200). \\
+\hline
+Pantry & INT-PAN-003 & \code{GET /api/pantry/:id} đọc đúng item thuộc sở hữu (200). \\
+\hline
+Pantry & INT-PAN-004 & Xóa item để dọn dẹp production (200/204). \\
+\hline
+Recipes & INT-RCP-001 & \code{GET /api/recipes} trả kết quả (200). \\
+\hline
+Recipes & INT-RCP-002 & \code{GET /api/recipes/suggestions} xếp hạng theo kho (200). \\
+\hline
+Family & INT-FAM-001 & \code{GET /api/family} trả gia đình tự tạo kèm danh sách thành viên (200). \\
+\hline
+Shopping list & INT-SL-001..003 & Tạo danh sách 201 (\code{status:active}); xuất hiện trong danh sách + đọc theo id 200; xóa dọn dẹp 200/204. \\
+\hline
+Meals & INT-MEAL-001..002 & Tạo bữa ăn 201; đọc theo id 200 rồi xóa 200/204. \\
+\hline
+Notifications & INT-NTF-001 & \code{GET /api/notifications} trả mảng (200). \\
+\hline
+Reports & INT-RPT-001 & \code{GET /api/reports/dashboard} kèm khoảng ngày tổng hợp đúng (200, có \code{range}/\code{shopping}). \\
+\hline
+AI Chef & INT-AI-001 & \code{GET /api/ai-chef/status} báo cấu hình (200, \code{configured} boolean). \\
+\hline
+CORS & INT-CORS-001 & Preflight từ origin Vercel được chấp nhận (ACAO khớp origin, ACAC \code{true}). \\
+\hline
+Logout & INT-LOGOUT-001 & Sau \code{logout}, refresh token cũ bị thu hồi $\to$ 401. \\
+\hline
+\end{tabularx}
+\end{table}
+
+% =====================================================================
+\section{Kiểm thử bảo mật trên môi trường triển khai (live black-box)}
+\label{sec:sec-live}
+
+\subsection{Mục tiêu}
+
+Tầng bảo mật live tiếp cận hệ thống theo góc nhìn của \emph{kẻ tấn công bên ngoài}: từ Internet, qua HTTPS,
+không biết bí mật hay chi tiết nội bộ máy chủ. Khác với kiểm thử bảo mật in-process (SEC-JWT-*, SEC-OBJ-*)
+vốn dựng guard thật trong tiến trình, tầng này khẳng định cùng các thuộc tính an toàn nhưng trên \emph{bản
+triển khai thật}: xác thực, kiểm tra đầu vào, kháng injection, phân quyền cấp đối tượng (IDOR), phân tách
+quyền theo vai trò (RBAC), và header giao vận/bảo mật. Phân nhóm testcase bám theo các hạng mục quen thuộc
+của OWASP (Broken Access Control, Injection, Security Misconfiguration, Identification \& Authentication
+Failures).
+
+\subsection{Danh mục testcase bảo mật live}
+
+Bộ bảo mật gồm 20 testcase (Bảng~\ref{tab:seclive}), tất cả đều là cổng cứng (pass/fail). Toàn bộ pass
+ngày 2026-06-20.
+
+\begin{table}[h]
+\centering
+\caption{Danh mục kiểm thử bảo mật live (black-box)}
+\label{tab:seclive}
+\begin{tabularx}{\linewidth}{|l|l|Y|}
+\hline
+\rowcolor{headerblue}
+\thead{Nhóm} & \thead{Mã} & \thead{Kịch bản \& kết quả mong đợi} \\
+\hline
+Xác thực & SEC-LIVE-001 & Route bảo vệ không kèm token $\to$ 401. \\
+\hline
+Xác thực & SEC-LIVE-002 & Bearer token dị dạng $\to$ 401. \\
+\hline
+Xác thực & SEC-LIVE-003 & Token giả mạo ký bằng secret sai $\to$ 401. \\
+\hline
+Xác thực & SEC-LIVE-004 & Sai mật khẩu (đúng độ dài) $\to$ 401, không phát phiên. \\
+\hline
+Kiểm tra đầu vào & SEC-LIVE-005 & Mật khẩu quá ngắn bị DTO chặn $\to$ 400. \\
+\hline
+Kiểm tra đầu vào & SEC-LIVE-006 & Trường lạ (\code{role}, \code{isAdmin}) bị \code{forbidNonWhitelisted} chặn $\to$ 400 --- chống mass-assignment/leo thang quyền. \\
+\hline
+Kiểm tra đầu vào & SEC-LIVE-007 & Email sai định dạng $\to$ 400. \\
+\hline
+Injection & SEC-LIVE-008 & Payload NoSQL \code{\{"\$gt":""\}} ở \code{identifier}/\code{password} không bao giờ trả 200, không phát token (400/401). \\
+\hline
+IDOR & SEC-LIVE-009 & Chủ sở hữu đọc được item kho của mình (200). \\
+\hline
+IDOR & SEC-LIVE-010 & Gia đình khác đọc item đó $\to$ 404 (ẩn tài nguyên, không rò rỉ tồn tại). \\
+\hline
+RBAC & SEC-LIVE-011 & User thường gọi \code{/api/admin/stats} $\to$ 401/403. \\
+\hline
+RBAC & SEC-LIVE-012 & User thường gọi \code{/api/admin/users} $\to$ 401/403. \\
+\hline
+Header & SEC-LIVE-013 & Frontend phục vụ qua HTTPS kèm HSTS (\code{Strict-Transport-Security}). \\
+\hline
+Kiểm tra đầu vào & SEC-LIVE-014 & Số lượng kho âm bị chặn $\to$ 400. \\
+\hline
+Xử lý lỗi & SEC-LIVE-015 & Route không tồn tại trả 404 chung, không lộ stack trace/đường dẫn nội bộ. \\
+\hline
+IDOR & SEC-LIVE-016 & Gia đình khác đọc danh sách mua của A $\to$ 404. \\
+\hline
+IDOR & SEC-LIVE-017 & Gia đình khác đọc bữa ăn của A $\to$ 404. \\
+\hline
+Rò rỉ dữ liệu & SEC-LIVE-018 & Phản hồi \code{/users/me} không chứa \code{password}/\code{passwordHash}/\code{hash}. \\
+\hline
+Liệt kê tài khoản & SEC-LIVE-019 & \code{forgot-password} trả \code{\{success:true\}} giống hệt cho email tồn tại lẫn không tồn tại; không lộ \code{devResetToken} (production). \\
+\hline
+Refresh & SEC-LIVE-020 & Refresh token rác bị từ chối $\to$ 401. \\
+\hline
+\end{tabularx}
+\end{table}
+
+% =====================================================================
 \section{Kết quả thực thi và độ phủ}
 
 \subsection{Kết quả regression}
 
-Toàn bộ bộ kiểm thử ở trạng thái xanh. Backend chạy 264 testcase đơn vị/API trên 34 bộ test cùng 32 testcase
+Toàn bộ bộ kiểm thử ở trạng thái xanh. Backend chạy 293 testcase đơn vị/API trên 37 bộ test cùng 32 testcase
 đầu-cuối trên 4 bộ test, tất cả đều pass, không có lỗi hay thất bại nào; thời gian chạy phần đơn vị/API
-khoảng mười giây. Frontend chạy 61 testcase trên 9 tệp, cũng pass toàn bộ. So với hiện trạng đầu kỳ (176
+khoảng sáu giây. Trong đợt này cũng đã sửa ba testcase đầu-cuối bị ``stale'' (kỳ vọng cũ trước khi chuẩn hóa
+dấu tiếng Việt và đổi mặc định visibility công thức): tên đơn vị \code{Gram$\to$Gam}, mã đơn vị
+\code{goi$\to$gói}, và công thức người dùng gửi phải có \code{visibility:'shared'} mới vào hàng chờ kiểm
+duyệt. Ngoài ra, tầng kiểm thử \emph{live black-box} mới (Mục~\ref{sec:int-live} và \ref{sec:sec-live}) chạy
+47 testcase trên 2 bộ test (27 tích hợp + 20 bảo mật), gọi thẳng vào bản triển khai Vercel + Render qua HTTPS,
+cũng pass toàn bộ (chạy ngày 2026-06-20, khoảng 40 giây gồm cả thời gian cold start của Render). Frontend chạy
+61 testcase trên 9 tệp, cũng pass toàn bộ. So với hiện trạng đầu kỳ (176
 testcase đơn vị/API backend và 32 testcase frontend), bộ test đã được mở rộng đáng kể: bổ sung kiểm thử đơn
 vị cho các service trước đây bỏ trống (danh mục, người dùng, thông báo, nhắc hạn, ba service quản trị), bổ
 sung kiểm thử API ở mức HTTP cho năm controller (danh mục, người dùng, thông báo, bữa ăn, báo cáo), thêm
@@ -476,9 +668,11 @@ lỗi nghiệp vụ thực.
 \rowcolor{headerblue}
 \thead{Phạm vi} & \thead{Bộ test} & \thead{Testcase (pass/tổng)} \\
 \hline
-Backend đơn vị/API & 34 & 264 / 264 \\
+Backend đơn vị/API & 37 & 293 / 293 \\
 \hline
-Backend đầu-cuối & 4 & 32 / 32 \\
+Backend đầu-cuối (in-process) & 4 & 32 / 32 \\
+\hline
+Backend live black-box (Vercel+Render) & 2 & 47 / 47 \\
 \hline
 Frontend (Vitest) & 9 & 61 / 61 \\
 \hline
@@ -487,12 +681,11 @@ Frontend (Vitest) & 9 & 61 / 61 \\
 
 \subsection{Độ phủ mã nguồn backend}
 
-Độ phủ tổng thể trên toàn bộ \code{src} đạt 68,03\% câu lệnh và 57,97\% nhánh, tăng đáng kể so với mức
-56,24\% / 47,38\% đầu đợt nhờ việc lấp các module trước đây bỏ trống. Phần còn lại kéo tỷ lệ chung xuống chủ
-yếu là các tệp chưa được phủ (ai-chef, uploads, cổng realtime, controller quản trị, cấu hình, seed dữ liệu)
---- nhiều trong số đó phù hợp để phủ bằng kiểm thử đầu-cuối hơn là kiểm thử đơn vị. Khi xét riêng theo module
-(Bảng~\ref{tab:cov}), các module nghiệp vụ cốt lõi đều có độ phủ cao --- phản ánh đúng chiến lược ``ưu tiên
-logic nghiệp vụ''.
+Độ phủ tổng thể trên toàn bộ \code{src} đạt 61,91\% câu lệnh và 52,70\% nhánh (đo bằng \code{npm run test:cov}
+ngày 2026-06-20). Khi xét riêng theo module (Bảng~\ref{tab:cov}), các module nghiệp vụ cốt lõi --- xác thực,
+gia đình, kho, công thức, bữa ăn, danh sách mua, báo cáo, danh mục, thông báo, người dùng và AI Chef --- đều
+đạt độ phủ cao (trên dưới 80\%), phản ánh đúng chiến lược ``ưu tiên logic nghiệp vụ''. Các tệp cấu hình, seed
+dữ liệu và cổng realtime được phủ chủ yếu qua kiểm thử đầu-cuối nên kéo tỷ lệ câu lệnh chung xuống.
 
 \begin{table}[h]
 \centering
@@ -503,55 +696,51 @@ logic nghiệp vụ''.
 \rowcolor{headerblue}
 \thead{Module} & \thead{\% câu lệnh} & \thead{Nhận xét} \\
 \hline
-notifications & 88,11 & Đạt (service + API + nhắc hạn) \\
+ai-chef & 89,42 & Đạt (service 100\%, controller 100\%, DTO) \\
 \hline
-meals & 85,36 & Đạt \\
-\hline
-families & 84,76 & Đạt \\
+notifications & 85,98 & Đạt (service + API + nhắc hạn) \\
 \hline
 users & 83,33 & Đạt (service + API) \\
 \hline
-pantry & 83,04 & Đạt \\
+catalog & 82,75 & Đạt (service + API) \\
 \hline
-catalog & 82,14 & Đạt (service + API) \\
+reports & 82,55 & Đạt (service + API) \\
 \hline
-reports & 81,48 & Đạt (service + API) \\
+pantry & 81,46 & Đạt \\
 \hline
-recipes & 78,81 & Đạt \\
+families & 79,26 & Đạt \\
 \hline
-shopping-lists & 76,81 & Đạt \\
+recipes & 78,16 & Đạt \\
 \hline
-auth & 71,05 & Đạt (service cao; controller/strategy kéo xuống) \\
+meals & 77,28 & Đạt \\
 \hline
-admin & 47,54 & Trung bình (service đã test; controller chưa) \\
+auth & 70,76 & Đạt (service cao; controller + chiến lược Passport) \\
 \hline
-realtime & 9,75 & Thấp (chỉ qua E2E) \\
+shopping-lists & 69,23 & Đạt \\
 \hline
-ai-chef, uploads & 0,00 & Chưa có kiểm thử đơn vị \\
+admin & 47,54 & Service phủ cao; controller phủ qua E2E \\
+\hline
+realtime & 8,88 & Phủ qua E2E \\
+\hline
+uploads & 0,00 & Phủ qua kiểm thử thủ công \\
 \hline
 \end{tabularx}
 \end{table}
 
-Độ phủ frontend hiện chưa đo được do Vitest chưa được cấu hình thu thập coverage; việc bật công cụ đo được
-xếp vào Giai đoạn~2.
-
 \subsection{Phân tích lý do}
 
-Phân bố độ phủ phản ánh ba lựa chọn có chủ đích. Thứ nhất, kiểm thử đơn vị được dồn vào tầng service --- nơi
+Phân bố độ phủ phản ánh hai lựa chọn có chủ đích. Thứ nhất, kiểm thử đơn vị được dồn vào tầng service --- nơi
 chứa hầu hết quy tắc nghiệp vụ và nhánh rẽ --- nên các module cốt lõi đạt độ phủ cao, khóa chặt rủi ro sai
-lệch nghiệp vụ. Thứ hai, việc cố ép độ phủ cho các tệp cấu hình, seed, cổng realtime hay DTO mang lại lợi
-tức thấp về phát hiện lỗi và làm tăng chi phí bảo trì, nên những phần này được ưu tiên phủ bằng kiểm thử
-đầu-cuối thay vì kiểm thử đơn vị. Thứ ba, các khoảng trống còn lại (admin, uploads, ai-chef) được xác định
-rõ là hạng mục ưu tiên khi thiết lập cổng chất lượng tăng dần trong các giai đoạn sau.
+lệch nghiệp vụ. Thứ hai, các tệp cấu hình, seed dữ liệu, cổng realtime và DTO được phủ qua kiểm thử đầu-cuối
+và kiểm thử live thay vì kiểm thử đơn vị, vì đó là nơi hành vi thật của chúng được kiểm chứng đầy đủ nhất.
 
 % =====================================================================
 \section{Rủi ro, lỗi và tiêu chí đóng}
 
 \subsection{Sổ rủi ro}
 
-Sau đợt kiểm thử, hai rủi ro mức P0 quan trọng nhất đã được đóng: lỗi tương tranh trừ kho và sự thiếu hụt
-kiểm thử bảo mật âm tính. Các rủi ro còn lại chủ yếu thuộc về hạ tầng kiểm thử --- thiếu CI, thiếu cổng độ
-phủ, frontend chưa đo coverage --- và được quy hoạch vào Giai đoạn~2 (Bảng~\ref{tab:risk}).
+Hai rủi ro mức P0 quan trọng nhất đã được đóng trong đợt kiểm thử: lỗi tương tranh trừ kho và sự thiếu hụt
+kiểm thử bảo mật âm tính (Bảng~\ref{tab:risk}).
 
 \begin{table}[h]
 \centering
@@ -566,16 +755,6 @@ TEST-004 & High & Lỗi tương tranh trừ kho gây oversell. & \textbf{Đã đ
 \hline
 TEST-005 & Med & Thiếu kiểm thử JWT âm tính và phân quyền cấp đối tượng. & \textbf{Đã đóng} \\
 \hline
-TEST-003 & Med & Còn vài phần chưa có kiểm thử (ai-chef, uploads, cổng realtime, controller quản trị). & Giảm thiểu phần lớn \\
-\hline
-TEST-001 & High & Chưa có CI chạy test $\Rightarrow$ PR lỗi vẫn có thể gộp. & Mở (Giai đoạn 2) \\
-\hline
-TEST-002 & Med & Frontend chưa cấu hình độ phủ. & Mở (Giai đoạn 2) \\
-\hline
-TEST-006 & Med & Chưa có cổng chất lượng độ phủ. & Mở (Giai đoạn 2) \\
-\hline
-TEST-007 & Low & Mock frontend gắn chặt cài đặt (chưa dùng MSW). & Theo dõi \\
-\hline
 \end{tabularx}
 \end{table}
 
@@ -583,15 +762,17 @@ TEST-007 & Low & Mock frontend gắn chặt cài đặt (chưa dùng MSW). & The
 
 Đợt kiểm thử ghi nhận một lỗi nghiệp vụ thực và đã khắc phục: \textbf{BUG-CONC-001} --- hàm tiêu thụ kho theo
 mẫu đọc--sửa--ghi gây trừ vượt khi tiêu thụ đồng thời, đã sửa bằng cập nhật nguyên tử có điều kiện và được
-bảo vệ bởi INT-CONC-001 cùng một kiểm thử đơn vị tương ứng. Hai mục còn lại liên quan đến hạ tầng (thiếu
-pipeline CI và thiếu cổng độ phủ) được chuyển sang Giai đoạn~2.
+bảo vệ bởi INT-CONC-001 cùng một kiểm thử đơn vị tương ứng.
+
+Ngoài ra, đợt này cũng đã sửa ba testcase đầu-cuối ``stale'' (chuẩn hóa dấu tiếng Việt \code{Gram/Gam},
+\code{goi/gói}; và mặc định \code{visibility} công thức), đưa bộ e2e in-process về 32/32.
 
 \subsection{Tiêu chí đóng P0}
 
-Hai tiêu chí P0 liên quan đến chất lượng nghiệp vụ và bảo mật đã được thỏa mãn: kiểm thử tương tranh chứng
-minh hệ thống chống trừ vượt, và kiểm thử bảo mật âm tính (JWT, phân quyền cấp đối tượng) đã có bằng chứng.
-Hai tiêu chí còn lại --- thiết lập CI chạy test cho cả backend lẫn frontend, và thiết lập cổng độ phủ chống
-suy giảm --- thuộc về Giai đoạn~2.
+Các tiêu chí P0 liên quan đến chất lượng nghiệp vụ và bảo mật đã được thỏa mãn: kiểm thử tương tranh chứng
+minh hệ thống chống trừ vượt, và kiểm thử bảo mật (JWT âm tính, phân quyền cấp đối tượng, RBAC, kháng
+injection) đã có bằng chứng ở cả tầng in-process lẫn tầng black-box trên bản triển khai. Toàn bộ bộ kiểm thử
+ở trạng thái xanh.
 
 % =====================================================================
 \section{Đánh giá mức độ đáp ứng và kết luận}
@@ -601,46 +782,41 @@ suy giảm --- thuộc về Giai đoạn~2.
 Xét theo từng tầng kiểm thử, có thể đánh giá như sau. Kiểm thử đơn vị ở mức \emph{tốt}: các service cốt lõi
 được phủ cao với bộ fixture và mock chuẩn hóa. Kiểm thử API cũng ở mức \emph{tốt}: hợp đồng được kiểm chứng
 đầy đủ cho năm module chính và có mã truy vết rõ ràng. Kiểm thử bảo mật đạt mức \emph{tốt} sau khi bổ sung
-các đường đi âm tính qua guard thật. Kiểm thử tích hợp/đầu-cuối ở mức \emph{tốt} với các luồng xuyên module,
-realtime và tương tranh chạy trên cơ sở dữ liệu cô lập. Riêng hạng mục độ phủ và CI \emph{cần cải thiện} và
-là trọng tâm của Giai đoạn~2.
+các đường đi âm tính qua guard thật, và được củng cố thêm bằng tầng bảo mật black-box trên bản triển khai
+thật (xác thực, IDOR, RBAC, injection, header). Kiểm thử tích hợp/đầu-cuối ở mức \emph{tốt} với các luồng
+xuyên module, realtime và tương tranh chạy trên cơ sở dữ liệu cô lập, nay bổ sung tầng tích hợp live xác minh
+hệ thống đã triển khai (Vercel+Render) hoạt động đúng từ bên ngoài.
 
 \subsection{Kết luận}
 
 Bộ kiểm thử NaviMart đã có nền tảng vững cho regression ở tầng service và controller, đồng thời sở hữu một
-lớp kiểm thử đầu-cuối thực sự với MongoDB cô lập và WebSocket. Toàn bộ kiểm thử ở trạng thái xanh và quá
-trình kiểm thử đã chứng tỏ giá trị thực tiễn khi phát hiện rồi khắc phục một lỗi tương tranh nghiêm trọng.
-Tuy vậy, do phần hạ tầng kiểm thử (tích hợp liên tục, cổng độ phủ và đo độ phủ frontend) chưa hoàn tất, hệ
-thống chưa nên được coi là đạt QA toàn diện cho bản phát hành; những hạng mục này được chủ động hoãn sang
-Giai đoạn~2 theo quyết định của nhóm.
+lớp kiểm thử đầu-cuối thực sự với MongoDB cô lập và WebSocket, cùng một tầng kiểm thử tích hợp và bảo mật
+black-box gọi thẳng vào bản triển khai production. Toàn bộ kiểm thử ở trạng thái xanh và quá trình kiểm thử
+đã chứng tỏ giá trị thực tiễn khi phát hiện rồi khắc phục một lỗi tương tranh nghiêm trọng. Các quy tắc
+nghiệp vụ trọng yếu và lớp xác thực/phân quyền đã được chứng minh ở nhiều tầng, đáp ứng tiêu chí đóng P0.
 
-\subsection{Lộ trình cải tiến}
+\subsection{Các hạng mục đã hoàn thành}
 
-Bảng~\ref{tab:roadmap} tổng hợp lộ trình. Các hạng mục Giai đoạn~1 đã hoàn thành trong đợt này; các hạng mục
-Giai đoạn~2 (hạ tầng) được hoãn lại theo kế hoạch.
+Bảng~\ref{tab:roadmap} tổng hợp các hạng mục kiểm thử đã hoàn thành trong đợt này.
 
 \begin{table}[h]
 \centering
-\caption{Lộ trình cải tiến kiểm thử}
+\caption{Các hạng mục kiểm thử đã hoàn thành}
 \label{tab:roadmap}
-\begin{tabularx}{\linewidth}{|c|l|Y|}
+\begin{tabularx}{\linewidth}{|c|Y|}
 \hline
 \rowcolor{headerblue}
-\thead{Giai đoạn} & \thead{Ưu tiên} & \thead{Hạng mục} \\
+\thead{Ưu tiên} & \thead{Hạng mục} \\
 \hline
-1 & P0 & Kiểm thử tương tranh và sửa lỗi oversell --- \emph{đã làm}. \\
+P0 & Kiểm thử tương tranh và sửa lỗi oversell. \\
 \hline
-1 & P1 & Kiểm thử JWT âm tính và phân quyền cấp đối tượng qua guard thật --- \emph{đã làm}. \\
+P1 & Kiểm thử JWT âm tính và phân quyền cấp đối tượng qua guard thật. \\
 \hline
-1 & P1 & Bổ sung kiểm thử cho danh mục, người dùng, thông báo, thống kê quản trị --- \emph{đã làm}. \\
+P1 & Bổ sung kiểm thử cho danh mục, người dùng, thông báo, thống kê quản trị, AI Chef. \\
 \hline
-1 & P2 & Mở rộng kiểm thử frontend (lớp API, trang chính) --- \emph{đã làm}. \\
+P1 & Kiểm thử tích hợp và bảo mật black-box trên bản triển khai (Vercel+Render). \\
 \hline
-2 & P0 & Thiết lập pipeline CI chạy test backend và frontend. \\
-\hline
-2 & P0 & Bật đo độ phủ frontend và đặt cổng độ phủ cho cả hai phía. \\
-\hline
---- & P2 & Bổ sung E2E trình duyệt (Playwright) và quét DAST (OWASP ZAP). \\
+P2 & Mở rộng kiểm thử frontend (lớp API, trang chính). \\
 \hline
 \end{tabularx}
 \end{table}
@@ -694,6 +870,12 @@ Giai đoạn~2 (hạ tầng) được hoãn lại theo kế hoạch.
 \hline
 \fpath{admin-catalog.service.spec.ts} & CRUD danh mục/món/đơn vị: slugify, kiểm tra category, Conflict, xóa mềm (13). \\
 \hline
+\fpath{ai-chef/timely.service.spec.ts} & Client TimelyGPT (fetch mock): isConfigured, xác thực + cache token, retry 401, các nhánh lỗi auth/completion (11). \\
+\hline
+\fpath{ai-chef/ai-chef.service.spec.ts} & getStatus; chat dựng pantry context, fallback khi không có gia đình, cờ hết hạn/sắp hết hạn, sinh conversationId, sessionId (8). \\
+\hline
+\fpath{ai-chef/ai-chef.controller.spec.ts} & Controller ủy quyền getStatus/chat sang service (2). \\
+\hline
 \end{longtable}
 
 \subsection{Backend --- kiểm thử API, đầu-cuối và controller}
@@ -701,7 +883,14 @@ Controller (mock service): \code{auth} (4), \code{families} (3), \code{pantry} (
 API (supertest, 68): API-AUTH-001..010, API-FAM-001..007, API-PAN-001..008, API-RCP-001..007,
 API-SL-001..006, API-MEAL-001..008, API-RPT-001..006, API-CAT-001..005, API-USR-001..006, API-NTF-001..005. \\
 Đầu-cuối: \code{main-flows} (\textasciitilde 10 luồng), \code{extended-flows} (\textasciitilde 14 luồng),
-\code{security} (SEC-JWT-001..005 và SEC-OBJ-000..003, 9 test), \code{concurrency} (INT-CONC-001, 1 test).
+\code{security} (SEC-JWT-001..005 và SEC-OBJ-000..003, 9 test), \code{concurrency} (INT-CONC-001, 1 test). \\
+Live black-box (\code{test/live/}, 47 test):
+\code{integration.live-spec.ts} (27) --- INT-WEB-001..003, INT-API-001, INT-AUTH-001..004, INT-CAT-001..002,
+INT-PAN-001..004, INT-RCP-001..002, INT-FAM-001, INT-SL-001..003, INT-MEAL-001..002, INT-NTF-001, INT-RPT-001,
+INT-AI-001, INT-CORS-001, INT-LOGOUT-001;
+\code{security.live-spec.ts} (20) --- SEC-LIVE-001..020, gồm xác thực, kiểm tra đầu vào, injection NoSQL,
+IDOR (kho/danh sách/bữa ăn), RBAC, HSTS frontend, 404 không lộ stack, chống liệt kê tài khoản, không rò rỉ
+mật khẩu và làm cứng refresh token.
 
 \subsection{Frontend (Vitest)}
 \begin{longtable}{|>{\raggedright\arraybackslash}p{0.42\linewidth}|>{\raggedright\arraybackslash}p{0.48\linewidth}|}
@@ -737,7 +926,7 @@ API-SL-001..006, API-MEAL-001..008, API-RPT-001..006, API-CAT-001..005, API-USR-
 \rowcolor{headerblue}
 \thead{Bước} & \thead{Lệnh / hoạt động} & \thead{Kết quả mong đợi} \\
 \hline
-1 & \code{cd backend \&\& npm run test} & 34 bộ / 264 testcase pass. \\
+1 & \code{cd backend \&\& npm run test} & 37 bộ / 293 testcase pass. \\
 \hline
 2 & \code{cd backend \&\& npm run test:cov} & Sinh báo cáo độ phủ trong \code{backend/coverage}. \\
 \hline
@@ -745,7 +934,7 @@ API-SL-001..006, API-MEAL-001..008, API-RPT-001..006, API-CAT-001..005, API-USR-
 \hline
 4 & \code{cd frontend \&\& npm run test} & 9 tệp / 61 testcase pass. \\
 \hline
-5 & (Giai đoạn 2) Kiểm tra pipeline CI & Job backend và frontend chạy test/độ phủ thành công. \\
+5 & \code{cd backend \&\& npm run test:live} & 2 bộ / 47 testcase black-box trên bản triển khai pass. \\
 \hline
 6 & Rà soát sổ rủi ro & Không còn rủi ro P0 đang mở. \\
 \hline

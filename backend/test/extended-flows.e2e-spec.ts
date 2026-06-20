@@ -224,7 +224,7 @@ describe('Extended flows (e2e)', () => {
       expect.arrayContaining([
         expect.objectContaining({
           code: 'g',
-          name: 'Gram',
+          name: 'Gam',
           type: 'weight',
         }),
       ]),
@@ -601,6 +601,9 @@ describe('Extended flows (e2e)', () => {
         name: 'Ca rot luoc ext',
         cookTimeMinutes: 10,
         servings: 2,
+        // Shared recipes are user submissions that require moderation; personal
+        // recipes auto-approve, so the moderation flow needs visibility 'shared'.
+        visibility: 'shared',
         ingredients: [{ foodId: carrotFoodId, quantity: 200, unit: 'g' }],
         steps: ['Rua ca rot', 'Luoc chin'],
       })
@@ -691,7 +694,8 @@ describe('Extended flows (e2e)', () => {
       id: expect.any(String),
       name: 'Mi goi ext',
       categoryId: newCategoryId,
-      defaultUnit: 'goi',
+      // Legacy unit code 'goi' is normalized to its canonical diacritic form.
+      defaultUnit: 'gói',
       barcode: '8934673009999',
     });
     const newFoodId = foodResponse.body.id;

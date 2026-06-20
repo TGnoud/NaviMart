@@ -7,6 +7,7 @@ import type { CatalogCategory, CatalogFood, ShoppingList } from '../api';
 import { onSocketEvent } from '../api/socket';
 import { useDialog } from '../contexts/DialogContext';
 import FoodAutocomplete from '../components/FoodAutocomplete';
+import CustomSelect from '../components/CustomSelect';
 import { ListRowsSkeleton, Skeleton } from '../components/Skeleton';
 
 export default function ListDetail() {
@@ -255,17 +256,17 @@ export default function ListDetail() {
                       placeholder="Thêm món đồ nhanh (gõ để tìm, Enter để thêm)..."
                       className="w-full pl-10 pr-4 py-3 rounded-none border border-[#c1c1c1] bg-surface-container-lowest font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container shadow-sm transition-all"
                     />
-                    <select
-                      value={newItemCategoryId}
-                      onChange={(event) => setNewItemCategoryId(event.target.value)}
-                      aria-label="Danh mục thực phẩm"
-                      className="w-full px-3 py-3 border border-[#c1c1c1] bg-surface-container-lowest text-on-surface focus:outline-none focus:border-primary-container"
-                    >
-                      <option value="">Chọn danh mục *</option>
-                      {categories.map((category) => (
-                        <option key={category.id} value={category.id}>{category.name}</option>
-                      ))}
-                    </select>
+                    <div className="w-full h-full min-h-[48px] bg-surface-container-lowest border border-[#c1c1c1] focus-within:border-primary-container focus-within:ring-1 focus-within:ring-primary-container transition-all">
+                      <CustomSelect
+                        value={newItemCategoryId}
+                        onChange={setNewItemCategoryId}
+                        options={[
+                          { value: '', label: 'Chọn danh mục *' },
+                          ...categories.map(category => ({ value: category.id, label: category.name }))
+                        ]}
+                        className="w-full h-[48px]"
+                      />
+                    </div>
                   </div>
                 )}
               </section>

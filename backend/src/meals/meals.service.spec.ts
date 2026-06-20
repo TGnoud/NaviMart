@@ -238,7 +238,7 @@ describe('MealsService', () => {
       const recipe = makeRecipe({
         servings: 2,
         ingredients: [
-          { name: 'Tao', quantity: 2, unit: 'qua', optional: false },
+          { name: 'Tao', quantity: 2, unit: 'quả', optional: false },
         ],
       });
       const meal = makeMealDoc({
@@ -256,7 +256,7 @@ describe('MealsService', () => {
         familyId: meal.familyId,
         name: 'Tao',
         quantity: 5,
-        unit: 'qua',
+        unit: 'quả',
         status: 'active',
         expiryDate: new Date('2026-06-25'),
         location: 'fridge',
@@ -285,7 +285,7 @@ describe('MealsService', () => {
       const recipe = makeRecipe({
         servings: 2,
         ingredients: [
-          { name: 'Tao', quantity: 4, unit: 'qua', optional: false },
+          { name: 'Tao', quantity: 4, unit: 'quả', optional: false },
         ],
       });
       const meal = makeMealDoc({
@@ -303,7 +303,7 @@ describe('MealsService', () => {
         familyId: meal.familyId,
         name: 'Tao',
         quantity: 1, // only 1 of 4 available
-        unit: 'qua',
+        unit: 'quả',
         status: 'active',
         expiryDate: new Date('2026-06-25'),
         location: 'fridge',
@@ -332,12 +332,12 @@ describe('MealsService', () => {
         meal.familyId,
         'Test Recipe',
         expect.arrayContaining([
-          expect.objectContaining({ name: 'Tao', quantity: 3, unit: 'qua' }),
+          expect.objectContaining({ name: 'Tao', quantity: 3, unit: 'quả' }),
         ]),
         meal.date,
       );
       expect(result.completion?.shortages).toEqual([
-        { name: 'Tao', unit: 'qua', missingQuantity: 3 },
+        { name: 'Tao', unit: 'quả', missingQuantity: 3 },
       ]);
       expect(result.completion?.shoppingListId).toBe(listId);
       // The created list is remembered on the meal so re-completing won't duplicate it.
@@ -359,7 +359,7 @@ describe('MealsService', () => {
             pantryItemId: pantryId,
             name: 'Tao',
             quantity: 4,
-            unit: 'qua',
+            unit: 'quả',
             expiryDate: new Date('2026-06-25'),
             location: 'fridge',
           },
@@ -372,7 +372,7 @@ describe('MealsService', () => {
         familyId: meal.familyId,
         name: 'Tao',
         quantity: 1,
-        unit: 'qua',
+        unit: 'quả',
         status: 'active',
         save: jest.fn().mockResolvedValue(undefined),
       };

@@ -5,7 +5,6 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
-import { UserInputLogsService } from '../admin/user-input-logs.service';
 import { AuthenticatedUser } from '../auth/types/authenticated-user.type';
 import { Category } from '../catalog/schemas/category.schema';
 import { Food } from '../catalog/schemas/food.schema';
@@ -40,7 +39,6 @@ export class RecipesService {
     private readonly pantryItemModel: Model<PantryItem>,
     private readonly missingIngredientsService: MissingIngredientsService,
     private readonly shoppingListGenerationService: ShoppingListGenerationService,
-    private readonly userInputLogsService: UserInputLogsService,
   ) {}
 
   async findAll(user: AuthenticatedUser, query: ListRecipesQueryDto) {
@@ -263,8 +261,6 @@ export class RecipesService {
           : 'pending',
     });
 
-    await this.logManualRecipeIngredients(user, recipe._id, dto.ingredients, ingredients);
-
     return this.toRecipeDetail(recipe);
   }
 
@@ -293,12 +289,6 @@ export class RecipesService {
     if (dto.ingredients !== undefined) {
       const ingredients = await this.buildIngredients(dto.ingredients);
       recipe.ingredients = ingredients as RecipeIngredient[];
-      await this.logManualRecipeIngredients(
-        user,
-        recipe._id,
-        dto.ingredients,
-        ingredients,
-      );
     }
     if (dto.steps !== undefined) recipe.steps = dto.steps;
     if (dto.nutrition !== undefined) recipe.nutrition = dto.nutrition;
@@ -546,38 +536,6 @@ export class RecipesService {
           unit: ingredient.unit!,
           optional: ingredient.optional ?? false,
         };
-      }),
-    );
-  }
-
-  private async logManualRecipeIngredients(
-    user: AuthenticatedUser,
-    recipeId: Types.ObjectId,
-    inputIngredients: RecipeIngredientDto[],
-    builtIngredients: Array<{
-      name: string;
-      categoryId?: Types.ObjectId;
-      unit?: string;
-    }>,
-  ) {
-    await Promise.all(
-      inputIngredients.map((ingredient, index) => {
-        if (ingredient.foodId || !ingredient.name) {
-          return Promise.resolve(null);
-        }
-
-        const builtIngredient = builtIngredients[index];
-        return this.userInputLogsService.createIfManual({
-          userId: new Types.ObjectId(user.userId),
-          familyId: user.activeFamilyId
-            ? new Types.ObjectId(user.activeFamilyId)
-            : undefined,
-          source: 'recipe_ingredient',
-          value: ingredient.name,
-          categoryId: builtIngredient?.categoryId,
-          unit: builtIngredient?.unit ?? ingredient.unit,
-          relatedId: recipeId,
-        });
       }),
     );
   }

@@ -42,6 +42,7 @@ describe('PantryService', () => {
   let foodModel: MockModel;
   let categoryModel: MockModel;
   let inventoryEventsService: { create: jest.Mock };
+  let userInputLogsService: { createIfManual: jest.Mock };
   let user: ReturnType<typeof makeUser>;
 
   beforeEach(() => {
@@ -50,6 +51,9 @@ describe('PantryService', () => {
     foodModel = createMockModel();
     categoryModel = createMockModel();
     inventoryEventsService = { create: jest.fn().mockResolvedValue(undefined) };
+    userInputLogsService = {
+      createIfManual: jest.fn().mockResolvedValue(null),
+    };
     user = makeUser();
 
     familyModel.findById.mockReturnValue(
@@ -68,6 +72,7 @@ describe('PantryService', () => {
       foodModel as never,
       categoryModel as never,
       inventoryEventsService as never,
+      userInputLogsService as never,
     );
   });
 

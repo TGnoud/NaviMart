@@ -122,6 +122,7 @@ export class NotificationsService {
               },
             },
           ] as never,
+          { updatePipeline: true },
         )
         .exec(),
       this.notificationModel
@@ -160,6 +161,7 @@ export class NotificationsService {
               },
             },
           ] as never,
+          { updatePipeline: true },
         )
         .exec(),
       this.notificationModel

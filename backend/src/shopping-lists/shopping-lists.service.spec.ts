@@ -51,6 +51,7 @@ describe('ShoppingListsService', () => {
   let pantryItemModel: MockModel;
   let inventoryEventsService: { create: jest.Mock; createMany: jest.Mock };
   let realtimeService: { emitToFamily: jest.Mock };
+  let userInputLogsService: { createIfManual: jest.Mock };
   let user: ReturnType<typeof makeUser>;
 
   beforeEach(() => {
@@ -64,6 +65,9 @@ describe('ShoppingListsService', () => {
       createMany: jest.fn().mockResolvedValue(undefined),
     };
     realtimeService = { emitToFamily: jest.fn() };
+    userInputLogsService = {
+      createIfManual: jest.fn().mockResolvedValue(null),
+    };
     user = makeUser();
 
     familyModel.findById.mockReturnValue(
@@ -84,6 +88,7 @@ describe('ShoppingListsService', () => {
       pantryItemModel as never,
       inventoryEventsService as never,
       realtimeService as never,
+      userInputLogsService as never,
     );
   });
 

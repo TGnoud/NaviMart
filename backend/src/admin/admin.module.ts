@@ -14,6 +14,12 @@ import { AdminStatsController } from './admin-stats.controller';
 import { AdminStatsService } from './admin-stats.service';
 import { AdminUsersController } from './admin-users.controller';
 import { AdminUsersService } from './admin-users.service';
+import {
+  UserInputLog,
+  UserInputLogSchema,
+} from './schemas/user-input-log.schema';
+import { UserInputLogsController } from './user-input-logs.controller';
+import { UserInputLogsService } from './user-input-logs.service';
 
 @Module({
   imports: [
@@ -24,6 +30,7 @@ import { AdminUsersService } from './admin-users.service';
       { name: Category.name, schema: CategorySchema },
       { name: Food.name, schema: FoodSchema },
       { name: Unit.name, schema: UnitSchema },
+      { name: UserInputLog.name, schema: UserInputLogSchema },
     ]),
   ],
   controllers: [
@@ -31,12 +38,15 @@ import { AdminUsersService } from './admin-users.service';
     AdminCatalogController,
     AdminRecipesController,
     AdminStatsController,
+    UserInputLogsController,
   ],
   providers: [
     AdminUsersService,
     AdminCatalogService,
     AdminRecipesService,
     AdminStatsService,
+    UserInputLogsService,
   ],
+  exports: [UserInputLogsService, MongooseModule],
 })
 export class AdminModule {}

@@ -6,6 +6,7 @@ import type {
   AdminFood,
   AdminRecipeRecord,
   AdminStatsResponse,
+  AdminUserInputLog,
   AdminUnit,
   AdminUserRecord,
   StorageLocation,
@@ -14,12 +15,13 @@ import { useAuth } from '../contexts/AuthContext';
 import { useDialog } from '../contexts/DialogContext';
 import { ListRowsSkeleton } from '../components/Skeleton';
 
-type Tab = 'overview' | 'users' | 'recipes' | 'catalog' | 'foods';
+type Tab = 'overview' | 'users' | 'recipes' | 'input-logs' | 'catalog' | 'foods';
 
 const TABS: { id: Tab; label: string; icon: string }[] = [
   { id: 'overview', label: 'Tổng quan', icon: 'dashboard' },
   { id: 'users', label: 'Người dùng', icon: 'group' },
   { id: 'recipes', label: 'Duyệt công thức', icon: 'menu_book' },
+  { id: 'input-logs', label: 'Dữ liệu nhập tay', icon: 'fact_check' },
   { id: 'foods', label: 'Thực phẩm', icon: 'grocery' },
   { id: 'catalog', label: 'Danh mục dữ liệu', icon: 'category' },
 ];
@@ -63,6 +65,18 @@ const STATUS_LABELS: Record<string, string> = {
   inactive: 'Ngừng hoạt động',
 };
 
+const INPUT_LOG_SOURCE_LABELS: Record<AdminUserInputLog['source'], string> = {
+  pantry: 'Kho thực phẩm',
+  shopping_list: 'Danh sách mua sắm',
+  recipe_ingredient: 'Nguyên liệu công thức',
+};
+
+const INPUT_LOG_STATUS_LABELS: Record<AdminUserInputLog['status'], string> = {
+  pending: 'Chờ xử lý',
+  approved: 'Đã duyệt',
+  rejected: 'Từ chối',
+};
+
 export default function AdminDashboard() {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
@@ -74,6 +88,8 @@ export default function AdminDashboard() {
   const [userSearch, setUserSearch] = useState('');
   const [recipes, setRecipes] = useState<AdminRecipeRecord[]>([]);
   const [recipeStatus, setRecipeStatus] = useState<'pending' | 'approved' | 'rejected'>('pending');
+  const [inputLogs, setInputLogs] = useState<AdminUserInputLog[]>([]);
+  const [inputLogStatus, setInputLogStatus] = useState<'pending' | 'approved' | 'rejected'>('pending');
   const [categories, setCategories] = useState<AdminCategory[]>([]);
   const [units, setUnits] = useState<AdminUnit[]>([]);
   const [newCategory, setNewCategory] = useState('');
@@ -103,6 +119,12 @@ export default function AdminDashboard() {
       } else if (tab === 'recipes') {
         const result = await adminApi.listModerationRecipes(recipeStatus);
         setRecipes(result.items);
+      } else if (tab === 'input-logs') {
+        const result = await adminApi.listUserInputLogs({
+          status: inputLogStatus,
+          limit: 100,
+        });
+        setInputLogs(result.items);
       } else if (tab === 'foods') {
         const [foodsData, categoriesData] = await Promise.all([
           adminApi.listFoods({ status: 'active', search: foodSearch.trim() || undefined }),
@@ -123,7 +145,7 @@ export default function AdminDashboard() {
     } finally {
       setLoading(false);
     }
-  }, [tab, userSearch, recipeStatus, foodSearch, handleError]);
+  }, [tab, userSearch, recipeStatus, inputLogStatus, foodSearch, handleError]);
 
   useEffect(() => {
     const debounced = (tab === 'users' && userSearch) || (tab === 'foods' && foodSearch);
@@ -160,6 +182,18 @@ export default function AdminDashboard() {
       setRecipes((items) => items.filter((r) => r.id !== recipe.id));
     } catch (err) {
       handleError(err, 'Không cập nhật được trạng thái công thức.');
+    }
+  };
+
+  const reviewInputLog = async (
+    log: AdminUserInputLog,
+    status: 'approved' | 'rejected',
+  ) => {
+    try {
+      await adminApi.setUserInputLogStatus(log.id, status);
+      setInputLogs((items) => items.filter((item) => item.id !== log.id));
+    } catch (err) {
+      handleError(err, 'Không cập nhật được dữ liệu nhập tay.');
     }
   };
 
@@ -505,6 +539,78 @@ export default function AdminDashboard() {
                   </div>
                 ))
               )}
+            </div>
+          ) : tab === 'input-logs' ? (
+            <div className="max-w-6xl space-y-4">
+              <div className="flex flex-wrap gap-2">
+                {(['pending', 'approved', 'rejected'] as const).map((status) => (
+                  <button
+                    key={status}
+                    onClick={() => setInputLogStatus(status)}
+                    className={`px-4 py-1.5 rounded-full font-label-sm transition-colors ${inputLogStatus === status ? 'bg-primary-container text-on-primary-container font-bold' : 'bg-surface-container-high text-on-surface-variant'}`}
+                  >
+                    {INPUT_LOG_STATUS_LABELS[status]}
+                  </button>
+                ))}
+              </div>
+
+              <div className="bg-surface-container-lowest rounded-xl border border-outline-variant/40 shadow-sm overflow-x-auto">
+                <table className="w-full min-w-[820px] text-left">
+                  <thead>
+                    <tr className="border-b border-outline-variant/40 font-label-sm text-on-surface-variant">
+                      <th className="px-4 py-3">Nội dung nhập</th>
+                      <th className="px-4 py-3">Nguồn</th>
+                      <th className="px-4 py-3">Đơn vị</th>
+                      <th className="px-4 py-3">Người nhập</th>
+                      <th className="px-4 py-3">Thời gian</th>
+                      <th className="px-4 py-3 text-right">Thao tác</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {inputLogs.map((log) => (
+                      <tr key={log.id} className="border-b border-outline-variant/20 hover:bg-surface-container-low/50">
+                        <td className="px-4 py-3">
+                          <p className="font-body-md font-bold text-on-surface">{log.value}</p>
+                          {log.note && <p className="font-label-sm text-on-surface-variant mt-1">{log.note}</p>}
+                        </td>
+                        <td className="px-4 py-3 text-on-surface-variant">{INPUT_LOG_SOURCE_LABELS[log.source]}</td>
+                        <td className="px-4 py-3 text-on-surface-variant">{log.unit ?? '—'}</td>
+                        <td className="px-4 py-3 text-on-surface-variant font-mono text-sm">{log.userId}</td>
+                        <td className="px-4 py-3 text-on-surface-variant">
+                          {log.createdAt ? new Date(log.createdAt).toLocaleString('vi-VN') : '—'}
+                        </td>
+                        <td className="px-4 py-3 text-right">
+                          {inputLogStatus === 'pending' ? (
+                            <div className="flex justify-end gap-2">
+                              <button
+                                onClick={() => reviewInputLog(log, 'approved')}
+                                className="text-primary p-2 hover:bg-primary-container/40 rounded-full transition-colors"
+                                title="Duyệt"
+                              >
+                                <span className="material-symbols-outlined text-[20px]">check</span>
+                              </button>
+                              <button
+                                onClick={() => reviewInputLog(log, 'rejected')}
+                                className="text-error p-2 hover:bg-error-container rounded-full transition-colors"
+                                title="Từ chối"
+                              >
+                                <span className="material-symbols-outlined text-[20px]">close</span>
+                              </button>
+                            </div>
+                          ) : (
+                            <span className="text-on-surface-variant">{INPUT_LOG_STATUS_LABELS[log.status]}</span>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                    {inputLogs.length === 0 && (
+                      <tr>
+                        <td colSpan={6} className="px-4 py-10 text-center text-on-surface-variant">Không có dữ liệu nhập tay trong mục này.</td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
           ) : tab === 'foods' ? (
             <div className="max-w-6xl space-y-4">

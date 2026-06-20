@@ -1,6 +1,11 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { FamilyPermissionGuard } from '../auth/guards/family-permission.guard';
+import {
+  UserInputLog,
+  UserInputLogSchema,
+} from '../admin/schemas/user-input-log.schema';
+import { UserInputLogsService } from '../admin/user-input-logs.service';
 import { Category, CategorySchema } from '../catalog/schemas/category.schema';
 import { Food, FoodSchema } from '../catalog/schemas/food.schema';
 import { Family, FamilySchema } from '../families/schemas/family.schema';
@@ -17,10 +22,11 @@ import { PantryItem, PantryItemSchema } from './schemas/pantry-item.schema';
       { name: Family.name, schema: FamilySchema },
       { name: Food.name, schema: FoodSchema },
       { name: Category.name, schema: CategorySchema },
+      { name: UserInputLog.name, schema: UserInputLogSchema },
     ]),
   ],
   controllers: [PantryController],
-  providers: [PantryService, FamilyPermissionGuard],
+  providers: [PantryService, FamilyPermissionGuard, UserInputLogsService],
   exports: [PantryService, MongooseModule],
 })
 export class PantryModule {}

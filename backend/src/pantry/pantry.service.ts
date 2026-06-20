@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
+import { UserInputLogsService } from '../admin/user-input-logs.service';
 import { AuthenticatedUser } from '../auth/types/authenticated-user.type';
 import { Category } from '../catalog/schemas/category.schema';
 import { Food } from '../catalog/schemas/food.schema';
@@ -32,6 +33,7 @@ export class PantryService {
     @InjectModel(Food.name) private readonly foodModel: Model<Food>,
     @InjectModel(Category.name) private readonly categoryModel: Model<Category>,
     private readonly inventoryEventsService: InventoryEventsService,
+    private readonly userInputLogsService: UserInputLogsService,
   ) {}
 
   async findAll(user: AuthenticatedUser, query: ListPantryItemsQueryDto) {
@@ -75,6 +77,18 @@ export class PantryService {
       createdBy: new Types.ObjectId(user.userId),
       note: dto.note,
     });
+
+    if (!dto.foodId && dto.name) {
+      await this.userInputLogsService.createIfManual({
+        userId: new Types.ObjectId(user.userId),
+        familyId,
+        source: 'pantry',
+        value: dto.name,
+        categoryId: item.categoryId,
+        unit: item.unit,
+        relatedId: item._id,
+      });
+    }
 
     return this.toPantryItemResponse(item);
   }
@@ -172,6 +186,18 @@ export class PantryService {
         source: 'manual',
         createdBy: new Types.ObjectId(user.userId),
         note: dto.note,
+      });
+    }
+
+    if (!dto.foodId && dto.name !== undefined) {
+      await this.userInputLogsService.createIfManual({
+        userId: new Types.ObjectId(user.userId),
+        familyId: item.familyId,
+        source: 'pantry',
+        value: dto.name,
+        categoryId: item.categoryId,
+        unit: item.unit,
+        relatedId: item._id,
       });
     }
 

@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
+import { UserInputLogsService } from '../admin/user-input-logs.service';
 import { AuthenticatedUser } from '../auth/types/authenticated-user.type';
 import { Category } from '../catalog/schemas/category.schema';
 import { Food, FOOD_STORAGE_LOCATIONS } from '../catalog/schemas/food.schema';
@@ -42,6 +43,7 @@ export class ShoppingListsService {
     private readonly pantryItemModel: Model<PantryItem>,
     private readonly inventoryEventsService: InventoryEventsService,
     private readonly realtimeService: RealtimeService,
+    private readonly userInputLogsService: UserInputLogsService,
   ) {}
 
   async findAll(
@@ -132,6 +134,19 @@ export class ShoppingListsService {
     list.items.push(item as ShoppingListItem);
     await list.save();
 
+    const savedItem = list.items[list.items.length - 1];
+    if (!dto.foodId && dto.name) {
+      await this.userInputLogsService.createIfManual({
+        userId: new Types.ObjectId(user.userId),
+        familyId: list.familyId,
+        source: 'shopping_list',
+        value: dto.name,
+        categoryId: savedItem.categoryId,
+        unit: savedItem.unit,
+        relatedId: savedItem._id,
+      });
+    }
+
     return this.emitListUpdated(this.toShoppingListResponse(list));
   }
 
@@ -180,6 +195,19 @@ export class ShoppingListsService {
     }
 
     await list.save();
+
+    if (!item.foodId && dto.name !== undefined) {
+      await this.userInputLogsService.createIfManual({
+        userId: new Types.ObjectId(user.userId),
+        familyId: list.familyId,
+        source: 'shopping_list',
+        value: dto.name,
+        categoryId: item.categoryId,
+        unit: item.unit,
+        relatedId: item._id,
+      });
+    }
+
     return this.emitListUpdated(this.toShoppingListResponse(list));
   }
 

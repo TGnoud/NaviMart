@@ -26,7 +26,6 @@ describe('RecipesService', () => {
   let familyModel: MockModel;
   let pantryItemModel: MockModel;
   let shoppingListGenerationService: { generateFromRecipe: jest.Mock };
-  let userInputLogsService: { createIfManual: jest.Mock };
 
   beforeEach(() => {
     recipeModel = createMockModel();
@@ -46,9 +45,6 @@ describe('RecipesService', () => {
     shoppingListGenerationService = {
       generateFromRecipe: jest.fn().mockResolvedValue({ ok: true }),
     };
-    userInputLogsService = {
-      createIfManual: jest.fn().mockResolvedValue(null),
-    };
 
     service = new RecipesService(
       recipeModel as never,
@@ -59,7 +55,6 @@ describe('RecipesService', () => {
       pantryItemModel as never,
       missingIngredientsService,
       shoppingListGenerationService as never,
-      userInputLogsService as never,
     );
   });
 

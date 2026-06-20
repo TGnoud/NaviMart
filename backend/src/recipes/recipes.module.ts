@@ -1,10 +1,5 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import {
-  UserInputLog,
-  UserInputLogSchema,
-} from '../admin/schemas/user-input-log.schema';
-import { UserInputLogsService } from '../admin/user-input-logs.service';
 import { Category, CategorySchema } from '../catalog/schemas/category.schema';
 import { Food, FoodSchema } from '../catalog/schemas/food.schema';
 import { Family, FamilySchema } from '../families/schemas/family.schema';
@@ -33,7 +28,6 @@ import { RecipesService } from './recipes.service';
       { name: Family.name, schema: FamilySchema },
       { name: PantryItem.name, schema: PantryItemSchema },
       { name: ShoppingList.name, schema: ShoppingListSchema },
-      { name: UserInputLog.name, schema: UserInputLogSchema },
     ]),
   ],
   controllers: [RecipesController],
@@ -41,7 +35,6 @@ import { RecipesService } from './recipes.service';
     RecipesService,
     MissingIngredientsService,
     ShoppingListGenerationService,
-    UserInputLogsService,
   ],
   exports: [RecipesService, MongooseModule],
 })

@@ -548,22 +548,6 @@ export type AdminStatsResponse = {
   families: { total: number };
 };
 
-export type AdminUserInputLog = {
-  id: string;
-  userId: string;
-  familyId?: string;
-  source: 'pantry' | 'shopping_list' | 'recipe_ingredient';
-  value: string;
-  categoryId?: string;
-  unit?: string;
-  relatedId?: string;
-  status: 'pending' | 'approved' | 'rejected';
-  reviewedBy?: string;
-  reviewedAt?: string;
-  note?: string;
-  createdAt?: string;
-};
-
 export const adminApi = {
   stats: () => apiRequest<AdminStatsResponse>('/admin/stats'),
 
@@ -590,24 +574,6 @@ export const adminApi = {
 
   setRecipeStatus: (recipeId: string, status: 'approved' | 'rejected', note?: string) =>
     apiRequest<AdminRecipeRecord>(`/admin/recipes/${recipeId}/status`, {
-      method: 'PATCH',
-      body: { status, note },
-    }),
-
-  listUserInputLogs: (query: {
-    status?: 'pending' | 'approved' | 'rejected';
-    source?: 'pantry' | 'shopping_list' | 'recipe_ingredient';
-    page?: number;
-    limit?: number;
-  } = {}) =>
-    apiRequest<Paginated<AdminUserInputLog>>('/admin/input-logs', { query }),
-
-  setUserInputLogStatus: (
-    logId: string,
-    status: 'approved' | 'rejected',
-    note?: string,
-  ) =>
-    apiRequest<AdminUserInputLog>(`/admin/input-logs/${logId}/status`, {
       method: 'PATCH',
       body: { status, note },
     }),

@@ -22,12 +22,15 @@ export default function FamilySharing() {
   const { showAlert, showConfirm } = useDialog();
   const { user, refreshSession } = useAuth();
   const [family, setFamily] = useState<Family | null>(null);
+  const [families, setFamilies] = useState<Family[]>([]);
   const [loading, setLoading] = useState(true);
 
   const [isQRModalOpen, setIsQRModalOpen] = useState(false);
   const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [invite, setInvite] = useState<FamilyInvite | null>(null);
   const [joinCode, setJoinCode] = useState('');
+  const [newFamilyName, setNewFamilyName] = useState('');
   const [working, setWorking] = useState(false);
 
   const handleError = useCallback(
@@ -40,7 +43,12 @@ export default function FamilySharing() {
   const loadFamily = useCallback(async () => {
     setLoading(true);
     try {
-      setFamily(await familyApi.current());
+      const [current, list] = await Promise.all([
+        familyApi.current(),
+        familyApi.list(),
+      ]);
+      setFamily(current);
+      setFamilies(list);
     } catch (err) {
       handleError(err, 'Không tải được thông tin gia đình.');
     } finally {
@@ -67,6 +75,38 @@ export default function FamilySharing() {
       setIsQRModalOpen(true);
     } catch (err) {
       handleError(err, 'Không tạo được mã mời.');
+    } finally {
+      setWorking(false);
+    }
+  };
+
+  const handleSwitchFamily = async (familyId: string) => {
+    if (working || familyId === family?.id) return;
+    setWorking(true);
+    try {
+      await familyApi.switch(familyId);
+      await refreshSession();
+      await loadFamily();
+    } catch (err) {
+      handleError(err, 'Không thể chuyển đổi nhóm gia đình.');
+    } finally {
+      setWorking(false);
+    }
+  };
+
+  const handleCreateFamily = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newFamilyName.trim() || working) return;
+    setWorking(true);
+    try {
+      await familyApi.create(newFamilyName.trim());
+      await refreshSession();
+      setIsCreateModalOpen(false);
+      setNewFamilyName('');
+      showAlert('Đã tạo nhóm gia đình mới!');
+      await loadFamily();
+    } catch (err) {
+      handleError(err, 'Không tạo được nhóm gia đình.');
     } finally {
       setWorking(false);
     }
@@ -158,6 +198,13 @@ export default function FamilySharing() {
                   </div>
                   <div className="flex gap-3 w-full md:w-auto">
                     <button
+                      onClick={() => setIsCreateModalOpen(true)}
+                      className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-secondary text-on-secondary font-body-md text-body-md px-4 py-2 rounded-lg hover:opacity-90 transition-opacity shadow-sm"
+                    >
+                      <span className="material-symbols-outlined text-sm">add</span>
+                      Tạo nhóm mới
+                    </button>
+                    <button
                       onClick={() => setIsJoinModalOpen(true)}
                       className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-primary-container text-on-primary-container font-body-md text-body-md px-4 py-2 rounded-lg hover:opacity-90 transition-opacity"
                     >
@@ -174,6 +221,34 @@ export default function FamilySharing() {
                         {working ? 'Đang tạo...' : 'Tạo mã mời'}
                       </button>
                     )}
+                  </div>
+                </div>
+
+                <div className="mb-8 bg-surface-container-lowest rounded-xl p-6 shadow-[0_2px_8px_rgba(0,0,0,0.05)] border border-outline-variant/30">
+                  <h3 className="font-headline-sm text-headline-sm text-on-surface mb-4">Danh sách Nhóm Gia Đình</h3>
+                  <div className="space-y-3">
+                    {families.map((f) => (
+                      <div key={f.id} className={`flex items-center justify-between p-4 rounded-lg border ${f.id === family?.id ? 'bg-primary-container/20 border-primary' : 'bg-surface-container-lowest border-outline-variant hover:bg-surface-container-low'} transition-colors`}>
+                        <div>
+                          <p className="font-body-lg text-body-lg font-bold text-on-surface flex items-center gap-2">
+                            {f.name}
+                            {f.id === family?.id && <span className="text-xs bg-primary text-on-primary px-2 py-0.5 rounded-full font-bold">Đang chọn</span>}
+                          </p>
+                          <p className="font-label-sm text-label-sm text-on-surface-variant mt-1">
+                            {f.members.length} thành viên
+                          </p>
+                        </div>
+                        {f.id !== family?.id && (
+                          <button
+                            onClick={() => handleSwitchFamily(f.id)}
+                            disabled={working}
+                            className="px-4 py-2 bg-surface-container-high hover:bg-surface-container-highest text-on-surface rounded-lg font-label-sm transition-colors disabled:opacity-50"
+                          >
+                            Chuyển
+                          </button>
+                        )}
+                      </div>
+                    ))}
                   </div>
                 </div>
 
@@ -362,6 +437,53 @@ export default function FamilySharing() {
                 <span className="font-label-sm text-on-surface-variant block mb-1">Mã mời (hết hạn {new Date(invite.expiresAt).toLocaleString('vi-VN')})</span>
                 <span className="font-headline-sm font-bold text-on-surface tracking-widest select-all">{invite.inviteCode}</span>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* Modal: Create Family */}
+        {isCreateModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+            <div className="bg-surface rounded-2xl p-6 w-full max-w-md shadow-xl border border-outline-variant/30">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="font-headline-sm text-headline-sm text-on-surface">Tạo nhóm gia đình mới</h2>
+                <button onClick={() => setIsCreateModalOpen(false)} className="p-2 text-on-surface-variant hover:bg-surface-container-high rounded-full transition-colors">
+                  <span className="material-symbols-outlined">close</span>
+                </button>
+              </div>
+
+              <form onSubmit={handleCreateFamily}>
+                <div className="space-y-4 mb-6">
+                  <div>
+                    <label className="block font-label-md text-on-surface mb-1">Tên nhóm gia đình</label>
+                    <input
+                      type="text"
+                      required
+                      value={newFamilyName}
+                      onChange={e => setNewFamilyName(e.target.value)}
+                      placeholder="Nhập tên nhóm..."
+                      className="w-full bg-surface-container-lowest border border-outline-variant rounded-xl px-4 py-3 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex justify-end gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setIsCreateModalOpen(false)}
+                    className="px-5 py-2.5 rounded-lg font-label-md font-bold text-on-surface-variant hover:bg-surface-container-high transition-colors"
+                  >
+                    Hủy
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={working || !newFamilyName.trim()}
+                    className="px-5 py-2.5 rounded-lg font-label-md font-bold bg-primary text-on-primary hover:opacity-90 transition-opacity shadow-sm disabled:opacity-50"
+                  >
+                    {working ? 'Đang tạo...' : 'Tạo mới'}
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
         )}

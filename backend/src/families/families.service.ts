@@ -67,6 +67,44 @@ export class FamiliesService {
     return this.toFamilyResponse(family);
   }
 
+  async listForUser(user: AuthenticatedUser) {
+    const families = await this.familyModel
+      .find({
+        'members': {
+          $elemMatch: {
+            userId: new Types.ObjectId(user.userId),
+            status: 'active',
+          },
+        },
+      })
+      .populate('members.userId', 'firstName lastName displayName email phone avatarUrl')
+      .exec();
+
+    return families.map((family) => this.toFamilyResponse(family));
+  }
+
+  async switchFamily(user: AuthenticatedUser, familyId: string) {
+    const family = await this.familyModel
+      .findById(familyId)
+      .populate('members.userId', 'firstName lastName displayName email phone avatarUrl')
+      .exec();
+
+    if (!family) {
+      throw new NotFoundException('Family not found');
+    }
+
+    this.assertActiveMember(family, user.userId);
+
+    await this.userModel
+      .updateOne(
+        { _id: new Types.ObjectId(user.userId) },
+        { $set: { activeFamilyId: family._id } }
+      )
+      .exec();
+
+    return this.toFamilyResponse(family);
+  }
+
   async createInvite(
     user: AuthenticatedUser,
     createFamilyInviteDto: CreateFamilyInviteDto,

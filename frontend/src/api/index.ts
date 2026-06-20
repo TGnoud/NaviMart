@@ -421,6 +421,10 @@ export type RecipeEditorInput = {
 
 export const familyApi = {
   current: () => apiRequest<Family>('/family'),
+  
+  list: () => apiRequest<Family[]>('/family/list'),
+  
+  switch: (familyId: string) => apiRequest<Family>(`/family/${familyId}/switch`, { method: 'POST' }),
 
   create: (name: string) => apiRequest<Family>('/family', { method: 'POST', body: { name } }),
 

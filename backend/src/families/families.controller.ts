@@ -39,6 +39,21 @@ export class FamiliesController {
     return this.familiesService.getCurrentFamily(user);
   }
 
+  @Get('list')
+  @ApiOkResponse({ description: 'List of user families.' })
+  listForUser(@CurrentUser() user: AuthenticatedUser) {
+    return this.familiesService.listForUser(user);
+  }
+
+  @Post(':id/switch')
+  @ApiOkResponse({ description: 'Switch active family.' })
+  switchFamily(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id') familyId: string,
+  ) {
+    return this.familiesService.switchFamily(user, familyId);
+  }
+
   @Post()
   @ApiCreatedResponse({ description: 'Family created.' })
   create(

@@ -1,557 +1,1296 @@
-﻿\documentclass[../main.tex]{subfiles}
+\documentclass[../main.tex]{subfiles}
 \begin{document}
+\setlength{\tabcolsep}{3pt}
 
-\section{Giới thiệu chung}
-Các tác nhân của hệ thống:
+\section{Bối cảnh hệ thống}
+NaviMart là hệ thống hỗ trợ các hộ gia đình quản lý việc đi chợ, lưu trữ thực phẩm, lên kế hoạch bữa ăn và gợi ý món ăn dựa trên lượng thực phẩm hiện có. Hệ thống hướng tới việc giảm thời gian lập danh sách mua sắm, hạn chế mua trùng lặp, giảm lãng phí thực phẩm và giúp các thành viên trong gia đình cùng theo dõi tình trạng thực phẩm chung.
 
-\begin{longtable}{|p{0.95\textwidth}|}|p{0.3\textwidth}|p{0.3\textwidth}|}
-\hline
-STT & Tên tác nhân & Mô tả ngắn \\
-\hline
-1 & Khách & Khách ghé thăm trang web, có thể là người dùng khi chưa đăng nhập hệ thống, có thể xem và sử dụng các tính năng không cần đăng nhập \\
-\hline
-2 & Người dùng & Người dùng đã đăng nhập hệ thống, có thể sử dụng tất cả tính năng của trang web \\
-\hline
-\end{longtable}
+Về phạm vi nghiệp vụ, hệ thống tập trung vào vòng đời của thực phẩm trong gia đình: người dùng lập danh sách mua sắm, đánh dấu các mặt hàng đã mua, hệ thống cập nhật thực phẩm vào kho/tủ lạnh, sau đó dùng dữ liệu kho để gợi ý món ăn, lên lịch bữa ăn và thống kê tình hình tiêu dùng. Các chức năng quản trị được tách riêng để quản lý dữ liệu nền, người dùng và nội dung công thức nấu ăn.
 
+\section{Các tác nhân}
+Các tác nhân của hệ thống được xác định dựa trên các biểu đồ use case. Ở mức tổng quan, hệ thống có ba tác nhân chính là Khách, Người dùng và Quản trị viên. Ngoài ra, trong một số module chi tiết còn có các tác nhân hỗ trợ tự động là Hệ thống và Hệ thống AI.
 
-Xác định các ca sử dụng:
+\begin{table}[H]
+    \centering
+    \caption{Danh sách tác nhân của hệ thống}
+    \begin{tabular}{|p{3.4cm}|p{9.9cm}|}
+        \hline
+        \cellcolor[HTML]{D5F5E3}\textbf{Tác nhân} & \cellcolor[HTML]{D5F5E3}\textbf{Mô tả} \\ \hline
+        Khách (Guest) & Người chưa có tài khoản hoặc chưa bắt đầu sử dụng hệ thống. Theo biểu đồ use case, Khách có thể đăng ký tài khoản và đăng nhập qua mạng xã hội. \\ \hline
+        Người dùng (User) & Người có tài khoản trong hệ thống. Người dùng có thể đăng nhập bằng Email/SĐT, quản lý tài khoản cá nhân, tham gia nhóm gia đình, quản lý danh sách mua sắm, kho thực phẩm, kế hoạch bữa ăn, công thức và thống kê. \\ \hline
+        Quản trị viên (Admin) & Người vận hành hệ thống, có quyền xem danh sách người dùng, khóa/mở khóa tài khoản, quản lý master data, kiểm duyệt công thức và xem dashboard tổng quan. \\ \hline
+        Hệ thống & Tác nhân hỗ trợ tự động trong module quản lý tủ lạnh/kho thực phẩm, thực hiện tự động trừ số lượng thực phẩm khi nấu ăn và thông báo thực phẩm sắp hết hạn. \\ \hline
+        Hệ thống AI & Tác nhân hỗ trợ trong module gợi ý món ăn, tham gia vào chức năng gợi ý món ăn theo Pantry và chat tương tác AI Chef. \\ \hline
+    \end{tabular}
+\end{table}
 
-\begin{longtable}{|p{0.95\textwidth}|}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|}
-\hline
-STT & Ca sử dụng & Mô tả ngắn & Tác nhân \\
-\hline
-1 & Đăng nhập & Đăng nhập bằng username và password đã đăng ký để cóthể sử dụng được các chức năng của ứng dụng & Khách \\
-\hline
-2 & Đăng ký & Đăng ký một tài khoản mới, lưu trữ vào database & Khách \\
-\hline
-3 & Đăng xuất & Thoát trạng thái đăng nhập của một tài khoản & Người dùng \\
-\hline
-4 & Cập nhật thông tin tài khoản & Cập nhật thông tin tài khoản cho phép người dùng xem cũng như chỉnh sửa lại những thông tin của mình như tên, username & Người dùng \\
-\hline
-5 & Tìm kiếm & Tìm kiếm theo từ vựng, ngữ pháp, … & Khách, người dùng \\
-\hline
-6 & Xem từ vựng yêu thích & Xem được từ vựng mình đã đánh dấu yêu thích ở mục từ vựng & Người dùng \\
-\hline
-7 & Xem bảng xếp hạng & Xem bảng xếp hạng của mình và những người chơi cùng & Người dùng \\
-\hline
-8 & Đóng góp từ vựng & Đóng góp thêm từ vựng mới cho ứng dụng & Khách, người dùng \\
-\hline
-9 & Học từ vựng, ngữ pháp & Học từ vựng, ngữ pháp. Với người dùng có thể bấm yêu thích từ vựng để có thể xem lại trong mục từ vựng yêu thích & Khách, Người dùng \\
-\hline
-10 & Chơi game & Chơi các game để rèn luyện trí nhớ & Khách, người dùng \\
-\hline
-11 & Đánh dấu từ vựng yêu thích.Xóa từ vựng yêu thích & Đánh dấu từ vựng để đưa nó vào danh sách từ vựng yêu thích.Xóa từ vựng yêu thích để xóa nó ra khỏi danh sách từ vựng yêu thích & Người dùng \\
-\hline
- \\
-\hline
-\end{longtable}
+\section{Biểu đồ use case tổng quan}
+Biểu đồ use case tổng quan mô tả các module chính của NaviMart và mối liên hệ giữa từng tác nhân với hệ thống. Ở mức tổng quan, NaviMart gồm tám module: Xác thực và quản lý tài khoản, Quản lý nhóm gia đình, Quản lý danh sách mua sắm, Quản lý tủ lạnh/kho thực phẩm, Lên kế hoạch bữa ăn, Gợi ý và công thức nấu ăn, Báo cáo và thống kê, Quản trị hệ thống.
 
+Khách chỉ tương tác với nhóm chức năng xác thực và quản lý tài khoản. Sau khi đăng nhập, Người dùng có thể truy cập các chức năng phục vụ sinh hoạt gia đình như quản lý nhóm gia đình, danh sách mua sắm, tủ lạnh, kế hoạch bữa ăn, gợi ý món ăn và thống kê. Quản trị viên sử dụng nhóm chức năng xác thực và quản trị hệ thống để theo dõi, kiểm soát dữ liệu vận hành.
 
-\section{\#\# **2.2. Biểu đồ Usecase}
-Biểu đồ Use Case tổng quan
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.8\textwidth]{placeholder}
+\begin{figure}[!htbp]
+    \centering
+    \includegraphics[width=0.95\textwidth]{usecase/overview_system.png}
+    \caption{Biểu đồ use case tổng quan hệ thống NaviMart}
+    \label{fig:overview-usecase}
 \end{figure}
 
-\section{Đặc tả usecase}
-\textbf{Đặc tả use case UC001 “Đăng nhập”}
+\section{Phân rã use case theo module}
+Các use case tổng quan được phân rã thành các nhóm chức năng nhỏ hơn để thuận tiện cho việc đặc tả chi tiết ở chương sau.
 
-\begin{longtable}{|p{0.95\textwidth}|}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|}
-\hline
-Mã Use case & UC001 & Tên Use case & Đăng nhập \\
-\hline
-Tác n­­­hân & Khách \\
-\hline
-Tiền điều kiện & Không \\
-\hline
-Luồng sự kiện chính(Thành công) & STTThực hiện bởiHành động1.Kháchchọn chức năng Đăng nhập2.Hệ thốnghiển thị giao diện đăng nhập3.Kháchnhập email và mật khẩu (mô tả phía dưới *)4.Kháchyêu cầu đăng nhập5.Hệ thốngkiểm tra xem khách đã nhập các trường bắt buộc nhập hay chưa6.Hệ thốngkiểm tra email và mật khẩu có hợp lệ không7.Hệ thốnghiển thị giao diện trang chủ cho người dùng & STT & Thực hiện bởi & Hành động & 1. & Khách & chọn chức năng Đăng nhập & 2. & Hệ thống & hiển thị giao diện đăng nhập & 3. & Khách & nhập email và mật khẩu (mô tả phía dưới *) & 4. & Khách & yêu cầu đăng nhập & 5. & Hệ thống & kiểm tra xem khách đã nhập các trường bắt buộc nhập hay chưa & 6. & Hệ thống & kiểm tra email và mật khẩu có hợp lệ không & 7. & Hệ thống & hiển thị giao diện trang chủ cho người dùng \\
-\hline
-STT & Thực hiện bởi & Hành động \\
-\hline
-1. & Khách & chọn chức năng Đăng nhập \\
-\hline
-2. & Hệ thống & hiển thị giao diện đăng nhập \\
-\hline
-3. & Khách & nhập email và mật khẩu (mô tả phía dưới *) \\
-\hline
-4. & Khách & yêu cầu đăng nhập \\
-\hline
-5. & Hệ thống & kiểm tra xem khách đã nhập các trường bắt buộc nhập hay chưa \\
-\hline
-6. & Hệ thống & kiểm tra email và mật khẩu có hợp lệ không \\
-\hline
-7. & Hệ thống & hiển thị giao diện trang chủ cho người dùng \\
-\hline
-\end{longtable}
-</td></tr><tr><td><p><strong>Luồng sự kiện thay thế</strong></p></td><td colspan="3">\begin{longtable}{|p{0.95\textwidth}|}|p{0.3\textwidth}|p{0.3\textwidth}|}
-\hline
-STT & Thực hiện bởi & Hành động \\
-\hline
-6a. & Hệ thống & thông báo lỗi: Cần nhập các trường bắt buộc nhập nếu khách nhập thiếu \\
-\hline
-7a. & Hệ thống & thông báo lỗi: Email và/hoặc mật khẩu chưa đúng nếu không tìm thấy email và mật khẩu trong hệ thống \\
-\hline
-\end{longtable}
-</td></tr><tr><td><p><strong>Hậu điều kiện</strong></p></td><td colspan="3"><p>Không</p></td></tr></tbody></table>
+\subsection{Module xác thực và quản lý tài khoản}
+Module xác thực và quản lý tài khoản cho phép Khách đăng ký tài khoản và đăng nhập qua mạng xã hội. Người dùng có thể đăng nhập bằng Email/SĐT, quên mật khẩu, đổi mật khẩu, đăng xuất, xem và cập nhật thông tin cá nhân.
 
-\* Dữ liệu đầu vào của thông tin cá nhân gồm các trường dữ liệu sau:
-
-\begin{longtable}{|p{0.95\textwidth}|}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|}
-\hline
-STT & Trường dữ liệu & Mô tả & Bắt buộc? & Điều kiện hợp lệ & Ví dụ \\
-\hline
-1. & Email &  & Có &  & li@gmail.com \\
-\hline
-2. & Mật khẩu &  & Có &  & 123456 \\
-\hline
-\end{longtable}
-
-
-\textbf{Đặc tả use case UC002 “Đăng ký”}
-
-\begin{longtable}{|p{0.95\textwidth}|}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|}
-\hline
-Mã Use case & UC002 & Tên Use case & Đăng ký \\
-\hline
-Tác nhân & Khách \\
-\hline
-Tiền điều kiện & Không \\
-\hline
-Luồng sự kiện chính(Thành công) & STTThực hiện bởiHành động1.Kháchchọn chức năng Đăng ký2.Hệ thốnghiển thị giao diện đăng nhập3.Kháchnhập email, họ tên và mật khẩu (mô tả phía dưới *)4.Kháchyêu cầu đăng ký5.Hệ thốngkiểm tra xem khách đã nhập các trường bắt buộc nhập hay chưa6.Hệ thốngkiểm tra email có hợp lệ không7.Hệ thốngkiểm tra xem email đã được sử dụng hay chưa8.Hệ thốnglưu thông tin đăng ký của khách vào database và hiển thị thông báo đăng ký thành công9.Hệ thốnghiển thị giao diện trang chủ & STT & Thực hiện bởi & Hành động & 1. & Khách & chọn chức năng Đăng ký & 2. & Hệ thống & hiển thị giao diện đăng nhập & 3. & Khách & nhập email, họ tên và mật khẩu (mô tả phía dưới *) & 4. & Khách & yêu cầu đăng ký & 5. & Hệ thống & kiểm tra xem khách đã nhập các trường bắt buộc nhập hay chưa & 6. & Hệ thống & kiểm tra email có hợp lệ không & 7. & Hệ thống & kiểm tra xem email đã được sử dụng hay chưa & 8. & Hệ thống & lưu thông tin đăng ký của khách vào database và hiển thị thông báo đăng ký thành công & 9. & Hệ thống & hiển thị giao diện trang chủ \\
-\hline
-STT & Thực hiện bởi & Hành động \\
-\hline
-1. & Khách & chọn chức năng Đăng ký \\
-\hline
-2. & Hệ thống & hiển thị giao diện đăng nhập \\
-\hline
-3. & Khách & nhập email, họ tên và mật khẩu (mô tả phía dưới *) \\
-\hline
-4. & Khách & yêu cầu đăng ký \\
-\hline
-5. & Hệ thống & kiểm tra xem khách đã nhập các trường bắt buộc nhập hay chưa \\
-\hline
-6. & Hệ thống & kiểm tra email có hợp lệ không \\
-\hline
-7. & Hệ thống & kiểm tra xem email đã được sử dụng hay chưa \\
-\hline
-8. & Hệ thống & lưu thông tin đăng ký của khách vào database và hiển thị thông báo đăng ký thành công \\
-\hline
-9. & Hệ thống & hiển thị giao diện trang chủ \\
-\hline
-\end{longtable}
-</td></tr><tr><td><p><strong>Luồng sự kiện thay thế</strong></p></td><td colspan="3">\begin{longtable}{|p{0.95\textwidth}|}|p{0.3\textwidth}|p{0.3\textwidth}|}
-\hline
-STT & Thực hiện bởi & Hành động \\
-\hline
-5a. & Hệ thống & thông báo lỗi: Cần nhập các trường bắt buộc nhập nếu khách nhập thiếu \\
-\hline
-6a. & Hệ thống & thông báo lỗi: Email chưa hợp lệ \\
-\hline
-7a. & Hệ thống & thông báo lỗi: Email đã được sử dụng \\
-\hline
-\end{longtable}
-</td></tr><tr><td><p><strong>Hậu điều kiện</strong></p></td><td colspan="3"><p>Không</p></td></tr></tbody></table>
-
-\* Dữ liệu đầu vào của thông tin cá nhân gồm các trường dữ liệu sau:
-
-\begin{longtable}{|p{0.95\textwidth}|}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|}
-\hline
-STT & Trường dữ liệu & Mô tả & Bắt buộc? & Điều kiện hợp lệ & Ví dụ \\
-\hline
-1. & Email &  & Có &  & li@gmail.com \\
-\hline
-2. & Tên &  & Có &  & Li \\
-\hline
-3. & Mật khẩu &  & Có &  & 123456 \\
-\hline
-\end{longtable}
-
-
-\textbf{Đặc tả use case UC003 “Đăng xuất”}
-
-\begin{longtable}{|p{0.95\textwidth}|}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|}
-\hline
-Mã Use case & UC003 & Tên Use case & Đăng xuất \\
-\hline
-Tác nhân & Người dùng \\
-\hline
-Tiền điều kiện & Không \\
-\hline
-Luồng sự kiện chính(Thành công) & STTThực hiện bởiHành động1.Người dùngchọn chức năng Đăng xuất2.Hệ thốngđăng xuất tài khoản hiện có, trở về giao diện trang chủ & STT & Thực hiện bởi & Hành động & 1. & Người dùng & chọn chức năng Đăng xuất & 2. & Hệ thống & đăng xuất tài khoản hiện có, trở về giao diện trang chủ \\
-\hline
-STT & Thực hiện bởi & Hành động \\
-\hline
-1. & Người dùng & chọn chức năng Đăng xuất \\
-\hline
-2. & Hệ thống & đăng xuất tài khoản hiện có, trở về giao diện trang chủ \\
-\hline
-\end{longtable}
-</td></tr><tr><td><p><strong>Hậu điều kiện</strong></p></td><td colspan="3"><p>Không</p></td></tr></tbody></table>
-
-\textbf{Đặc tả use case UC004 “Cập nhật thông tin tài khoản”}
-
-\begin{longtable}{|p{0.95\textwidth}|}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|}
-\hline
-Mã Use case & UC004 & Tên Use case & Cập nhật thông tin tài khoản \\
-\hline
-Tác nhân & Người dùng \\
-\hline
-Tiền điều kiện & Không \\
-\hline
-Luồng sự kiện chính(Thành công) & STTThực hiện bởiHành động1.Người dùngchọn chức năng Cập nhật thông tin tài khoản2.Hệ thốnghiển thị giao diện cập nhật thông tin tài khoản3.Kháchnhập tên và username( dữ liệu ở *)4.Kháchyêu cầu cập nhật5.Hệ thốngkiểm tra username đã hợp lệ chưa6.Hệ thốngcập nhật thông tin và lưu lại vào database & STT & Thực hiện bởi & Hành động & 1. & Người dùng & chọn chức năng Cập nhật thông tin tài khoản & 2. & Hệ thống & hiển thị giao diện cập nhật thông tin tài khoản & 3. & Khách & nhập tên và username( dữ liệu ở *) & 4. & Khách & yêu cầu cập nhật & 5. & Hệ thống & kiểm tra username đã hợp lệ chưa & 6. & Hệ thống & cập nhật thông tin và lưu lại vào database \\
-\hline
-STT & Thực hiện bởi & Hành động \\
-\hline
-1. & Người dùng & chọn chức năng Cập nhật thông tin tài khoản \\
-\hline
-2. & Hệ thống & hiển thị giao diện cập nhật thông tin tài khoản \\
-\hline
-3. & Khách & nhập tên và username( dữ liệu ở *) \\
-\hline
-4. & Khách & yêu cầu cập nhật \\
-\hline
-5. & Hệ thống & kiểm tra username đã hợp lệ chưa \\
-\hline
-6. & Hệ thống & cập nhật thông tin và lưu lại vào database \\
-\hline
-\end{longtable}
-</td></tr><tr><td><p><strong>Luồng sự kiện thay thế</strong></p></td><td colspan="3">\begin{longtable}{|p{0.95\textwidth}|}|p{0.3\textwidth}|p{0.3\textwidth}|}
-\hline
-STT & Thực hiện bởi & Hành động \\
-\hline
-5a. & Hệ thống & thông báo lỗi: Nhập lại username nếu không hợp lệ (username không chứa khoảng trống) \\
-\hline
-\end{longtable}
-</td></tr><tr><td><p><strong>Hậu điều kiện</strong></p></td><td colspan="3"><p>Không</p></td></tr></tbody></table>
-
-\* Dữ liệu đầu vào của thông tin cá nhân gồm các trường dữ liệu sau:
-
-\begin{longtable}{|p{0.95\textwidth}|}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|}
-\hline
-STT & Trường dữ liệu & Mô tả & Bắt buộc? & Điều kiện hợp lệ & Ví dụ \\
-\hline
-1. & Tên &  & Không &  & Li \\
-\hline
-2. & Username &  & Không & Không chứa khoảng trống và dấu câu & camli123 \\
-\hline
-\end{longtable}
-
-
-\textbf{Đặc tả use case UC005 “Tìm kiếm”}
-
-\begin{longtable}{|p{0.95\textwidth}|}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|}
-\hline
-Mã Use case & UC005 & Tên Use case & Tìm kiếm \\
-\hline
-Tác nhân & Khách, Người dùng \\
-\hline
-Tiền điều kiện & Không \\
-\hline
-Luồng sự kiện chính(Thành công) & STTThực hiện bởiHành động1.Kháchchọn chức năng Tìm kiếm trên giao diện trang chủ2.Hệ thốnghiển thị kết quả tìm kiếm theo danh sách các từ vựng & STT & Thực hiện bởi & Hành động & 1. & Khách & chọn chức năng Tìm kiếm trên giao diện trang chủ & 2. & Hệ thống & hiển thị kết quả tìm kiếm theo danh sách các từ vựng \\
-\hline
-STT & Thực hiện bởi & Hành động \\
-\hline
-1. & Khách & chọn chức năng Tìm kiếm trên giao diện trang chủ \\
-\hline
-2. & Hệ thống & hiển thị kết quả tìm kiếm theo danh sách các từ vựng \\
-\hline
-\end{longtable}
-</td></tr><tr><td><p><strong>Luồng sự kiện thay thế</strong></p></td><td colspan="3">\begin{longtable}{|p{0.95\textwidth}|}|p{0.3\textwidth}|p{0.3\textwidth}|}
-\hline
-STT & Thực hiện bởi & Hành động \\
-\hline
-2a. & Hệ thống & thông báo: không tìm thấy kết quả nào cả \\
-\hline
-\end{longtable}
-</td></tr><tr><td><p><strong>Hậu điều kiện</strong></p></td><td colspan="3"><p>Không</p></td></tr></tbody></table>
-
-\textbf{Đặc tả use case UC006 “Xem từ vựng yêu thích”}
-
-\begin{longtable}{|p{0.95\textwidth}|}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|}
-\hline
-Mã Use case & UC006 & Tên Use case & Xem từ vựng yêu thích \\
-\hline
-Tác nhân & Người dùng \\
-\hline
-Tiền điều kiện & Đã đăng nhập thành công \\
-\hline
-Luồng sự kiện chính(Thành công) & STTThực hiện bởiHành động1.Kháchchọn chức năng Xem từ vựng yêu thích2.Hệ thốnghiển thị giao diện của chức năng & STT & Thực hiện bởi & Hành động & 1. & Khách & chọn chức năng Xem từ vựng yêu thích & 2. & Hệ thống & hiển thị giao diện của chức năng \\
-\hline
-STT & Thực hiện bởi & Hành động \\
-\hline
-1. & Khách & chọn chức năng Xem từ vựng yêu thích \\
-\hline
-2. & Hệ thống & hiển thị giao diện của chức năng \\
-\hline
-\end{longtable}
-</td></tr><tr><td><p><strong>Hậu điều kiện</strong></p></td><td colspan="3"><p>Không</p></td></tr></tbody></table>
-
-\textbf{Đặc tả use case UC007 “Xem bảng xếp hạng”}
-
-\begin{longtable}{|p{0.95\textwidth}|}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|}
-\hline
-Mã Use case & UC007 & Tên Use case & Xem bảng xếp hạng \\
-\hline
-Tác nhân & Người dùng \\
-\hline
-Tiền điều kiện & Đã đăng nhập thành công \\
-\hline
-Luồng sự kiện chính(Thành công) & STTThực hiện bởiHành động1.Kháchchọn chức năng Xem bảng xếp hạng2.Hệ thốnghiển thị giao diện bảng xếp hạng & STT & Thực hiện bởi & Hành động & 1. & Khách & chọn chức năng Xem bảng xếp hạng & 2. & Hệ thống & hiển thị giao diện bảng xếp hạng \\
-\hline
-STT & Thực hiện bởi & Hành động \\
-\hline
-1. & Khách & chọn chức năng Xem bảng xếp hạng \\
-\hline
-2. & Hệ thống & hiển thị giao diện bảng xếp hạng \\
-\hline
-\end{longtable}
-</td></tr><tr><td><p><strong>Hậu điều kiện</strong></p></td><td colspan="3"><p>Không</p></td></tr></tbody></table>
-
-\textbf{Đặc tả use case UC008 “Đóng góp từ vựng”}
-
-\begin{longtable}{|p{0.95\textwidth}|}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|}
-\hline
-Mã Use case & UC008 & Tên Use case & Đóng góp từ vựng \\
-\hline
-Tác nhân & Người dùng, Khách \\
-\hline
-Tiền điều kiện & Không \\
-\hline
-Luồng sự kiện chính(Thành công) & STTThực hiện bởiHành động1.Kháchchọn chức năng Đóng góp từ vựng2.Hệ thốnghiển thị giao diện Đóng góp từ vựng3.KháchNhập các trường được yêu cầu4.Kháchyêu cầu thêm từ5.Hệ thốngkiểm tra xem khách đã nhập các trường bắt buộc nhập hay chưa6.Hệ thốngkiểm tra từ được nhập đã tồn tại trong database hay chưa7.Hệ thốngthêm từ được nhập vào database và thông báo nhập từ thành công & STT & Thực hiện bởi & Hành động & 1. & Khách & chọn chức năng Đóng góp từ vựng & 2. & Hệ thống & hiển thị giao diện Đóng góp từ vựng & 3. & Khách & Nhập các trường được yêu cầu & 4. & Khách & yêu cầu thêm từ & 5. & Hệ thống & kiểm tra xem khách đã nhập các trường bắt buộc nhập hay chưa & 6. & Hệ thống & kiểm tra từ được nhập đã tồn tại trong database hay chưa & 7. & Hệ thống & thêm từ được nhập vào database và thông báo nhập từ thành công \\
-\hline
-STT & Thực hiện bởi & Hành động \\
-\hline
-1. & Khách & chọn chức năng Đóng góp từ vựng \\
-\hline
-2. & Hệ thống & hiển thị giao diện Đóng góp từ vựng \\
-\hline
-3. & Khách & Nhập các trường được yêu cầu \\
-\hline
-4. & Khách & yêu cầu thêm từ \\
-\hline
-5. & Hệ thống & kiểm tra xem khách đã nhập các trường bắt buộc nhập hay chưa \\
-\hline
-6. & Hệ thống & kiểm tra từ được nhập đã tồn tại trong database hay chưa \\
-\hline
-7. & Hệ thống & thêm từ được nhập vào database và thông báo nhập từ thành công \\
-\hline
-\end{longtable}
-</td></tr><tr><td><p><strong>Luồng sự kiện thay thế</strong></p></td><td colspan="3">\begin{longtable}{|p{0.95\textwidth}|}|p{0.3\textwidth}|p{0.3\textwidth}|}
-\hline
-STT & Thực hiện bởi & Hành động \\
-\hline
-5a. & Hệ thống & thông báo lỗi: Cần nhập các trường bắt buộc nhập nếu khách nhập thiếu \\
-\hline
-7a. & Hệ thống & thông báo lỗi: từ này đã tồn tại trong hệ thống \\
-\hline
-\end{longtable}
-</td></tr><tr><td><p><strong>Hậu điều kiện</strong></p></td><td colspan="3"><p>Không</p></td></tr></tbody></table>
-
-\textbf{Đặc tả use case UC009 “Học từ vựng, ngữ pháp”}
-
-\begin{longtable}{|p{0.95\textwidth}|}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|}
-\hline
-Mã Use case & UC009 & Tên Use case & Học từ vựng ngữ pháp \\
-\hline
-Tác nhân & Khách, Người dùng \\
-\hline
-Tiền điều kiện & Không \\
-\hline
-Luồng sự kiện chính(Thành công) & STTThực hiện bởiHành động1.Kháchchọn chức năng Học từ vựng, ngữ pháp2.Hệ thốnghiển thị giao diện chức năng & STT & Thực hiện bởi & Hành động & 1. & Khách & chọn chức năng Học từ vựng, ngữ pháp & 2. & Hệ thống & hiển thị giao diện chức năng \\
-\hline
-STT & Thực hiện bởi & Hành động \\
-\hline
-1. & Khách & chọn chức năng Học từ vựng, ngữ pháp \\
-\hline
-2. & Hệ thống & hiển thị giao diện chức năng \\
-\hline
-\end{longtable}
-</td></tr><tr><td><p><strong>Hậu điều kiện</strong></p></td><td colspan="3"><p>Không</p></td></tr></tbody></table>
-
-\textbf{Đặc tả use case UC010 “Đánh dấu từ vựng yêu thích”}
-
-\begin{longtable}{|p{0.95\textwidth}|}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|}
-\hline
-Mã Use case & UC010 & Tên Use case & Đánh dấu từ vựng yêu thích \\
-\hline
-Tác nhân & Người dùng \\
-\hline
-Tiền điều kiện & Đã đăng nhập thành công \\
-\hline
-Luồng sự kiện chính(Thành công) & STTThực hiện bởiHành động1.Kháchchọn từ vựng yêu thích2.Hệ thốngxác nhận yêu cầu của người dùng3.Hệ thốnglưu từ vựng yêu thích vào danh sách từ vựng yêu thích của người dùng & STT & Thực hiện bởi & Hành động & 1. & Khách & chọn từ vựng yêu thích & 2. & Hệ thống & xác nhận yêu cầu của người dùng & 3. & Hệ thống & lưu từ vựng yêu thích vào danh sách từ vựng yêu thích của người dùng \\
-\hline
-STT & Thực hiện bởi & Hành động \\
-\hline
-1. & Khách & chọn từ vựng yêu thích \\
-\hline
-2. & Hệ thống & xác nhận yêu cầu của người dùng \\
-\hline
-3. & Hệ thống & lưu từ vựng yêu thích vào danh sách từ vựng yêu thích của người dùng \\
-\hline
-\end{longtable}
-</td></tr><tr><td><p><strong>Hậu điều kiện</strong></p></td><td colspan="3"><p>Không</p></td></tr></tbody></table>
-
-\textbf{Đặc tả use case UC011 “Xóa từ vựng yêu thích”}
-
-\begin{longtable}{|p{0.95\textwidth}|}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|}
-\hline
-Mã Use case & UC001 & Tên Use case & Xóa từ vựng yêu thích \\
-\hline
-Tác nhân & Người dùng \\
-\hline
-Tiền điều kiện & Đã đăng nhập thành công \\
-\hline
-Luồng sự kiện chính(Thành công) & STTThực hiện bởiHành động1.Kháchchọn xóa từ vựng yêu thích2.Hệ thốngxác nhận yêu cầu của người dùng3.Hệ thốngxóa từ vựng yêu thích khỏi danh sách từ vựng yêu thích của người dùng & STT & Thực hiện bởi & Hành động & 1. & Khách & chọn xóa từ vựng yêu thích & 2. & Hệ thống & xác nhận yêu cầu của người dùng & 3. & Hệ thống & xóa từ vựng yêu thích khỏi danh sách từ vựng yêu thích của người dùng \\
-\hline
-STT & Thực hiện bởi & Hành động \\
-\hline
-1. & Khách & chọn xóa từ vựng yêu thích \\
-\hline
-2. & Hệ thống & xác nhận yêu cầu của người dùng \\
-\hline
-3. & Hệ thống & xóa từ vựng yêu thích khỏi danh sách từ vựng yêu thích của người dùng \\
-\hline
-\end{longtable}
-</td></tr><tr><td><p><strong>Hậu điều kiện</strong></p></td><td colspan="3"><p>Không</p></td></tr></tbody></table>
-
-\textbf{Đặc tả use case UC012 “Chơi game”}
-
-\section{\#}
-\begin{longtable}{|p{0.95\textwidth}|}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|}
-\hline
-Mã Use case & UC012 & Tên Use case & Chơi game \\
-\hline
-Tác nhân & Khách/Người dùng \\
-\hline
-Tiền điều kiện & Không \\
-\hline
-Luồng sự kiện chính(Thành công) & STTThực hiện bởiHành động1.Khách/Người dùngchọn chơi game theo 3 danh mục : hãy chọn từ đúng, ghép từ, tay nhanh hơn não2.Hệ thốngxác nhận yêu cầuđiều hướng đến trang game3.Hệ thốnghiển thị dữ liệu trò chơi dựa trên lựa chọn của người dùng & STT & Thực hiện bởi & Hành động & 1. & Khách/Người dùng & chọn chơi game theo 3 danh mục : hãy chọn từ đúng, ghép từ, tay nhanh hơn não & 2. & Hệ thống & xác nhận yêu cầuđiều hướng đến trang game & 3. & Hệ thống & hiển thị dữ liệu trò chơi dựa trên lựa chọn của người dùng \\
-\hline
-STT & Thực hiện bởi & Hành động \\
-\hline
-1. & Khách/Người dùng & chọn chơi game theo 3 danh mục : hãy chọn từ đúng, ghép từ, tay nhanh hơn não \\
-\hline
-2. & Hệ thống & xác nhận yêu cầuđiều hướng đến trang game \\
-\hline
-3. & Hệ thống & hiển thị dữ liệu trò chơi dựa trên lựa chọn của người dùng \\
-\hline
-\end{longtable}
-</td></tr><tr><td><p><strong>Hậu điều kiện</strong></p></td><td colspan="3"><p>Không</p></td></tr></tbody></table>
-
-\section{Biểu đồ hoạt động}
-Usecase “Đăng nhập”
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.8\textwidth]{placeholder}
+\begin{figure}[!htbp]
+    \centering
+    \includegraphics[width=0.9\textwidth]{usecase/auth.png}
+    \caption{Biểu đồ use case module xác thực và quản lý tài khoản}
+    \label{fig:auth-usecase}
 \end{figure}
 
-Usecase “Đăng ký”
+\subsection{Module quản lý nhóm gia đình}
+Module nhóm gia đình cho phép Người dùng tạo và quản lý không gian dùng chung cho gia đình. Theo biểu đồ use case, Người dùng có thể tham gia nhóm, rời khỏi nhóm, xem thông tin và thành viên, tạo nhóm gia đình, tạo mã mời và cập nhật phân quyền.
 
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.8\textwidth]{placeholder}
+\begin{figure}[!htbp]
+    \centering
+    \includegraphics[width=0.9\textwidth]{usecase/family_group.png}
+    \caption{Biểu đồ use case module quản lý nhóm gia đình}
+    \label{fig:family-usecase}
 \end{figure}
 
-Usecase “Đăng xuất”
+\subsection{Module quản lý danh sách mua sắm}
+Module danh sách mua sắm hỗ trợ Người dùng tạo mới danh sách, xem, sửa tên hoặc xóa danh sách, thêm mặt hàng, cập nhật/xóa mặt hàng và đánh dấu mặt hàng đã mua. Khi mặt hàng được đánh dấu đã mua, thông tin thực phẩm được tự động chuyển vào tủ lạnh để tiếp tục quản lý ở module kho thực phẩm.
 
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.8\textwidth]{placeholder}
+\begin{figure}[!htbp]
+    \centering
+    \includegraphics[width=0.9\textwidth]{usecase/shopping_list.png}
+    \caption{Biểu đồ use case module quản lý danh sách mua sắm}
+    \label{fig:shopping-usecase}
 \end{figure}
 
-Usecase “Cập nhật thông tài khoản”
+\subsection{Module quản lý tủ lạnh và kho thực phẩm}
+Module quản lý tủ lạnh và kho thực phẩm cho phép Người dùng xem và tìm kiếm thực phẩm, thêm thực phẩm thủ công, cập nhật thông tin thực phẩm và xóa/thanh lý thực phẩm. Tác nhân Hệ thống thực hiện các use case tự động gồm tự động trừ khi nấu ăn và thông báo thực phẩm sắp hết hạn.
 
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.8\textwidth]{placeholder}
+\begin{figure}[!htbp]
+    \centering
+    \includegraphics[width=0.9\textwidth]{usecase/pantry.png}
+    \caption{Biểu đồ use case module quản lý tủ lạnh và kho thực phẩm}
+    \label{fig:pantry-usecase}
 \end{figure}
 
-Usecase “Tìm kiếm”
+\subsection{Module lên kế hoạch bữa ăn}
+Module lên kế hoạch bữa ăn giúp Người dùng xem lịch trình và tạo phiên ăn, thêm hoặc sửa món ăn trong lịch trình và xóa món ăn khỏi kế hoạch.
 
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.8\textwidth]{placeholder}
+\begin{figure}[!htbp]
+    \centering
+    \includegraphics[width=0.9\textwidth]{usecase/meal_planner.png}
+    \caption{Biểu đồ use case module lên kế hoạch bữa ăn}
+    \label{fig:meal-plan-usecase}
 \end{figure}
 
-Usecase “Xem từ vựng yêu thích”\begin{figure}[H]
-\centering
-\includegraphics[width=0.8\textwidth]{placeholder}
+\subsection{Module gợi ý và công thức nấu ăn}
+Module gợi ý và công thức nấu ăn giúp Người dùng thêm nguyên liệu thiếu vào danh sách mua sắm, tìm và xem công thức, lưu/bỏ lưu công thức, nhận gợi ý món ăn theo Pantry và chat tương tác với AI Chef. Tác nhân Hệ thống AI hỗ trợ trực tiếp cho chức năng gợi ý món ăn theo Pantry và chat tương tác AI Chef.
+
+\begin{figure}[!htbp]
+    \centering
+    \includegraphics[width=0.9\textwidth]{usecase/ai_recipes.png}
+    \caption{Biểu đồ use case module gợi ý và công thức nấu ăn}
+    \label{fig:recipe-usecase}
 \end{figure}
 
-Usecase “Xem bảng xếp hạng”\begin{figure}[H]
-\centering
-\includegraphics[width=0.8\textwidth]{placeholder}
+\subsection{Module báo cáo, thống kê và quản trị}
+Module báo cáo và thống kê giúp Người dùng xem thống kê tiêu dùng và lãng phí. Module quản trị dành cho Quản trị viên, bao gồm đăng nhập và xem danh sách user, khóa/mở khóa tài khoản, quản lý master data, kiểm duyệt công thức và xem dashboard tổng quan.
+
+\begin{figure}[!htbp]
+    \centering
+    \includegraphics[width=0.9\textwidth]{usecase/statistics_admin.png}
+    \caption{Biểu đồ use case module báo cáo, thống kê và quản trị}
+    \label{fig:statistics-admin-usecase}
 \end{figure}
 
-Usecase “Thêm từ vựng yêu thích”
+\section{Quy trình nghiệp vụ}
+Các module của NaviMart được liên kết thành một luồng nghiệp vụ khép kín. Điểm bắt đầu thường là nhu cầu mua sắm hoặc chuẩn bị bữa ăn của gia đình; dữ liệu phát sinh từ mỗi bước sẽ được dùng lại ở các bước tiếp theo để giảm thao tác thủ công. Hình \ref{fig:activity-overview-business} mô tả luồng nghiệp vụ tổng quan của hệ thống.
 
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.8\textwidth]{placeholder}
+\begin{figure}[!htbp]
+    \centering
+    \includegraphics[width=0.95\textwidth,height=0.66\textheight,keepaspectratio]{activity/Activity_00_Tong_quan_nghiep_vu.png}
+    \caption{Activity diagram quy trình nghiệp vụ tổng quan NaviMart}
+    \label{fig:activity-overview-business}
 \end{figure}
 
-Usecase “Xóa từ vựng yêu thích”
+\subsection{Quy trình xác thực và quản lý tài khoản}
+Quy trình xác thực bắt đầu khi Khách hoặc Người dùng truy cập NaviMart. Nếu chưa có tài khoản, Khách thực hiện đăng ký và hệ thống kiểm tra tính hợp lệ của thông tin. Nếu đã có tài khoản, Người dùng có thể đăng nhập bằng Email/SĐT, còn Khách có thể đăng nhập qua mạng xã hội. Sau khi xác thực thành công, Người dùng truy cập vào hệ thống và có thể xem/cập nhật thông tin cá nhân, đổi mật khẩu hoặc đăng xuất khi cần.
 
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.8\textwidth]{placeholder}
+\begin{figure}[!htbp]
+    \centering
+    \includegraphics[width=0.95\textwidth,height=0.66\textheight,keepaspectratio]{activity/Activity_01_Xac_thuc_quan_ly_tai_khoan.png}
+    \caption{Activity diagram quy trình xác thực và quản lý tài khoản}
+    \label{fig:activity-auth}
 \end{figure}
 
-Usecase “Đóng góp từ vựng”
+\subsection{Quy trình quản lý nhóm gia đình}
+Quy trình quản lý nhóm gia đình cho phép Người dùng tạo nhóm mới hoặc tham gia nhóm bằng mã mời. Khi đã thuộc một nhóm, Người dùng có thể xem thông tin nhóm, xem danh sách thành viên, tạo mã mời cho thành viên khác, cập nhật phân quyền hoặc rời khỏi nhóm. Hệ thống chịu trách nhiệm kiểm tra mã mời, khởi tạo nhóm, lưu thay đổi phân quyền và cập nhật trạng thái thành viên.
 
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.8\textwidth]{placeholder}
+\begin{figure}[!htbp]
+    \centering
+    \includegraphics[width=0.95\textwidth,height=0.66\textheight,keepaspectratio]{activity/Activity_02_Quan_ly_nhom_gia_dinh.png}
+    \caption{Activity diagram quy trình quản lý nhóm gia đình}
+    \label{fig:activity-family-group}
 \end{figure}
 
-Usecase “Chơi game”
+\subsection{Quy trình quản lý danh sách mua sắm}
+Người dùng tạo danh sách mua sắm mới theo ngày, theo tuần hoặc theo một nhu cầu cụ thể. Sau đó, Người dùng thêm các mặt hàng cần mua kèm số lượng, đơn vị tính và ghi chú nếu có. Trong quá trình mua hàng, Người dùng cập nhật trạng thái từng mặt hàng để xác định mặt hàng đã mua. Khi mặt hàng được đánh dấu là đã mua, hệ thống ghi nhận trạng thái và tự động chuyển thông tin thực phẩm sang tủ lạnh/kho thực phẩm.
 
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.8\textwidth]{placeholder}
+\begin{figure}[!htbp]
+    \centering
+    \includegraphics[width=0.95\textwidth,height=0.66\textheight,keepaspectratio]{activity/Activity_03_Quan_ly_danh_sach_mua_sam.png}
+    \caption{Activity diagram quy trình quản lý danh sách mua sắm}
+    \label{fig:activity-shopping-list}
 \end{figure}
 
-Usecase “Học từ vựng, ngữ pháp”
+\subsection{Quy trình quản lý thực phẩm trong tủ lạnh}
+Thực phẩm có thể được đưa vào kho từ danh sách mua sắm đã mua hoặc được Người dùng nhập thủ công. Hệ thống chuẩn hóa và kiểm tra dữ liệu thực phẩm trước khi lưu vào kho. Sau khi thực phẩm được đưa vào kho, Người dùng có thể xem danh sách thực phẩm hiện có, tìm kiếm theo tên, cập nhật số lượng, hạn sử dụng, vị trí lưu trữ hoặc xóa/thanh lý thực phẩm khi không còn sử dụng được.
 
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.8\textwidth]{placeholder}
+Hệ thống đồng thời thực hiện các tác vụ tự động như theo dõi hạn sử dụng, gửi thông báo khi thực phẩm sắp hết hạn và tự động trừ số lượng nguyên liệu khi Người dùng xác nhận đã nấu ăn. Nếu một nguyên liệu đã cạn hoặc gần cạn, hệ thống cảnh báo để Người dùng có thể bổ sung vào danh sách mua sắm.
+
+\begin{figure}[!htbp]
+    \centering
+    \includegraphics[width=0.95\textwidth,height=0.66\textheight,keepaspectratio]{activity/Activity_04_Quan_ly_tu_lanh_kho_thuc_pham.png}
+    \caption{Activity diagram quy trình quản lý tủ lạnh và kho thực phẩm}
+    \label{fig:activity-pantry}
 \end{figure}
 
-\section{\#\# **2.5. Các yêu cầu phi chức năng}
-Chức năng
+\subsection{Quy trình lên kế hoạch bữa ăn}
+Người dùng tạo lịch trình bữa ăn theo ngày hoặc theo tuần, sau đó thêm món ăn vào từng phiên ăn. Trong quá trình lập kế hoạch, Người dùng có thể chỉnh sửa hoặc xóa món ăn khỏi lịch trình. Sau khi kế hoạch được cập nhật, hệ thống kiểm tra nguyên liệu cần thiết cho các món trong lịch trình.
 
-\- Hỗ trợ nhiều người dùng sử dụng đồng thời.
+Nếu còn thiếu nguyên liệu, Người dùng có thể thêm các nguyên liệu thiếu vào danh sách mua sắm và hệ thống cập nhật danh sách tương ứng. Nếu nguyên liệu đã đủ, lịch trình được đánh dấu là sẵn sàng để thực hiện.
 
-\- Nếu xảy ra lỗi thì trở lại bình thường trong vòng 1h
+\begin{figure}[!htbp]
+    \centering
+    \includegraphics[width=0.95\textwidth,height=0.66\textheight,keepaspectratio]{activity/Activity_05_Len_ke_hoach_bua_an.png}
+    \caption{Activity diagram quy trình lên kế hoạch bữa ăn}
+    \label{fig:activity-meal-planner}
+\end{figure}
 
-Tính dễ dùng
+\subsection{Quy trình gợi ý món ăn}
+Người dùng truy cập chức năng gợi ý món ăn khi cần lựa chọn thực đơn. Người dùng có thể tìm kiếm công thức thủ công hoặc yêu cầu Hệ thống AI gợi ý món ăn theo dữ liệu Pantry. Khi gợi ý theo Pantry, Hệ thống AI đọc dữ liệu kho thực phẩm hiện tại, đối chiếu với công thức và đề xuất món ăn phù hợp.
 
-\- Giao diện người dùng tương thích với nhiều thiết bị.
+Sau khi Người dùng chọn món ăn hoặc công thức, hệ thống kiểm tra nguyên liệu cần thiết. Nếu công thức được chọn còn thiếu nguyên liệu, hệ thống cho phép thêm nhanh các nguyên liệu này vào danh sách mua sắm. Người dùng cũng có thể lưu/bỏ lưu công thức hoặc trao đổi thêm với AI Chef để nhận phản hồi linh hoạt hơn.
 
-Thân thiện.
+\begin{figure}[!htbp]
+    \centering
+    \includegraphics[width=0.95\textwidth,height=0.66\textheight,keepaspectratio]{activity/Activity_06_Goi_y_mon_an_cong_thuc.png}
+    \caption{Activity diagram quy trình gợi ý món ăn và công thức nấu ăn}
+    \label{fig:activity-recipe-suggestion}
+\end{figure}
 
-Tính ổn định
+\subsection{Quy trình thống kê và quản trị}
+Quy trình thống kê dành cho Người dùng và quy trình quản trị dành cho Quản trị viên được mô tả chung trong một activity diagram do hai luồng này cùng khai thác dữ liệu vận hành của hệ thống. Ở phía Người dùng, hệ thống tổng hợp dữ liệu mua sắm, kho thực phẩm và thanh lý thực phẩm để tính toán thống kê tiêu dùng và lãng phí.
 
-\- Hệ thống phải hoạt động liên tục 24 giờ/ngày, 7 ngày/tuần, với thời gian ngừng hoạt động không quá 10%.
+Ở phía quản trị, Quản trị viên đăng nhập vào khu vực quản trị, được hệ thống xác thực quyền, sau đó có thể xem danh sách user, khóa/mở khóa tài khoản, quản lý master data, kiểm duyệt công thức và xem dashboard tổng quan. Các thao tác này giúp đảm bảo dữ liệu trong hệ thống nhất quán, nội dung phù hợp và hoạt động vận hành ổn định.
 
-Hiệu suất
+\begin{figure}[!htbp]
+    \centering
+    \includegraphics[width=0.95\textwidth,height=0.66\textheight,keepaspectratio]{activity/Activity_07_Thong_ke_va_quan_tri.png}
+    \caption{Activity diagram quy trình thống kê và quản trị hệ thống}
+    \label{fig:activity-statistics-admin}
+\end{figure}
 
-\- Hệ thống phải hỗ trợ đến 1000 người dùng truy xuất CSDL trung tâm đồng thời bất kỳ lúc nào, và đến 500 người dùng truy xuất các server cục bộ.
 
-\- Hệ thống phải truy xuất đến CSDL danh mục học phần cũ với độ trễ không quá 10 giây.
+\section{Đặc tả chi tiết các use case}
+Các use case dưới đây mô tả chi tiết tác nhân tham gia, tiền điều kiện, luồng sự kiện chính, luồng thay thế và hậu điều kiện của từng chức năng trong hệ thống NaviMart.
 
-Sự hỗ trợ
+\subsection{Đặc tả use case UC001 ``Đăng ký tài khoản''}
+\textit{Mô tả: Cho phép người dùng chưa có tài khoản tạo mới tài khoản để sử dụng hệ thống.}
+\vspace{0.5cm}
 
-\- Không có.
+% Dùng \begingroup và \endgroup để việc nới rộng dòng không ảnh hưởng tới bảng khác
+\begingroup
+\renewcommand{\arraystretch}{1.5}
 
-Các ràng buộc thiết kế
+% Thay vì dùng \begin{table}[H] và \begin{tabular}, ta dùng \begin{longtable}
+\begin{longtable}{|p{2.7cm}|p{0.8cm}|p{2.6cm}|p{7.3cm}|}
+\hline
+\cellcolor[HTML]{D5F5E3}\textbf{Mã Use case} & \multicolumn{1}{l|}{UC001} & \cellcolor[HTML]{D5F5E3}\textbf{Tên Use case} & Đăng ký tài khoản \\ \hline
+\cellcolor[HTML]{D5F5E3}\textbf{Tác nhân} & \multicolumn{3}{p{10.7cm}|}{Khách (Guest)} \\ \hline
+\cellcolor[HTML]{D5F5E3}\textbf{Tiền điều kiện} & \multicolumn{3}{p{10.7cm}|}{Thiết bị có kết nối mạng.} \\ \hline
 
-\- Hệ thống phải cung cấp giao diện dựa Web.
+% --- KHỐI LUỒNG SỰ KIỆN CHÍNH ---
+\cellcolor[HTML]{D5F5E3}\textbf{Luồng sự kiện chính} & \cellcolor[HTML]{FDEBD0}\textbf{STT} & \cellcolor[HTML]{FDEBD0}\textbf{Thực hiện bởi} & \multicolumn{1}{c|}{\cellcolor[HTML]{FDEBD0}\textbf{Hành động}} \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 1. & Người dùng & truy cập ứng dụng và chọn "Đăng ký". \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 2. & Hệ thống & hiển thị biểu mẫu đăng ký (Họ tên, Email/SĐT, Mật khẩu). \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 3. & Người dùng & điền đầy đủ thông tin hợp lệ và nhấn "Đăng ký". \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 4. & Hệ thống & kiểm tra dữ liệu, xác nhận Email/SĐT chưa từng được sử dụng. \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 5. & Hệ thống & lưu thông tin, gửi mã OTP (hoặc link xác thực) tới Email/SĐT. \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 6. & Người dùng & nhập mã xác thực thành công. \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 7. & Hệ thống & thông báo đăng ký thành công và chuyển hướng đến trang Đăng nhập. \\ \hline
+
+% --- KHỐI LUỒNG SỰ KIỆN THAY THẾ ---
+\cellcolor[HTML]{D5F5E3}\textbf{Luồng sự kiện thay thế} & \cellcolor[HTML]{FDEBD0}\textbf{STT} & \cellcolor[HTML]{FDEBD0}\textbf{Thực hiện bởi} & \multicolumn{1}{c|}{\cellcolor[HTML]{FDEBD0}\textbf{Hành động}} \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 4a & Hệ thống & Email/SĐT đã tồn tại: Hệ thống báo lỗi "Tài khoản đã tồn tại" và yêu cầu nhập lại hoặc chuyển sang Đăng nhập. \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 6a & Hệ thống & Nhập sai OTP: Hệ thống báo lỗi, cho phép nhập lại hoặc gửi lại mã (tối đa 3 lần). \\ \hline
+
+\cellcolor[HTML]{D5F5E3}\textbf{Hậu điều kiện} & \multicolumn{3}{p{10.7cm}|}{Một tài khoản người dùng mới được tạo trong cơ sở dữ liệu ở trạng thái hoạt động.} \\ \hline
+\end{longtable}
+\endgroup
+
+\subsection{Đặc tả use case UC002 ``Đăng nhập hệ thống (Email/SĐT)''}
+\textit{Mô tả: Cho phép người dùng truy cập vào hệ thống.}
+\vspace{0.5cm}
+
+% Dùng \begingroup và \endgroup để việc nới rộng dòng không ảnh hưởng tới bảng khác
+\begingroup
+\renewcommand{\arraystretch}{1.5}
+
+% Thay vì dùng \begin{table}[H] và \begin{tabular}, ta dùng \begin{longtable}
+\begin{longtable}{|p{2.7cm}|p{0.8cm}|p{2.6cm}|p{7.3cm}|}
+\hline
+\cellcolor[HTML]{D5F5E3}\textbf{Mã Use case} & \multicolumn{1}{l|}{UC002} & \cellcolor[HTML]{D5F5E3}\textbf{Tên Use case} & Đăng nhập hệ thống (Email/SĐT) \\ \hline
+\cellcolor[HTML]{D5F5E3}\textbf{Tác nhân} & \multicolumn{3}{p{10.7cm}|}{Người dùng (User), Quản trị viên (Admin)} \\ \hline
+\cellcolor[HTML]{D5F5E3}\textbf{Tiền điều kiện} & \multicolumn{3}{p{10.7cm}|}{Người dùng đã có tài khoản.} \\ \hline
+
+% --- KHỐI LUỒNG SỰ KIỆN CHÍNH ---
+\cellcolor[HTML]{D5F5E3}\textbf{Luồng sự kiện chính} & \cellcolor[HTML]{FDEBD0}\textbf{STT} & \cellcolor[HTML]{FDEBD0}\textbf{Thực hiện bởi} & \multicolumn{1}{c|}{\cellcolor[HTML]{FDEBD0}\textbf{Hành động}} \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 1. & Người dùng & mở ứng dụng, chọn "Đăng nhập". \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 2. & Người dùng & nhập Email/SĐT và Mật khẩu. \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 3. & Người dùng & Nhấn "Đăng nhập". \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 4. & Hệ thống & kiểm tra thông tin. \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 5. & Hệ thống & Thông tin hợp lệ, hệ thống sinh ra Token và cấp quyền truy cập. \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 6. & Hệ thống & Chuyển hướng người dùng vào Trang chủ. \\ \hline
+
+% --- KHỐI LUỒNG SỰ KIỆN THAY THẾ ---
+\cellcolor[HTML]{D5F5E3}\textbf{Luồng sự kiện thay thế} & \cellcolor[HTML]{FDEBD0}\textbf{STT} & \cellcolor[HTML]{FDEBD0}\textbf{Thực hiện bởi} & \multicolumn{1}{c|}{\cellcolor[HTML]{FDEBD0}\textbf{Hành động}} \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 4a & Hệ thống & Sai thông tin: Hệ thống báo lỗi "Tài khoản hoặc mật khẩu không chính xác". \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 4b & Hệ thống & Tài khoản bị khóa: Hệ thống thông báo "Tài khoản của bạn đã bị khóa". \\ \hline
+
+\cellcolor[HTML]{D5F5E3}\textbf{Hậu điều kiện} & \multicolumn{3}{p{10.7cm}|}{Người dùng đăng nhập thành công.} \\ \hline
+\end{longtable}
+\endgroup
+
+\subsection{Đặc tả use case UC003 ``Đăng nhập qua mạng xã hội (OAuth Google/Facebook)''}
+\textit{Mô tả: Đăng nhập nhanh bằng tài khoản Google hoặc Facebook.}
+\vspace{0.5cm}
+
+% Dùng \begingroup và \endgroup để việc nới rộng dòng không ảnh hưởng tới bảng khác
+\begingroup
+\renewcommand{\arraystretch}{1.5}
+
+% Thay vì dùng \begin{table}[H] và \begin{tabular}, ta dùng \begin{longtable}
+\begin{longtable}{|p{2.7cm}|p{0.8cm}|p{2.6cm}|p{7.3cm}|}
+\hline
+\cellcolor[HTML]{D5F5E3}\textbf{Mã Use case} & \multicolumn{1}{l|}{UC003} & \cellcolor[HTML]{D5F5E3}\textbf{Tên Use case} & Đăng nhập qua mạng xã hội (OAuth Google/Facebook) \\ \hline
+\cellcolor[HTML]{D5F5E3}\textbf{Tác nhân} & \multicolumn{3}{p{10.7cm}|}{Khách} \\ \hline
+\cellcolor[HTML]{D5F5E3}\textbf{Tiền điều kiện} & \multicolumn{3}{p{10.7cm}|}{Có tài khoản mạng xã hội.} \\ \hline
+
+% --- KHỐI LUỒNG SỰ KIỆN CHÍNH ---
+\cellcolor[HTML]{D5F5E3}\textbf{Luồng sự kiện chính} & \cellcolor[HTML]{FDEBD0}\textbf{STT} & \cellcolor[HTML]{FDEBD0}\textbf{Thực hiện bởi} & \multicolumn{1}{c|}{\cellcolor[HTML]{FDEBD0}\textbf{Hành động}} \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 1. & Người dùng & chọn "Đăng nhập với Google/Facebook". \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 2. & Hệ thống & gọi API của nhà cung cấp để xác thực. \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 3. & Người dùng & đồng ý cấp quyền truy cập thông tin cơ bản (Email, Tên). \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 4. & Hệ thống & nhận dữ liệu, kiểm tra Email đã tồn tại trong CSDL chưa. \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 5. & Hệ thống & Nếu chưa, tự động tạo tài khoản mới. Nếu có, tiến hành đăng nhập. \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 6. & Hệ thống & Chuyển hướng vào Trang chủ. \\ \hline
+
+% --- KHỐI LUỒNG SỰ KIỆN THAY THẾ ---
+\cellcolor[HTML]{D5F5E3}\textbf{Luồng sự kiện thay thế} & \cellcolor[HTML]{FDEBD0}\textbf{STT} & \cellcolor[HTML]{FDEBD0}\textbf{Thực hiện bởi} & \multicolumn{1}{c|}{\cellcolor[HTML]{FDEBD0}\textbf{Hành động}} \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 3a & Người dùng & Người dùng từ chối cấp quyền: Hủy bỏ đăng nhập. \\ \hline
+
+\cellcolor[HTML]{D5F5E3}\textbf{Hậu điều kiện} & \multicolumn{3}{p{10.7cm}|}{Người dùng đăng nhập thành công.} \\ \hline
+\end{longtable}
+\endgroup
+
+\subsection{Đặc tả use case UC004 ``Quên mật khẩu \& Đặt lại mật khẩu''}
+\textit{Mô tả: Hỗ trợ lấy lại quyền truy cập khi quên mật khẩu.}
+\vspace{0.5cm}
+
+% Dùng \begingroup và \endgroup để việc nới rộng dòng không ảnh hưởng tới bảng khác
+\begingroup
+\renewcommand{\arraystretch}{1.5}
+
+% Thay vì dùng \begin{table}[H] và \begin{tabular}, ta dùng \begin{longtable}
+\begin{longtable}{|p{2.7cm}|p{0.8cm}|p{2.6cm}|p{7.3cm}|}
+\hline
+\cellcolor[HTML]{D5F5E3}\textbf{Mã Use case} & \multicolumn{1}{l|}{UC004} & \cellcolor[HTML]{D5F5E3}\textbf{Tên Use case} & Quên mật khẩu \& Đặt lại mật khẩu \\ \hline
+\cellcolor[HTML]{D5F5E3}\textbf{Tác nhân} & \multicolumn{3}{p{10.7cm}|}{Người dùng} \\ \hline
+\cellcolor[HTML]{D5F5E3}\textbf{Tiền điều kiện} & \multicolumn{3}{p{10.7cm}|}{Không} \\ \hline
+
+% --- KHỐI LUỒNG SỰ KIỆN CHÍNH ---
+\cellcolor[HTML]{D5F5E3}\textbf{Luồng sự kiện chính} & \cellcolor[HTML]{FDEBD0}\textbf{STT} & \cellcolor[HTML]{FDEBD0}\textbf{Thực hiện bởi} & \multicolumn{1}{c|}{\cellcolor[HTML]{FDEBD0}\textbf{Hành động}} \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 1. & Người dùng & Tại màn hình Đăng nhập, người dùng chọn "Quên mật khẩu". \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 2. & Hệ thống & yêu cầu nhập Email/SĐT đã đăng ký. \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 3. & Người dùng & nhập thông tin và nhấn "Gửi". \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 4. & Hệ thống & kiểm tra và gửi mã OTP đặt lại mật khẩu. \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 5. & Người dùng & nhập mã OTP và Mật khẩu mới. \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 6. & Hệ thống & cập nhật mật khẩu mới. \\ \hline
+
+% --- KHỐI LUỒNG SỰ KIỆN THAY THẾ ---
+\cellcolor[HTML]{D5F5E3}\textbf{Luồng sự kiện thay thế} & \cellcolor[HTML]{FDEBD0}\textbf{STT} & \cellcolor[HTML]{FDEBD0}\textbf{Thực hiện bởi} & \multicolumn{1}{c|}{\cellcolor[HTML]{FDEBD0}\textbf{Hành động}} \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 4a & Hệ thống & Email/SĐT không tồn tại: Báo lỗi "Tài khoản không tồn tại". \\ \hline
+
+\cellcolor[HTML]{D5F5E3}\textbf{Hậu điều kiện} & \multicolumn{3}{p{10.7cm}|}{Mật khẩu được thay đổi thành công.} \\ \hline
+\end{longtable}
+\endgroup
+
+\subsection{Đặc tả use case UC005 ``Xem và Cập nhật thông tin cá nhân''}
+\textit{Mô tả: Xem và thay đổi thông tin Profile (Avatar, Tên, SĐT).}
+\vspace{0.5cm}
+
+% Dùng \begingroup và \endgroup để việc nới rộng dòng không ảnh hưởng tới bảng khác
+\begingroup
+\renewcommand{\arraystretch}{1.5}
+
+% Thay vì dùng \begin{table}[H] và \begin{tabular}, ta dùng \begin{longtable}
+\begin{longtable}{|p{2.7cm}|p{0.8cm}|p{2.6cm}|p{7.3cm}|}
+\hline
+\cellcolor[HTML]{D5F5E3}\textbf{Mã Use case} & \multicolumn{1}{l|}{UC005} & \cellcolor[HTML]{D5F5E3}\textbf{Tên Use case} & Xem và Cập nhật thông tin cá nhân \\ \hline
+\cellcolor[HTML]{D5F5E3}\textbf{Tác nhân} & \multicolumn{3}{p{10.7cm}|}{Người dùng} \\ \hline
+\cellcolor[HTML]{D5F5E3}\textbf{Tiền điều kiện} & \multicolumn{3}{p{10.7cm}|}{Đã đăng nhập.} \\ \hline
+
+% --- KHỐI LUỒNG SỰ KIỆN CHÍNH ---
+\cellcolor[HTML]{D5F5E3}\textbf{Luồng sự kiện chính} & \cellcolor[HTML]{FDEBD0}\textbf{STT} & \cellcolor[HTML]{FDEBD0}\textbf{Thực hiện bởi} & \multicolumn{1}{c|}{\cellcolor[HTML]{FDEBD0}\textbf{Hành động}} \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 1. & Người dùng & vào mục "Tài khoản/Profile". \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 2. & Hệ thống & hiển thị thông tin hiện tại. \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 3. & Người dùng & nhấn "Chỉnh sửa". \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 4. & Người dùng & thay đổi thông tin (đổi ảnh đại diện, đổi tên) và nhấn "Lưu". \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 5. & Hệ thống & kiểm tra tính hợp lệ và cập nhật CSDL. \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 6. & Hệ thống & hiển thị thông báo "Cập nhật thành công". \\ \hline
+
+\cellcolor[HTML]{D5F5E3}\textbf{Hậu điều kiện} & \multicolumn{3}{p{10.7cm}|}{Thông tin cá nhân được cập nhật.} \\ \hline
+\end{longtable}
+\endgroup
+
+\subsection{Đặc tả use case UC006 ``Đổi mật khẩu''}
+\textit{Mô tả: Thay đổi mật khẩu khi đang đăng nhập.}
+\vspace{0.5cm}
+
+% Dùng \begingroup và \endgroup để việc nới rộng dòng không ảnh hưởng tới bảng khác
+\begingroup
+\renewcommand{\arraystretch}{1.5}
+
+% Thay vì dùng \begin{table}[H] và \begin{tabular}, ta dùng \begin{longtable}
+\begin{longtable}{|p{2.7cm}|p{0.8cm}|p{2.6cm}|p{7.3cm}|}
+\hline
+\cellcolor[HTML]{D5F5E3}\textbf{Mã Use case} & \multicolumn{1}{l|}{UC006} & \cellcolor[HTML]{D5F5E3}\textbf{Tên Use case} & Đổi mật khẩu \\ \hline
+\cellcolor[HTML]{D5F5E3}\textbf{Tác nhân} & \multicolumn{3}{p{10.7cm}|}{Người dùng} \\ \hline
+\cellcolor[HTML]{D5F5E3}\textbf{Tiền điều kiện} & \multicolumn{3}{p{10.7cm}|}{Không} \\ \hline
+
+% --- KHỐI LUỒNG SỰ KIỆN CHÍNH ---
+\cellcolor[HTML]{D5F5E3}\textbf{Luồng sự kiện chính} & \cellcolor[HTML]{FDEBD0}\textbf{STT} & \cellcolor[HTML]{FDEBD0}\textbf{Thực hiện bởi} & \multicolumn{1}{c|}{\cellcolor[HTML]{FDEBD0}\textbf{Hành động}} \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 1. & Người dùng & Tại mục "Tài khoản", chọn "Đổi mật khẩu". \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 2. & Người dùng & Nhập Mật khẩu cũ, Mật khẩu mới và Xác nhận mật khẩu mới. \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 3. & Người dùng & Nhấn "Lưu". \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 4. & Hệ thống & kiểm tra Mật khẩu cũ chính xác và cập nhật Mật khẩu mới. \\ \hline
+
+% --- KHỐI LUỒNG SỰ KIỆN THAY THẾ ---
+\cellcolor[HTML]{D5F5E3}\textbf{Luồng sự kiện thay thế} & \cellcolor[HTML]{FDEBD0}\textbf{STT} & \cellcolor[HTML]{FDEBD0}\textbf{Thực hiện bởi} & \multicolumn{1}{c|}{\cellcolor[HTML]{FDEBD0}\textbf{Hành động}} \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 4a & Hệ thống & Mật khẩu cũ sai: Hệ thống báo lỗi yêu cầu nhập lại. \\ \hline
+
+\cellcolor[HTML]{D5F5E3}\textbf{Hậu điều kiện} & \multicolumn{3}{p{10.7cm}|}{Mật khẩu được cập nhật.} \\ \hline
+\end{longtable}
+\endgroup
+
+\subsection{Đặc tả use case UC007 ``Đăng xuất''}
+\textit{Mô tả: Thoát khỏi tài khoản hiện tại.}
+\vspace{0.5cm}
+
+% Dùng \begingroup và \endgroup để việc nới rộng dòng không ảnh hưởng tới bảng khác
+\begingroup
+\renewcommand{\arraystretch}{1.5}
+
+% Thay vì dùng \begin{table}[H] và \begin{tabular}, ta dùng \begin{longtable}
+\begin{longtable}{|p{2.7cm}|p{0.8cm}|p{2.6cm}|p{7.3cm}|}
+\hline
+\cellcolor[HTML]{D5F5E3}\textbf{Mã Use case} & \multicolumn{1}{l|}{UC007} & \cellcolor[HTML]{D5F5E3}\textbf{Tên Use case} & Đăng xuất \\ \hline
+\cellcolor[HTML]{D5F5E3}\textbf{Tác nhân} & \multicolumn{3}{p{10.7cm}|}{Người dùng} \\ \hline
+\cellcolor[HTML]{D5F5E3}\textbf{Tiền điều kiện} & \multicolumn{3}{p{10.7cm}|}{Không} \\ \hline
+
+% --- KHỐI LUỒNG SỰ KIỆN CHÍNH ---
+\cellcolor[HTML]{D5F5E3}\textbf{Luồng sự kiện chính} & \cellcolor[HTML]{FDEBD0}\textbf{STT} & \cellcolor[HTML]{FDEBD0}\textbf{Thực hiện bởi} & \multicolumn{1}{c|}{\cellcolor[HTML]{FDEBD0}\textbf{Hành động}} \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 1. & Người dùng & chọn "Đăng xuất" tại menu cài đặt. \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 2. & Hệ thống & hiển thị popup xác nhận. \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 3. & Người dùng & nhấn "Đồng ý". \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 4. & Hệ thống & hủy token hiện tại và chuyển về màn hình Đăng nhập. \\ \hline
+
+\cellcolor[HTML]{D5F5E3}\textbf{Hậu điều kiện} & \multicolumn{3}{p{10.7cm}|}{Kết thúc phiên làm việc của người dùng.} \\ \hline
+\end{longtable}
+\endgroup
+
+\subsection{Đặc tả use case UC008 ``Tạo nhóm gia đình''}
+\textit{Mô tả: Tạo một không gian dùng chung để chia sẻ tủ lạnh và danh sách đi chợ.}
+\vspace{0.5cm}
+
+% Dùng \begingroup và \endgroup để việc nới rộng dòng không ảnh hưởng tới bảng khác
+\begingroup
+\renewcommand{\arraystretch}{1.5}
+
+% Thay vì dùng \begin{table}[H] và \begin{tabular}, ta dùng \begin{longtable}
+\begin{longtable}{|p{2.7cm}|p{0.8cm}|p{2.6cm}|p{7.3cm}|}
+\hline
+\cellcolor[HTML]{D5F5E3}\textbf{Mã Use case} & \multicolumn{1}{l|}{UC008} & \cellcolor[HTML]{D5F5E3}\textbf{Tên Use case} & Tạo nhóm gia đình \\ \hline
+\cellcolor[HTML]{D5F5E3}\textbf{Tác nhân} & \multicolumn{3}{p{10.7cm}|}{Người dùng (Owner)} \\ \hline
+\cellcolor[HTML]{D5F5E3}\textbf{Tiền điều kiện} & \multicolumn{3}{p{10.7cm}|}{Chưa thuộc nhóm gia đình nào.} \\ \hline
+
+% --- KHỐI LUỒNG SỰ KIỆN CHÍNH ---
+\cellcolor[HTML]{D5F5E3}\textbf{Luồng sự kiện chính} & \cellcolor[HTML]{FDEBD0}\textbf{STT} & \cellcolor[HTML]{FDEBD0}\textbf{Thực hiện bởi} & \multicolumn{1}{c|}{\cellcolor[HTML]{FDEBD0}\textbf{Hành động}} \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 1. & Người dùng & chọn chức năng "Tạo gia đình mới". \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 2. & Người dùng & Nhập Tên gia đình (vd: "Nhà của Cún"). \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 3. & Người dùng & Nhấn "Tạo". \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 4. & Hệ thống & tạo bản ghi gia đình mới, gán quyền "Owner" (Chủ nhóm) cho người dùng này. \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 5. & Hệ thống & Chuyển đến màn hình Quản lý nhóm. \\ \hline
+
+\cellcolor[HTML]{D5F5E3}\textbf{Hậu điều kiện} & \multicolumn{3}{p{10.7cm}|}{Một nhóm gia đình mới được tạo.} \\ \hline
+\end{longtable}
+\endgroup
+
+\subsection{Đặc tả use case UC009 ``Xem thông tin nhóm gia đình \& Danh sách thành viên''}
+\textit{Mô tả: Xem các thành viên đang có mặt trong nhóm.}
+\vspace{0.5cm}
+
+% Dùng \begingroup và \endgroup để việc nới rộng dòng không ảnh hưởng tới bảng khác
+\begingroup
+\renewcommand{\arraystretch}{1.5}
+
+% Thay vì dùng \begin{table}[H] và \begin{tabular}, ta dùng \begin{longtable}
+\begin{longtable}{|p{2.7cm}|p{0.8cm}|p{2.6cm}|p{7.3cm}|}
+\hline
+\cellcolor[HTML]{D5F5E3}\textbf{Mã Use case} & \multicolumn{1}{l|}{UC009} & \cellcolor[HTML]{D5F5E3}\textbf{Tên Use case} & Xem thông tin nhóm gia đình \& Danh sách thành viên \\ \hline
+\cellcolor[HTML]{D5F5E3}\textbf{Tác nhân} & \multicolumn{3}{p{10.7cm}|}{Người dùng trong nhóm} \\ \hline
+\cellcolor[HTML]{D5F5E3}\textbf{Tiền điều kiện} & \multicolumn{3}{p{10.7cm}|}{Không} \\ \hline
+
+% --- KHỐI LUỒNG SỰ KIỆN CHÍNH ---
+\cellcolor[HTML]{D5F5E3}\textbf{Luồng sự kiện chính} & \cellcolor[HTML]{FDEBD0}\textbf{STT} & \cellcolor[HTML]{FDEBD0}\textbf{Thực hiện bởi} & \multicolumn{1}{c|}{\cellcolor[HTML]{FDEBD0}\textbf{Hành động}} \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 1. & Người dùng trong nhóm & Chọn "Gia đình của tôi". \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 2. & Hệ thống & truy vấn và hiển thị Tên gia đình, danh sách thành viên kèm vai trò (Owner, Editor, Viewer). \\ \hline
+
+\cellcolor[HTML]{D5F5E3}\textbf{Hậu điều kiện} & \multicolumn{3}{p{10.7cm}|}{Không} \\ \hline
+\end{longtable}
+\endgroup
+
+\subsection{Đặc tả use case UC010 ``Tạo mã mời/Link mời thành viên mới''}
+\textit{Mô tả: Chủ nhóm tạo ra mã để mời người thân.}
+\vspace{0.5cm}
+
+% Dùng \begingroup và \endgroup để việc nới rộng dòng không ảnh hưởng tới bảng khác
+\begingroup
+\renewcommand{\arraystretch}{1.5}
+
+% Thay vì dùng \begin{table}[H] và \begin{tabular}, ta dùng \begin{longtable}
+\begin{longtable}{|p{2.7cm}|p{0.8cm}|p{2.6cm}|p{7.3cm}|}
+\hline
+\cellcolor[HTML]{D5F5E3}\textbf{Mã Use case} & \multicolumn{1}{l|}{UC010} & \cellcolor[HTML]{D5F5E3}\textbf{Tên Use case} & Tạo mã mời/Link mời thành viên mới \\ \hline
+\cellcolor[HTML]{D5F5E3}\textbf{Tác nhân} & \multicolumn{3}{p{10.7cm}|}{Người dùng (Owner)} \\ \hline
+\cellcolor[HTML]{D5F5E3}\textbf{Tiền điều kiện} & \multicolumn{3}{p{10.7cm}|}{Là Owner của nhóm.} \\ \hline
+
+% --- KHỐI LUỒNG SỰ KIỆN CHÍNH ---
+\cellcolor[HTML]{D5F5E3}\textbf{Luồng sự kiện chính} & \cellcolor[HTML]{FDEBD0}\textbf{STT} & \cellcolor[HTML]{FDEBD0}\textbf{Thực hiện bởi} & \multicolumn{1}{c|}{\cellcolor[HTML]{FDEBD0}\textbf{Hành động}} \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 1. & Owner & chọn "Mời thành viên". \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 2. & Hệ thống & sinh ra một Mã Code (hoặc QR) có hiệu lực 24h. \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 3. & Owner & copy mã hoặc gửi trực tiếp qua ứng dụng khác. \\ \hline
+
+\cellcolor[HTML]{D5F5E3}\textbf{Hậu điều kiện} & \multicolumn{3}{p{10.7cm}|}{Không} \\ \hline
+\end{longtable}
+\endgroup
+
+\subsection{Đặc tả use case UC011 ``Tham gia nhóm gia đình''}
+\textit{Mô tả: Người dùng gia nhập nhóm bằng mã mời.}
+\vspace{0.5cm}
+
+% Dùng \begingroup và \endgroup để việc nới rộng dòng không ảnh hưởng tới bảng khác
+\begingroup
+\renewcommand{\arraystretch}{1.5}
+
+% Thay vì dùng \begin{table}[H] và \begin{tabular}, ta dùng \begin{longtable}
+\begin{longtable}{|p{2.7cm}|p{0.8cm}|p{2.6cm}|p{7.3cm}|}
+\hline
+\cellcolor[HTML]{D5F5E3}\textbf{Mã Use case} & \multicolumn{1}{l|}{UC011} & \cellcolor[HTML]{D5F5E3}\textbf{Tên Use case} & Tham gia nhóm gia đình \\ \hline
+\cellcolor[HTML]{D5F5E3}\textbf{Tác nhân} & \multicolumn{3}{p{10.7cm}|}{Người dùng} \\ \hline
+\cellcolor[HTML]{D5F5E3}\textbf{Tiền điều kiện} & \multicolumn{3}{p{10.7cm}|}{Có mã mời hợp lệ.} \\ \hline
+
+% --- KHỐI LUỒNG SỰ KIỆN CHÍNH ---
+\cellcolor[HTML]{D5F5E3}\textbf{Luồng sự kiện chính} & \cellcolor[HTML]{FDEBD0}\textbf{STT} & \cellcolor[HTML]{FDEBD0}\textbf{Thực hiện bởi} & \multicolumn{1}{c|}{\cellcolor[HTML]{FDEBD0}\textbf{Hành động}} \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 1. & Người dùng & chọn "Tham gia gia đình". \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 2. & Người dùng & Nhập Mã mời hoặc quét QR. \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 3. & Người dùng & Nhấn "Xác nhận". \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 4. & Hệ thống & kiểm tra mã. Nếu hợp lệ, thêm người dùng vào nhóm với quyền mặc định. \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 5. & Hệ thống & Hiển thị thông báo tham gia thành công. \\ \hline
+
+% --- KHỐI LUỒNG SỰ KIỆN THAY THẾ ---
+\cellcolor[HTML]{D5F5E3}\textbf{Luồng sự kiện thay thế} & \cellcolor[HTML]{FDEBD0}\textbf{STT} & \cellcolor[HTML]{FDEBD0}\textbf{Thực hiện bởi} & \multicolumn{1}{c|}{\cellcolor[HTML]{FDEBD0}\textbf{Hành động}} \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 4a & Hệ thống & Mã hết hạn hoặc không hợp lệ: Báo lỗi "Mã mời không tồn tại hoặc đã hết hạn". \\ \hline
+
+\cellcolor[HTML]{D5F5E3}\textbf{Hậu điều kiện} & \multicolumn{3}{p{10.7cm}|}{Người dùng trở thành thành viên của nhóm.} \\ \hline
+\end{longtable}
+\endgroup
+
+\subsection{Đặc tả use case UC012 ``Cập nhật phân quyền cho thành viên''}
+\textit{Mô tả: Owner thay đổi quyền của thành viên (Edit list, Edit pantry, View only).}
+\vspace{0.5cm}
+
+% Dùng \begingroup và \endgroup để việc nới rộng dòng không ảnh hưởng tới bảng khác
+\begingroup
+\renewcommand{\arraystretch}{1.5}
+
+% Thay vì dùng \begin{table}[H] và \begin{tabular}, ta dùng \begin{longtable}
+\begin{longtable}{|p{2.7cm}|p{0.8cm}|p{2.6cm}|p{7.3cm}|}
+\hline
+\cellcolor[HTML]{D5F5E3}\textbf{Mã Use case} & \multicolumn{1}{l|}{UC012} & \cellcolor[HTML]{D5F5E3}\textbf{Tên Use case} & Cập nhật phân quyền cho thành viên \\ \hline
+\cellcolor[HTML]{D5F5E3}\textbf{Tác nhân} & \multicolumn{3}{p{10.7cm}|}{Người dùng (Owner)} \\ \hline
+\cellcolor[HTML]{D5F5E3}\textbf{Tiền điều kiện} & \multicolumn{3}{p{10.7cm}|}{Không} \\ \hline
+
+% --- KHỐI LUỒNG SỰ KIỆN CHÍNH ---
+\cellcolor[HTML]{D5F5E3}\textbf{Luồng sự kiện chính} & \cellcolor[HTML]{FDEBD0}\textbf{STT} & \cellcolor[HTML]{FDEBD0}\textbf{Thực hiện bởi} & \multicolumn{1}{c|}{\cellcolor[HTML]{FDEBD0}\textbf{Hành động}} \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 1. & Người dùng & Tại danh sách thành viên, Owner nhấn vào biểu tượng sửa quyền của 1 thành viên. \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 2. & Người dùng & Chọn quyền mới từ danh sách dropdown. \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 3. & Hệ thống & lưu lại cài đặt quyền và áp dụng ngay lập tức. \\ \hline
+
+\cellcolor[HTML]{D5F5E3}\textbf{Hậu điều kiện} & \multicolumn{3}{p{10.7cm}|}{Không} \\ \hline
+\end{longtable}
+\endgroup
+
+\subsection{Đặc tả use case UC013 ``Xóa thành viên khỏi nhóm (Kick)''}
+\textit{Mô tả: Đuổi một người dùng ra khỏi nhóm.}
+\vspace{0.5cm}
+
+% Dùng \begingroup và \endgroup để việc nới rộng dòng không ảnh hưởng tới bảng khác
+\begingroup
+\renewcommand{\arraystretch}{1.5}
+
+% Thay vì dùng \begin{table}[H] và \begin{tabular}, ta dùng \begin{longtable}
+\begin{longtable}{|p{2.7cm}|p{0.8cm}|p{2.6cm}|p{7.3cm}|}
+\hline
+\cellcolor[HTML]{D5F5E3}\textbf{Mã Use case} & \multicolumn{1}{l|}{UC013} & \cellcolor[HTML]{D5F5E3}\textbf{Tên Use case} & Xóa thành viên khỏi nhóm (Kick) \\ \hline
+\cellcolor[HTML]{D5F5E3}\textbf{Tác nhân} & \multicolumn{3}{p{10.7cm}|}{Người dùng (Owner)} \\ \hline
+\cellcolor[HTML]{D5F5E3}\textbf{Tiền điều kiện} & \multicolumn{3}{p{10.7cm}|}{Không} \\ \hline
+
+% --- KHỐI LUỒNG SỰ KIỆN CHÍNH ---
+\cellcolor[HTML]{D5F5E3}\textbf{Luồng sự kiện chính} & \cellcolor[HTML]{FDEBD0}\textbf{STT} & \cellcolor[HTML]{FDEBD0}\textbf{Thực hiện bởi} & \multicolumn{1}{c|}{\cellcolor[HTML]{FDEBD0}\textbf{Hành động}} \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 1. & Owner & chọn "Xóa" cạnh tên thành viên. \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 2. & Người dùng & Xác nhận "Bạn có chắc chắn muốn xóa?". \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 3. & Người dùng & Nhấn Đồng ý, hệ thống gỡ thành viên khỏi nhóm. \\ \hline
+
+\cellcolor[HTML]{D5F5E3}\textbf{Hậu điều kiện} & \multicolumn{3}{p{10.7cm}|}{Người bị xóa không còn quyền truy cập dữ liệu nhóm.} \\ \hline
+\end{longtable}
+\endgroup
+
+\subsection{Đặc tả use case UC014 ``Rời khỏi nhóm gia đình''}
+\textit{Mô tả: Tự động rời khỏi nhóm hiện tại.}
+\vspace{0.5cm}
+
+% Dùng \begingroup và \endgroup để việc nới rộng dòng không ảnh hưởng tới bảng khác
+\begingroup
+\renewcommand{\arraystretch}{1.5}
+
+% Thay vì dùng \begin{table}[H] và \begin{tabular}, ta dùng \begin{longtable}
+\begin{longtable}{|p{2.7cm}|p{0.8cm}|p{2.6cm}|p{7.3cm}|}
+\hline
+\cellcolor[HTML]{D5F5E3}\textbf{Mã Use case} & \multicolumn{1}{l|}{UC014} & \cellcolor[HTML]{D5F5E3}\textbf{Tên Use case} & Rời khỏi nhóm gia đình \\ \hline
+\cellcolor[HTML]{D5F5E3}\textbf{Tác nhân} & \multicolumn{3}{p{10.7cm}|}{Thành viên nhóm (Không phải Owner)} \\ \hline
+\cellcolor[HTML]{D5F5E3}\textbf{Tiền điều kiện} & \multicolumn{3}{p{10.7cm}|}{Không} \\ \hline
+
+% --- KHỐI LUỒNG SỰ KIỆN CHÍNH ---
+\cellcolor[HTML]{D5F5E3}\textbf{Luồng sự kiện chính} & \cellcolor[HTML]{FDEBD0}\textbf{STT} & \cellcolor[HTML]{FDEBD0}\textbf{Thực hiện bởi} & \multicolumn{1}{c|}{\cellcolor[HTML]{FDEBD0}\textbf{Hành động}} \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 1. & Thành viên nhóm & Chọn "Rời nhóm". \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 2. & Thành viên nhóm & Xác nhận thao tác. \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 3. & Hệ thống & gỡ user khỏi gia đình. \\ \hline
+
+\cellcolor[HTML]{D5F5E3}\textbf{Hậu điều kiện} & \multicolumn{3}{p{10.7cm}|}{Không} \\ \hline
+\end{longtable}
+\endgroup
+
+\subsection{Đặc tả use case UC015 ``Tạo mới danh sách mua sắm''}
+\vspace{0.5cm}
+
+% Dùng \begingroup và \endgroup để việc nới rộng dòng không ảnh hưởng tới bảng khác
+\begingroup
+\renewcommand{\arraystretch}{1.5}
+
+% Thay vì dùng \begin{table}[H] và \begin{tabular}, ta dùng \begin{longtable}
+\begin{longtable}{|p{2.7cm}|p{0.8cm}|p{2.6cm}|p{7.3cm}|}
+\hline
+\cellcolor[HTML]{D5F5E3}\textbf{Mã Use case} & \multicolumn{1}{l|}{UC015} & \cellcolor[HTML]{D5F5E3}\textbf{Tên Use case} & Tạo mới danh sách mua sắm \\ \hline
+\cellcolor[HTML]{D5F5E3}\textbf{Tác nhân} & \multicolumn{3}{p{10.7cm}|}{Người dùng (Quyền Edit List)} \\ \hline
+\cellcolor[HTML]{D5F5E3}\textbf{Tiền điều kiện} & \multicolumn{3}{p{10.7cm}|}{Không} \\ \hline
+
+% --- KHỐI LUỒNG SỰ KIỆN CHÍNH ---
+\cellcolor[HTML]{D5F5E3}\textbf{Luồng sự kiện chính} & \cellcolor[HTML]{FDEBD0}\textbf{STT} & \cellcolor[HTML]{FDEBD0}\textbf{Thực hiện bởi} & \multicolumn{1}{c|}{\cellcolor[HTML]{FDEBD0}\textbf{Hành động}} \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 1. & Người dùng & Chọn tab "Mua sắm", nhấn "Tạo danh sách mới". \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 2. & Người dùng & Nhập Tên danh sách (vd: Chợ cuối tuần). \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 3. & Người dùng & Nhấn Lưu, hệ thống tạo một danh sách trống. \\ \hline
+
+\cellcolor[HTML]{D5F5E3}\textbf{Hậu điều kiện} & \multicolumn{3}{p{10.7cm}|}{Không} \\ \hline
+\end{longtable}
+\endgroup
+
+\subsection{Đặc tả use case UC016 ``Xem, Sửa tên, Xóa danh sách mua sắm''}
+\vspace{0.5cm}
+
+% Dùng \begingroup và \endgroup để việc nới rộng dòng không ảnh hưởng tới bảng khác
+\begingroup
+\renewcommand{\arraystretch}{1.5}
+
+% Thay vì dùng \begin{table}[H] và \begin{tabular}, ta dùng \begin{longtable}
+\begin{longtable}{|p{2.7cm}|p{0.8cm}|p{2.6cm}|p{7.3cm}|}
+\hline
+\cellcolor[HTML]{D5F5E3}\textbf{Mã Use case} & \multicolumn{1}{l|}{UC016} & \cellcolor[HTML]{D5F5E3}\textbf{Tên Use case} & Xem, Sửa tên, Xóa danh sách mua sắm \\ \hline
+\cellcolor[HTML]{D5F5E3}\textbf{Tác nhân} & \multicolumn{3}{p{10.7cm}|}{Người dùng (Quyền Edit List)} \\ \hline
+\cellcolor[HTML]{D5F5E3}\textbf{Tiền điều kiện} & \multicolumn{3}{p{10.7cm}|}{Không} \\ \hline
+
+% --- KHỐI LUỒNG SỰ KIỆN CHÍNH ---
+\cellcolor[HTML]{D5F5E3}\textbf{Luồng sự kiện chính} & \cellcolor[HTML]{FDEBD0}\textbf{STT} & \cellcolor[HTML]{FDEBD0}\textbf{Thực hiện bởi} & \multicolumn{1}{c|}{\cellcolor[HTML]{FDEBD0}\textbf{Hành động}} \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 1. & Người dùng & Chọn biểu tượng Tùy chọn (3 chấm) trên một danh sách. \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 2. & Người dùng & Chọn "Đổi tên", nhập tên mới và lưu. Hoặc chọn "Xóa". \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 3. & Hệ thống & Nếu chọn Xóa, hệ thống yêu cầu xác nhận. Sau khi xác nhận, toàn bộ danh sách và mặt hàng bên trong bị xóa khỏi view nhưng có thể được lưu trữ mềm (soft-delete). \\ \hline
+
+\cellcolor[HTML]{D5F5E3}\textbf{Hậu điều kiện} & \multicolumn{3}{p{10.7cm}|}{Không} \\ \hline
+\end{longtable}
+\endgroup
+
+\subsection{Đặc tả use case UC017 ``Thêm mặt hàng vào danh sách''}
+\vspace{0.5cm}
+
+% Dùng \begingroup và \endgroup để việc nới rộng dòng không ảnh hưởng tới bảng khác
+\begingroup
+\renewcommand{\arraystretch}{1.5}
+
+% Thay vì dùng \begin{table}[H] và \begin{tabular}, ta dùng \begin{longtable}
+\begin{longtable}{|p{2.7cm}|p{0.8cm}|p{2.6cm}|p{7.3cm}|}
+\hline
+\cellcolor[HTML]{D5F5E3}\textbf{Mã Use case} & \multicolumn{1}{l|}{UC017} & \cellcolor[HTML]{D5F5E3}\textbf{Tên Use case} & Thêm mặt hàng vào danh sách \\ \hline
+\cellcolor[HTML]{D5F5E3}\textbf{Tác nhân} & \multicolumn{3}{p{10.7cm}|}{Người dùng (Quyền Edit List)} \\ \hline
+\cellcolor[HTML]{D5F5E3}\textbf{Tiền điều kiện} & \multicolumn{3}{p{10.7cm}|}{Không} \\ \hline
+
+% --- KHỐI LUỒNG SỰ KIỆN CHÍNH ---
+\cellcolor[HTML]{D5F5E3}\textbf{Luồng sự kiện chính} & \cellcolor[HTML]{FDEBD0}\textbf{STT} & \cellcolor[HTML]{FDEBD0}\textbf{Thực hiện bởi} & \multicolumn{1}{c|}{\cellcolor[HTML]{FDEBD0}\textbf{Hành động}} \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 1. & Hệ thống & Mở một danh sách mua sắm. \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 2. & Người dùng & Nhập tên mặt hàng. Hệ thống gợi ý từ Master Data. \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 3. & Hệ thống & Điền số lượng và đơn vị tính (vd: 2 kg). \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 4. & Người dùng & Nhấn "Thêm". Hệ thống lưu mặt hàng với trạng thái "Chưa mua". \\ \hline
+
+\cellcolor[HTML]{D5F5E3}\textbf{Hậu điều kiện} & \multicolumn{3}{p{10.7cm}|}{Không} \\ \hline
+\end{longtable}
+\endgroup
+
+\subsection{Đặc tả use case UC018 ``Cập nhật và Xóa mặt hàng''}
+\vspace{0.5cm}
+
+% Dùng \begingroup và \endgroup để việc nới rộng dòng không ảnh hưởng tới bảng khác
+\begingroup
+\renewcommand{\arraystretch}{1.5}
+
+% Thay vì dùng \begin{table}[H] và \begin{tabular}, ta dùng \begin{longtable}
+\begin{longtable}{|p{2.7cm}|p{0.8cm}|p{2.6cm}|p{7.3cm}|}
+\hline
+\cellcolor[HTML]{D5F5E3}\textbf{Mã Use case} & \multicolumn{1}{l|}{UC018} & \cellcolor[HTML]{D5F5E3}\textbf{Tên Use case} & Cập nhật và Xóa mặt hàng \\ \hline
+\cellcolor[HTML]{D5F5E3}\textbf{Tác nhân} & \multicolumn{3}{p{10.7cm}|}{Người dùng (Quyền Edit List)} \\ \hline
+\cellcolor[HTML]{D5F5E3}\textbf{Tiền điều kiện} & \multicolumn{3}{p{10.7cm}|}{Không} \\ \hline
+
+% --- KHỐI LUỒNG SỰ KIỆN CHÍNH ---
+\cellcolor[HTML]{D5F5E3}\textbf{Luồng sự kiện chính} & \cellcolor[HTML]{FDEBD0}\textbf{STT} & \cellcolor[HTML]{FDEBD0}\textbf{Thực hiện bởi} & \multicolumn{1}{c|}{\cellcolor[HTML]{FDEBD0}\textbf{Hành động}} \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 1. & Người dùng & Bấm vào một mặt hàng trong danh sách. \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 2. & Hệ thống & Thay đổi số lượng hoặc ghi chú rồi nhấn "Lưu". \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 3. & Hệ thống & Hoặc vuốt sang trái/nhấn biểu tượng thùng rác để Xóa mặt hàng đó. \\ \hline
+
+\cellcolor[HTML]{D5F5E3}\textbf{Hậu điều kiện} & \multicolumn{3}{p{10.7cm}|}{Không} \\ \hline
+\end{longtable}
+\endgroup
+
+\subsection{Đặc tả use case UC019 ``Đánh dấu đã mua và Tự động chuyển vào Tủ lạnh''}
+\textit{Mô tả: Khi hoàn tất đi siêu thị, hàng đã mua sẽ tự động chạy vào Pantry.}
+\vspace{0.5cm}
+
+% Dùng \begingroup và \endgroup để việc nới rộng dòng không ảnh hưởng tới bảng khác
+\begingroup
+\renewcommand{\arraystretch}{1.5}
+
+% Thay vì dùng \begin{table}[H] và \begin{tabular}, ta dùng \begin{longtable}
+\begin{longtable}{|p{2.7cm}|p{0.8cm}|p{2.6cm}|p{7.3cm}|}
+\hline
+\cellcolor[HTML]{D5F5E3}\textbf{Mã Use case} & \multicolumn{1}{l|}{UC019} & \cellcolor[HTML]{D5F5E3}\textbf{Tên Use case} & Đánh dấu đã mua và Tự động chuyển vào Tủ lạnh \\ \hline
+\cellcolor[HTML]{D5F5E3}\textbf{Tác nhân} & \multicolumn{3}{p{10.7cm}|}{Người dùng} \\ \hline
+\cellcolor[HTML]{D5F5E3}\textbf{Tiền điều kiện} & \multicolumn{3}{p{10.7cm}|}{Có mặt hàng trạng thái "Chưa mua".} \\ \hline
+
+% --- KHỐI LUỒNG SỰ KIỆN CHÍNH ---
+\cellcolor[HTML]{D5F5E3}\textbf{Luồng sự kiện chính} & \cellcolor[HTML]{FDEBD0}\textbf{STT} & \cellcolor[HTML]{FDEBD0}\textbf{Thực hiện bởi} & \multicolumn{1}{c|}{\cellcolor[HTML]{FDEBD0}\textbf{Hành động}} \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 1. & Người dùng & Bấm vào checkbox cạnh mặt hàng để đổi thành "Đã mua" (Gạch ngang). \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 2. & Người dùng & Nhấn nút "Hoàn tất đi chợ" (Finish Shopping). \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 3. & Hệ thống & gom các mặt hàng "Đã mua", tự động tạo các bản ghi mới trong Kho thực phẩm (Pantry) tương ứng. \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 4. & Hệ thống & Các mặt hàng này biến mất khỏi danh sách hiện tại. \\ \hline
+
+\cellcolor[HTML]{D5F5E3}\textbf{Hậu điều kiện} & \multicolumn{3}{p{10.7cm}|}{Tủ lạnh được cập nhật số lượng đồ ăn thực tế.} \\ \hline
+\end{longtable}
+\endgroup
+
+\subsection{Đặc tả use case UC020 ``Xem và Tìm kiếm thực phẩm trong kho''}
+\vspace{0.5cm}
+
+% Dùng \begingroup và \endgroup để việc nới rộng dòng không ảnh hưởng tới bảng khác
+\begingroup
+\renewcommand{\arraystretch}{1.5}
+
+% Thay vì dùng \begin{table}[H] và \begin{tabular}, ta dùng \begin{longtable}
+\begin{longtable}{|p{2.7cm}|p{0.8cm}|p{2.6cm}|p{7.3cm}|}
+\hline
+\cellcolor[HTML]{D5F5E3}\textbf{Mã Use case} & \multicolumn{1}{l|}{UC020} & \cellcolor[HTML]{D5F5E3}\textbf{Tên Use case} & Xem và Tìm kiếm thực phẩm trong kho \\ \hline
+\cellcolor[HTML]{D5F5E3}\textbf{Tác nhân} & \multicolumn{3}{p{10.7cm}|}{Người dùng} \\ \hline
+\cellcolor[HTML]{D5F5E3}\textbf{Tiền điều kiện} & \multicolumn{3}{p{10.7cm}|}{Không} \\ \hline
+
+% --- KHỐI LUỒNG SỰ KIỆN CHÍNH ---
+\cellcolor[HTML]{D5F5E3}\textbf{Luồng sự kiện chính} & \cellcolor[HTML]{FDEBD0}\textbf{STT} & \cellcolor[HTML]{FDEBD0}\textbf{Thực hiện bởi} & \multicolumn{1}{c|}{\cellcolor[HTML]{FDEBD0}\textbf{Hành động}} \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 1. & Hệ thống & Vào tab "Tủ lạnh". \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 2. & Hệ thống & hiển thị danh sách toàn bộ thực phẩm đang có, chia theo danh mục vị trí (Tủ mát, Tủ đông, Tủ khô). \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 3. & Người dùng & có thể nhập từ khóa vào ô tìm kiếm để lọc nhanh thực phẩm cần tìm. \\ \hline
+
+\cellcolor[HTML]{D5F5E3}\textbf{Hậu điều kiện} & \multicolumn{3}{p{10.7cm}|}{Không} \\ \hline
+\end{longtable}
+\endgroup
+
+\subsection{Đặc tả use case UC021 ``Thêm mới thực phẩm vào tủ lạnh (Thủ công)''}
+\vspace{0.5cm}
+
+% Dùng \begingroup và \endgroup để việc nới rộng dòng không ảnh hưởng tới bảng khác
+\begingroup
+\renewcommand{\arraystretch}{1.5}
+
+% Thay vì dùng \begin{table}[H] và \begin{tabular}, ta dùng \begin{longtable}
+\begin{longtable}{|p{2.7cm}|p{0.8cm}|p{2.6cm}|p{7.3cm}|}
+\hline
+\cellcolor[HTML]{D5F5E3}\textbf{Mã Use case} & \multicolumn{1}{l|}{UC021} & \cellcolor[HTML]{D5F5E3}\textbf{Tên Use case} & Thêm mới thực phẩm vào tủ lạnh (Thủ công) \\ \hline
+\cellcolor[HTML]{D5F5E3}\textbf{Tác nhân} & \multicolumn{3}{p{10.7cm}|}{Người dùng (Quyền Edit Pantry)} \\ \hline
+\cellcolor[HTML]{D5F5E3}\textbf{Tiền điều kiện} & \multicolumn{3}{p{10.7cm}|}{Không} \\ \hline
+
+% --- KHỐI LUỒNG SỰ KIỆN CHÍNH ---
+\cellcolor[HTML]{D5F5E3}\textbf{Luồng sự kiện chính} & \cellcolor[HTML]{FDEBD0}\textbf{STT} & \cellcolor[HTML]{FDEBD0}\textbf{Thực hiện bởi} & \multicolumn{1}{c|}{\cellcolor[HTML]{FDEBD0}\textbf{Hành động}} \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 1. & Người dùng & Nhấn nút (+) tại tab Tủ lạnh. \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 2. & Người dùng & Nhập Tên, Số lượng, Đơn vị, Ngày hết hạn, Vị trí bảo quản. \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 3. & Người dùng & Nhấn "Lưu", hệ thống ghi nhận thực phẩm vào CSDL Pantry. \\ \hline
+
+\cellcolor[HTML]{D5F5E3}\textbf{Hậu điều kiện} & \multicolumn{3}{p{10.7cm}|}{Không} \\ \hline
+\end{longtable}
+\endgroup
+
+\subsection{Đặc tả use case UC022 ``Cập nhật thông tin thực phẩm''}
+\vspace{0.5cm}
+
+% Dùng \begingroup và \endgroup để việc nới rộng dòng không ảnh hưởng tới bảng khác
+\begingroup
+\renewcommand{\arraystretch}{1.5}
+
+% Thay vì dùng \begin{table}[H] và \begin{tabular}, ta dùng \begin{longtable}
+\begin{longtable}{|p{2.7cm}|p{0.8cm}|p{2.6cm}|p{7.3cm}|}
+\hline
+\cellcolor[HTML]{D5F5E3}\textbf{Mã Use case} & \multicolumn{1}{l|}{UC022} & \cellcolor[HTML]{D5F5E3}\textbf{Tên Use case} & Cập nhật thông tin thực phẩm \\ \hline
+\cellcolor[HTML]{D5F5E3}\textbf{Tác nhân} & \multicolumn{3}{p{10.7cm}|}{Người dùng (Quyền Edit Pantry)} \\ \hline
+\cellcolor[HTML]{D5F5E3}\textbf{Tiền điều kiện} & \multicolumn{3}{p{10.7cm}|}{Không} \\ \hline
+
+% --- KHỐI LUỒNG SỰ KIỆN CHÍNH ---
+\cellcolor[HTML]{D5F5E3}\textbf{Luồng sự kiện chính} & \cellcolor[HTML]{FDEBD0}\textbf{STT} & \cellcolor[HTML]{FDEBD0}\textbf{Thực hiện bởi} & \multicolumn{1}{c|}{\cellcolor[HTML]{FDEBD0}\textbf{Hành động}} \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 1. & Người dùng & Bấm vào một thực phẩm trong tủ lạnh. \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 2. & Hệ thống & Sửa thông tin (Giảm số lượng sau khi ăn 1 phần, hoặc đổi vị trí). \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 3. & Người dùng & Nhấn "Cập nhật". Hệ thống lưu trữ thay đổi. \\ \hline
+
+\cellcolor[HTML]{D5F5E3}\textbf{Hậu điều kiện} & \multicolumn{3}{p{10.7cm}|}{Không} \\ \hline
+\end{longtable}
+\endgroup
+
+\subsection{Đặc tả use case UC023 ``Xóa/Thanh lý thực phẩm''}
+\textit{Mô tả: Khi ăn hết hoặc đồ bị hỏng phải vứt đi.}
+\vspace{0.5cm}
+
+% Dùng \begingroup và \endgroup để việc nới rộng dòng không ảnh hưởng tới bảng khác
+\begingroup
+\renewcommand{\arraystretch}{1.5}
+
+% Thay vì dùng \begin{table}[H] và \begin{tabular}, ta dùng \begin{longtable}
+\begin{longtable}{|p{2.7cm}|p{0.8cm}|p{2.6cm}|p{7.3cm}|}
+\hline
+\cellcolor[HTML]{D5F5E3}\textbf{Mã Use case} & \multicolumn{1}{l|}{UC023} & \cellcolor[HTML]{D5F5E3}\textbf{Tên Use case} & Xóa/Thanh lý thực phẩm \\ \hline
+\cellcolor[HTML]{D5F5E3}\textbf{Tác nhân} & \multicolumn{3}{p{10.7cm}|}{Người dùng (Quyền Edit Pantry)} \\ \hline
+\cellcolor[HTML]{D5F5E3}\textbf{Tiền điều kiện} & \multicolumn{3}{p{10.7cm}|}{Không} \\ \hline
+
+% --- KHỐI LUỒNG SỰ KIỆN CHÍNH ---
+\cellcolor[HTML]{D5F5E3}\textbf{Luồng sự kiện chính} & \cellcolor[HTML]{FDEBD0}\textbf{STT} & \cellcolor[HTML]{FDEBD0}\textbf{Thực hiện bởi} & \multicolumn{1}{c|}{\cellcolor[HTML]{FDEBD0}\textbf{Hành động}} \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 1. & Người dùng & Chọn thực phẩm cần xóa. \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 2. & Người dùng & Nhấn "Xóa". \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 3. & Hệ thống & hỏi lý do: "Đã ăn hết" hay "Vứt bỏ do hỏng" (để phục vụ báo cáo thống kê). \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 4. & Hệ thống & gỡ bỏ thực phẩm khỏi Pantry và cập nhật vào báo cáo. \\ \hline
+
+\cellcolor[HTML]{D5F5E3}\textbf{Hậu điều kiện} & \multicolumn{3}{p{10.7cm}|}{Không} \\ \hline
+\end{longtable}
+\endgroup
+
+\subsection{Đặc tả use case UC024 ``Tự động trừ số lượng thực phẩm khi nấu ăn''}
+\vspace{0.5cm}
+
+% Dùng \begingroup và \endgroup để việc nới rộng dòng không ảnh hưởng tới bảng khác
+\begingroup
+\renewcommand{\arraystretch}{1.5}
+
+% Thay vì dùng \begin{table}[H] và \begin{tabular}, ta dùng \begin{longtable}
+\begin{longtable}{|p{2.7cm}|p{0.8cm}|p{2.6cm}|p{7.3cm}|}
+\hline
+\cellcolor[HTML]{D5F5E3}\textbf{Mã Use case} & \multicolumn{1}{l|}{UC024} & \cellcolor[HTML]{D5F5E3}\textbf{Tên Use case} & Tự động trừ số lượng thực phẩm khi nấu ăn \\ \hline
+\cellcolor[HTML]{D5F5E3}\textbf{Tác nhân} & \multicolumn{3}{p{10.7cm}|}{Hệ thống} \\ \hline
+\cellcolor[HTML]{D5F5E3}\textbf{Tiền điều kiện} & \multicolumn{3}{p{10.7cm}|}{Không} \\ \hline
+
+% --- KHỐI LUỒNG SỰ KIỆN CHÍNH ---
+\cellcolor[HTML]{D5F5E3}\textbf{Luồng sự kiện chính} & \cellcolor[HTML]{FDEBD0}\textbf{STT} & \cellcolor[HTML]{FDEBD0}\textbf{Thực hiện bởi} & \multicolumn{1}{c|}{\cellcolor[HTML]{FDEBD0}\textbf{Hành động}} \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 1. & Người dùng & xác nhận "Đã nấu xong" một công thức hoặc một món trong Lịch trình bữa ăn. \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 2. & Hệ thống & quét các nguyên liệu trong công thức. \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 3. & Hệ thống & Trừ đi số lượng tương ứng trong Pantry (nếu có). \\ \hline
+
+\cellcolor[HTML]{D5F5E3}\textbf{Hậu điều kiện} & \multicolumn{3}{p{10.7cm}|}{Số lượng thực phẩm được đồng bộ tự động.} \\ \hline
+\end{longtable}
+\endgroup
+
+\subsection{Đặc tả use case UC025 ``Gửi thông báo nhắc nhở thực phẩm sắp hết hạn''}
+\vspace{0.5cm}
+
+% Dùng \begingroup và \endgroup để việc nới rộng dòng không ảnh hưởng tới bảng khác
+\begingroup
+\renewcommand{\arraystretch}{1.5}
+
+% Thay vì dùng \begin{table}[H] và \begin{tabular}, ta dùng \begin{longtable}
+\begin{longtable}{|p{2.7cm}|p{0.8cm}|p{2.6cm}|p{7.3cm}|}
+\hline
+\cellcolor[HTML]{D5F5E3}\textbf{Mã Use case} & \multicolumn{1}{l|}{UC025} & \cellcolor[HTML]{D5F5E3}\textbf{Tên Use case} & Gửi thông báo nhắc nhở thực phẩm sắp hết hạn \\ \hline
+\cellcolor[HTML]{D5F5E3}\textbf{Tác nhân} & \multicolumn{3}{p{10.7cm}|}{Hệ thống (CRON Job)} \\ \hline
+\cellcolor[HTML]{D5F5E3}\textbf{Tiền điều kiện} & \multicolumn{3}{p{10.7cm}|}{Không} \\ \hline
+
+% --- KHỐI LUỒNG SỰ KIỆN CHÍNH ---
+\cellcolor[HTML]{D5F5E3}\textbf{Luồng sự kiện chính} & \cellcolor[HTML]{FDEBD0}\textbf{STT} & \cellcolor[HTML]{FDEBD0}\textbf{Thực hiện bởi} & \multicolumn{1}{c|}{\cellcolor[HTML]{FDEBD0}\textbf{Hành động}} \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 1. & Hệ thống & Định kỳ quét dữ liệu Pantry mỗi ngày. \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 2. & Hệ thống & Lọc các thực phẩm có (Ngày hết hạn - Ngày hiện tại) <= 2 ngày. \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 3. & Hệ thống & Gửi Push Notification cảnh báo tới điện thoại của các thành viên. \\ \hline
+
+\cellcolor[HTML]{D5F5E3}\textbf{Hậu điều kiện} & \multicolumn{3}{p{10.7cm}|}{Không} \\ \hline
+\end{longtable}
+\endgroup
+
+\subsection{Đặc tả use case UC026 ``Xem lịch trình và Tạo phiên ăn''}
+\vspace{0.5cm}
+
+% Dùng \begingroup và \endgroup để việc nới rộng dòng không ảnh hưởng tới bảng khác
+\begingroup
+\renewcommand{\arraystretch}{1.5}
+
+% Thay vì dùng \begin{table}[H] và \begin{tabular}, ta dùng \begin{longtable}
+\begin{longtable}{|p{2.7cm}|p{0.8cm}|p{2.6cm}|p{7.3cm}|}
+\hline
+\cellcolor[HTML]{D5F5E3}\textbf{Mã Use case} & \multicolumn{1}{l|}{UC026} & \cellcolor[HTML]{D5F5E3}\textbf{Tên Use case} & Xem lịch trình và Tạo phiên ăn \\ \hline
+\cellcolor[HTML]{D5F5E3}\textbf{Tác nhân} & \multicolumn{3}{p{10.7cm}|}{Người dùng} \\ \hline
+\cellcolor[HTML]{D5F5E3}\textbf{Tiền điều kiện} & \multicolumn{3}{p{10.7cm}|}{Không} \\ \hline
+
+% --- KHỐI LUỒNG SỰ KIỆN CHÍNH ---
+\cellcolor[HTML]{D5F5E3}\textbf{Luồng sự kiện chính} & \cellcolor[HTML]{FDEBD0}\textbf{STT} & \cellcolor[HTML]{FDEBD0}\textbf{Thực hiện bởi} & \multicolumn{1}{c|}{\cellcolor[HTML]{FDEBD0}\textbf{Hành động}} \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 1. & Người dùng & vào tab "Kế hoạch nấu ăn". Hiển thị lịch theo tuần/ngày. \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 2. & Hệ thống & Mặc định có 3 phiên: Sáng, Trưa, Tối. \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 3. & Người dùng & có thể nhấn "Thêm bữa phụ" để tạo một session mới. \\ \hline
+
+\cellcolor[HTML]{D5F5E3}\textbf{Hậu điều kiện} & \multicolumn{3}{p{10.7cm}|}{Không} \\ \hline
+\end{longtable}
+\endgroup
+
+\subsection{Đặc tả use case UC027 ``Thêm và Sửa món ăn trong lịch trình''}
+\vspace{0.5cm}
+
+% Dùng \begingroup và \endgroup để việc nới rộng dòng không ảnh hưởng tới bảng khác
+\begingroup
+\renewcommand{\arraystretch}{1.5}
+
+% Thay vì dùng \begin{table}[H] và \begin{tabular}, ta dùng \begin{longtable}
+\begin{longtable}{|p{2.7cm}|p{0.8cm}|p{2.6cm}|p{7.3cm}|}
+\hline
+\cellcolor[HTML]{D5F5E3}\textbf{Mã Use case} & \multicolumn{1}{l|}{UC027} & \cellcolor[HTML]{D5F5E3}\textbf{Tên Use case} & Thêm và Sửa món ăn trong lịch trình \\ \hline
+\cellcolor[HTML]{D5F5E3}\textbf{Tác nhân} & \multicolumn{3}{p{10.7cm}|}{Người dùng} \\ \hline
+\cellcolor[HTML]{D5F5E3}\textbf{Tiền điều kiện} & \multicolumn{3}{p{10.7cm}|}{Không} \\ \hline
+
+% --- KHỐI LUỒNG SỰ KIỆN CHÍNH ---
+\cellcolor[HTML]{D5F5E3}\textbf{Luồng sự kiện chính} & \cellcolor[HTML]{FDEBD0}\textbf{STT} & \cellcolor[HTML]{FDEBD0}\textbf{Thực hiện bởi} & \multicolumn{1}{c|}{\cellcolor[HTML]{FDEBD0}\textbf{Hành động}} \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 1. & Người dùng & Tại một ngày và phiên ăn cụ thể, nhấn "Thêm món". \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 2. & Hệ thống & Tìm kiếm món ăn hoặc chọn từ mục Công thức yêu thích. \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 3. & Người dùng & Nhấn "Thêm". Hệ thống lưu món ăn vào lịch. \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 4. & Hệ thống & Nếu muốn đổi món, nhấn vào món đó và chọn "Đổi món khác". \\ \hline
+
+\cellcolor[HTML]{D5F5E3}\textbf{Hậu điều kiện} & \multicolumn{3}{p{10.7cm}|}{Không} \\ \hline
+\end{longtable}
+\endgroup
+
+\subsection{Đặc tả use case UC028 ``Xóa món ăn khỏi lịch trình''}
+\vspace{0.5cm}
+
+% Dùng \begingroup và \endgroup để việc nới rộng dòng không ảnh hưởng tới bảng khác
+\begingroup
+\renewcommand{\arraystretch}{1.5}
+
+% Thay vì dùng \begin{table}[H] và \begin{tabular}, ta dùng \begin{longtable}
+\begin{longtable}{|p{2.7cm}|p{0.8cm}|p{2.6cm}|p{7.3cm}|}
+\hline
+\cellcolor[HTML]{D5F5E3}\textbf{Mã Use case} & \multicolumn{1}{l|}{UC028} & \cellcolor[HTML]{D5F5E3}\textbf{Tên Use case} & Xóa món ăn khỏi lịch trình \\ \hline
+\cellcolor[HTML]{D5F5E3}\textbf{Tác nhân} & \multicolumn{3}{p{10.7cm}|}{Người dùng} \\ \hline
+\cellcolor[HTML]{D5F5E3}\textbf{Tiền điều kiện} & \multicolumn{3}{p{10.7cm}|}{Không} \\ \hline
+
+% --- KHỐI LUỒNG SỰ KIỆN CHÍNH ---
+\cellcolor[HTML]{D5F5E3}\textbf{Luồng sự kiện chính} & \cellcolor[HTML]{FDEBD0}\textbf{STT} & \cellcolor[HTML]{FDEBD0}\textbf{Thực hiện bởi} & \multicolumn{1}{c|}{\cellcolor[HTML]{FDEBD0}\textbf{Hành động}} \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 1. & Người dùng & Nhấn giữ hoặc vuốt để xóa một món ăn khỏi một bữa ăn đã lên lịch. \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 2. & Hệ thống & cập nhật lại giao diện lịch trình. \\ \hline
+
+\cellcolor[HTML]{D5F5E3}\textbf{Hậu điều kiện} & \multicolumn{3}{p{10.7cm}|}{Không} \\ \hline
+\end{longtable}
+\endgroup
+
+\subsection{Đặc tả use case UC029 ``Gợi ý món ăn dựa trên thực phẩm hiện có''}
+\vspace{0.5cm}
+
+% Dùng \begingroup và \endgroup để việc nới rộng dòng không ảnh hưởng tới bảng khác
+\begingroup
+\renewcommand{\arraystretch}{1.5}
+
+% Thay vì dùng \begin{table}[H] và \begin{tabular}, ta dùng \begin{longtable}
+\begin{longtable}{|p{2.7cm}|p{0.8cm}|p{2.6cm}|p{7.3cm}|}
+\hline
+\cellcolor[HTML]{D5F5E3}\textbf{Mã Use case} & \multicolumn{1}{l|}{UC029} & \cellcolor[HTML]{D5F5E3}\textbf{Tên Use case} & Gợi ý món ăn dựa trên thực phẩm hiện có \\ \hline
+\cellcolor[HTML]{D5F5E3}\textbf{Tác nhân} & \multicolumn{3}{p{10.7cm}|}{Hệ thống AI} \\ \hline
+\cellcolor[HTML]{D5F5E3}\textbf{Tiền điều kiện} & \multicolumn{3}{p{10.7cm}|}{Không} \\ \hline
+
+% --- KHỐI LUỒNG SỰ KIỆN CHÍNH ---
+\cellcolor[HTML]{D5F5E3}\textbf{Luồng sự kiện chính} & \cellcolor[HTML]{FDEBD0}\textbf{STT} & \cellcolor[HTML]{FDEBD0}\textbf{Thực hiện bởi} & \multicolumn{1}{c|}{\cellcolor[HTML]{FDEBD0}\textbf{Hành động}} \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 1. & Hệ thống AI & Nhấn nút "Gợi ý món ăn hôm nay". \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 2. & Hệ thống & đọc danh sách Pantry. \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 3. & Hệ thống & Lọc các Công thức có chứa nguyên liệu khớp với Pantry (Ưu tiên nguyên liệu sắp hết hạn). \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 4. & Hệ thống & Trả về Top 5-10 món ăn. \\ \hline
+
+\cellcolor[HTML]{D5F5E3}\textbf{Hậu điều kiện} & \multicolumn{3}{p{10.7cm}|}{Không} \\ \hline
+\end{longtable}
+\endgroup
+
+\subsection{Đặc tả use case UC030 ``Tìm kiếm và Xem chi tiết công thức''}
+\vspace{0.5cm}
+
+% Dùng \begingroup và \endgroup để việc nới rộng dòng không ảnh hưởng tới bảng khác
+\begingroup
+\renewcommand{\arraystretch}{1.5}
+
+% Thay vì dùng \begin{table}[H] và \begin{tabular}, ta dùng \begin{longtable}
+\begin{longtable}{|p{2.7cm}|p{0.8cm}|p{2.6cm}|p{7.3cm}|}
+\hline
+\cellcolor[HTML]{D5F5E3}\textbf{Mã Use case} & \multicolumn{1}{l|}{UC030} & \cellcolor[HTML]{D5F5E3}\textbf{Tên Use case} & Tìm kiếm và Xem chi tiết công thức \\ \hline
+\cellcolor[HTML]{D5F5E3}\textbf{Tác nhân} & \multicolumn{3}{p{10.7cm}|}{Người dùng} \\ \hline
+\cellcolor[HTML]{D5F5E3}\textbf{Tiền điều kiện} & \multicolumn{3}{p{10.7cm}|}{Không} \\ \hline
+
+% --- KHỐI LUỒNG SỰ KIỆN CHÍNH ---
+\cellcolor[HTML]{D5F5E3}\textbf{Luồng sự kiện chính} & \cellcolor[HTML]{FDEBD0}\textbf{STT} & \cellcolor[HTML]{FDEBD0}\textbf{Thực hiện bởi} & \multicolumn{1}{c|}{\cellcolor[HTML]{FDEBD0}\textbf{Hành động}} \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 1. & Hệ thống & Vào kho Công thức, nhập tên (vd: "Thịt kho"). \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 2. & Người dùng & Chọn một kết quả để mở chi tiết. \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 3. & Hệ thống & hiển thị: Nguyên liệu cần chuẩn bị, Các bước thực hiện, Giá trị dinh dưỡng (nếu có). \\ \hline
+
+\cellcolor[HTML]{D5F5E3}\textbf{Hậu điều kiện} & \multicolumn{3}{p{10.7cm}|}{Không} \\ \hline
+\end{longtable}
+\endgroup
+
+\subsection{Đặc tả use case UC031 ``Lưu/Bỏ lưu công thức yêu thích''}
+\vspace{0.5cm}
+
+% Dùng \begingroup và \endgroup để việc nới rộng dòng không ảnh hưởng tới bảng khác
+\begingroup
+\renewcommand{\arraystretch}{1.5}
+
+% Thay vì dùng \begin{table}[H] và \begin{tabular}, ta dùng \begin{longtable}
+\begin{longtable}{|p{2.7cm}|p{0.8cm}|p{2.6cm}|p{7.3cm}|}
+\hline
+\cellcolor[HTML]{D5F5E3}\textbf{Mã Use case} & \multicolumn{1}{l|}{UC031} & \cellcolor[HTML]{D5F5E3}\textbf{Tên Use case} & Lưu/Bỏ lưu công thức yêu thích \\ \hline
+\cellcolor[HTML]{D5F5E3}\textbf{Tác nhân} & \multicolumn{3}{p{10.7cm}|}{Người dùng} \\ \hline
+\cellcolor[HTML]{D5F5E3}\textbf{Tiền điều kiện} & \multicolumn{3}{p{10.7cm}|}{Không} \\ \hline
+
+% --- KHỐI LUỒNG SỰ KIỆN CHÍNH ---
+\cellcolor[HTML]{D5F5E3}\textbf{Luồng sự kiện chính} & \cellcolor[HTML]{FDEBD0}\textbf{STT} & \cellcolor[HTML]{FDEBD0}\textbf{Thực hiện bởi} & \multicolumn{1}{c|}{\cellcolor[HTML]{FDEBD0}\textbf{Hành động}} \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 1. & Người dùng & Tại trang chi tiết công thức, nhấn biểu tượng "Trái tim" để lưu. \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 2. & Hệ thống & Món ăn được đưa vào danh sách "Yêu thích". \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 3. & Người dùng & Bấm lần nữa để gỡ khỏi danh sách Yêu thích. \\ \hline
+
+\cellcolor[HTML]{D5F5E3}\textbf{Hậu điều kiện} & \multicolumn{3}{p{10.7cm}|}{Không} \\ \hline
+\end{longtable}
+\endgroup
+
+\subsection{Đặc tả use case UC032 ``Tự động thêm nguyên liệu còn thiếu vào Danh sách mua sắm''}
+\vspace{0.5cm}
+
+% Dùng \begingroup và \endgroup để việc nới rộng dòng không ảnh hưởng tới bảng khác
+\begingroup
+\renewcommand{\arraystretch}{1.5}
+
+% Thay vì dùng \begin{table}[H] và \begin{tabular}, ta dùng \begin{longtable}
+\begin{longtable}{|p{2.7cm}|p{0.8cm}|p{2.6cm}|p{7.3cm}|}
+\hline
+\cellcolor[HTML]{D5F5E3}\textbf{Mã Use case} & \multicolumn{1}{l|}{UC032} & \cellcolor[HTML]{D5F5E3}\textbf{Tên Use case} & Tự động thêm nguyên liệu còn thiếu vào Danh sách mua sắm \\ \hline
+\cellcolor[HTML]{D5F5E3}\textbf{Tác nhân} & \multicolumn{3}{p{10.7cm}|}{Người dùng} \\ \hline
+\cellcolor[HTML]{D5F5E3}\textbf{Tiền điều kiện} & \multicolumn{3}{p{10.7cm}|}{Không} \\ \hline
+
+% --- KHỐI LUỒNG SỰ KIỆN CHÍNH ---
+\cellcolor[HTML]{D5F5E3}\textbf{Luồng sự kiện chính} & \cellcolor[HTML]{FDEBD0}\textbf{STT} & \cellcolor[HTML]{FDEBD0}\textbf{Thực hiện bởi} & \multicolumn{1}{c|}{\cellcolor[HTML]{FDEBD0}\textbf{Hành động}} \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 1. & Người dùng & Tại trang chi tiết công thức, hệ thống đối chiếu Nguyên liệu cần thiết với Pantry hiện tại. \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 2. & Hệ thống & Hiển thị thông báo: "Bạn còn thiếu: Hành tây, Cà chua". \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 3. & Người dùng & nhấn nút "Thêm vào danh sách đi chợ". \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 4. & Hệ thống & tự tạo các item này trong Danh sách mua sắm đang active. \\ \hline
+
+\cellcolor[HTML]{D5F5E3}\textbf{Hậu điều kiện} & \multicolumn{3}{p{10.7cm}|}{Không} \\ \hline
+\end{longtable}
+\endgroup
+
+\subsection{Đặc tả use case UC033 ``Chat tương tác với AI Chef''}
+\vspace{0.5cm}
+
+% Dùng \begingroup và \endgroup để việc nới rộng dòng không ảnh hưởng tới bảng khác
+\begingroup
+\renewcommand{\arraystretch}{1.5}
+
+% Thay vì dùng \begin{table}[H] và \begin{tabular}, ta dùng \begin{longtable}
+\begin{longtable}{|p{2.7cm}|p{0.8cm}|p{2.6cm}|p{7.3cm}|}
+\hline
+\cellcolor[HTML]{D5F5E3}\textbf{Mã Use case} & \multicolumn{1}{l|}{UC033} & \cellcolor[HTML]{D5F5E3}\textbf{Tên Use case} & Chat tương tác với AI Chef \\ \hline
+\cellcolor[HTML]{D5F5E3}\textbf{Tác nhân} & \multicolumn{3}{p{10.7cm}|}{Người dùng, AI} \\ \hline
+\cellcolor[HTML]{D5F5E3}\textbf{Tiền điều kiện} & \multicolumn{3}{p{10.7cm}|}{Không} \\ \hline
+
+% --- KHỐI LUỒNG SỰ KIỆN CHÍNH ---
+\cellcolor[HTML]{D5F5E3}\textbf{Luồng sự kiện chính} & \cellcolor[HTML]{FDEBD0}\textbf{STT} & \cellcolor[HTML]{FDEBD0}\textbf{Thực hiện bởi} & \multicolumn{1}{c|}{\cellcolor[HTML]{FDEBD0}\textbf{Hành động}} \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 1. & Hệ thống & Mở khung chat "Hỏi AI Chef". \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 2. & Người dùng & Nhập câu hỏi (vd: "Tối nay nấu gì ngon với 50k?"). \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 3. & Hệ thống & gọi API LLM (kết hợp prompt chứa dữ liệu Pantry hiện tại). \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 4. & Hệ thống & AI phản hồi lại bằng văn bản gợi ý món kèm link công thức. \\ \hline
+
+\cellcolor[HTML]{D5F5E3}\textbf{Hậu điều kiện} & \multicolumn{3}{p{10.7cm}|}{Không} \\ \hline
+\end{longtable}
+\endgroup
+
+\subsection{Đặc tả use case UC034 ``Xem thống kê tiêu dùng và lãng phí''}
+\vspace{0.5cm}
+
+% Dùng \begingroup và \endgroup để việc nới rộng dòng không ảnh hưởng tới bảng khác
+\begingroup
+\renewcommand{\arraystretch}{1.5}
+
+% Thay vì dùng \begin{table}[H] và \begin{tabular}, ta dùng \begin{longtable}
+\begin{longtable}{|p{2.7cm}|p{0.8cm}|p{2.6cm}|p{7.3cm}|}
+\hline
+\cellcolor[HTML]{D5F5E3}\textbf{Mã Use case} & \multicolumn{1}{l|}{UC034} & \cellcolor[HTML]{D5F5E3}\textbf{Tên Use case} & Xem thống kê tiêu dùng và lãng phí \\ \hline
+\cellcolor[HTML]{D5F5E3}\textbf{Tác nhân} & \multicolumn{3}{p{10.7cm}|}{Người dùng} \\ \hline
+\cellcolor[HTML]{D5F5E3}\textbf{Tiền điều kiện} & \multicolumn{3}{p{10.7cm}|}{Không} \\ \hline
+
+% --- KHỐI LUỒNG SỰ KIỆN CHÍNH ---
+\cellcolor[HTML]{D5F5E3}\textbf{Luồng sự kiện chính} & \cellcolor[HTML]{FDEBD0}\textbf{STT} & \cellcolor[HTML]{FDEBD0}\textbf{Thực hiện bởi} & \multicolumn{1}{c|}{\cellcolor[HTML]{FDEBD0}\textbf{Hành động}} \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 1. & Hệ thống & Vào tab "Thống kê". \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 2. & Hệ thống & tổng hợp dữ liệu từ Pantry và Danh sách đi chợ trong 30 ngày qua. \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 3. & Hệ thống & Hiển thị Biểu đồ chi tiêu/số lượng hàng đã mua. \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 4. & Hệ thống & Hiển thị Biểu đồ/Tỷ lệ thực phẩm vứt bỏ (dựa trên thao tác Xóa với lý do "Hỏng/Hết hạn" ở UC4.4). \\ \hline
+
+\cellcolor[HTML]{D5F5E3}\textbf{Hậu điều kiện} & \multicolumn{3}{p{10.7cm}|}{Người dùng nắm được tình hình chi tiêu thực phẩm.} \\ \hline
+\end{longtable}
+\endgroup
+
+\subsection{Đặc tả use case UC035 ``Đăng nhập và Xem danh sách User''}
+\vspace{0.5cm}
+
+% Dùng \begingroup và \endgroup để việc nới rộng dòng không ảnh hưởng tới bảng khác
+\begingroup
+\renewcommand{\arraystretch}{1.5}
+
+% Thay vì dùng \begin{table}[H] và \begin{tabular}, ta dùng \begin{longtable}
+\begin{longtable}{|p{2.7cm}|p{0.8cm}|p{2.6cm}|p{7.3cm}|}
+\hline
+\cellcolor[HTML]{D5F5E3}\textbf{Mã Use case} & \multicolumn{1}{l|}{UC035} & \cellcolor[HTML]{D5F5E3}\textbf{Tên Use case} & Đăng nhập và Xem danh sách User \\ \hline
+\cellcolor[HTML]{D5F5E3}\textbf{Tác nhân} & \multicolumn{3}{p{10.7cm}|}{Quản trị viên (Admin)} \\ \hline
+\cellcolor[HTML]{D5F5E3}\textbf{Tiền điều kiện} & \multicolumn{3}{p{10.7cm}|}{Không} \\ \hline
+
+% --- KHỐI LUỒNG SỰ KIỆN CHÍNH ---
+\cellcolor[HTML]{D5F5E3}\textbf{Luồng sự kiện chính} & \cellcolor[HTML]{FDEBD0}\textbf{STT} & \cellcolor[HTML]{FDEBD0}\textbf{Thực hiện bởi} & \multicolumn{1}{c|}{\cellcolor[HTML]{FDEBD0}\textbf{Hành động}} \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 1. & Hệ thống & Đăng nhập vào Admin Portal. \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 2. & Quản trị viên & Chọn "Quản lý người dùng". Hệ thống hiển thị bảng danh sách toàn bộ User đã đăng ký. \\ \hline
+
+\cellcolor[HTML]{D5F5E3}\textbf{Hậu điều kiện} & \multicolumn{3}{p{10.7cm}|}{Không} \\ \hline
+\end{longtable}
+\endgroup
+
+\subsection{Đặc tả use case UC036 ``Khóa/Mở khóa tài khoản''}
+\vspace{0.5cm}
+
+% Dùng \begingroup và \endgroup để việc nới rộng dòng không ảnh hưởng tới bảng khác
+\begingroup
+\renewcommand{\arraystretch}{1.5}
+
+% Thay vì dùng \begin{table}[H] và \begin{tabular}, ta dùng \begin{longtable}
+\begin{longtable}{|p{2.7cm}|p{0.8cm}|p{2.6cm}|p{7.3cm}|}
+\hline
+\cellcolor[HTML]{D5F5E3}\textbf{Mã Use case} & \multicolumn{1}{l|}{UC036} & \cellcolor[HTML]{D5F5E3}\textbf{Tên Use case} & Khóa/Mở khóa tài khoản \\ \hline
+\cellcolor[HTML]{D5F5E3}\textbf{Tác nhân} & \multicolumn{3}{p{10.7cm}|}{Admin} \\ \hline
+\cellcolor[HTML]{D5F5E3}\textbf{Tiền điều kiện} & \multicolumn{3}{p{10.7cm}|}{Không} \\ \hline
+
+% --- KHỐI LUỒNG SỰ KIỆN CHÍNH ---
+\cellcolor[HTML]{D5F5E3}\textbf{Luồng sự kiện chính} & \cellcolor[HTML]{FDEBD0}\textbf{STT} & \cellcolor[HTML]{FDEBD0}\textbf{Thực hiện bởi} & \multicolumn{1}{c|}{\cellcolor[HTML]{FDEBD0}\textbf{Hành động}} \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 1. & Admin & tìm kiếm một User vi phạm quy định. \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 2. & Admin & Nhấn nút "Block/Khóa". Nhập lý do khóa. \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 3. & Hệ thống & cập nhật trạng thái User thành "Blocked". \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 4. & Hệ thống & Lần tới User đăng nhập sẽ bị từ chối. \\ \hline
+
+\cellcolor[HTML]{D5F5E3}\textbf{Hậu điều kiện} & \multicolumn{3}{p{10.7cm}|}{Không} \\ \hline
+\end{longtable}
+\endgroup
+
+\subsection{Đặc tả use case UC037 ``Quản lý Master Data (Thực phẩm, Đơn vị tính)''}
+\vspace{0.5cm}
+
+% Dùng \begingroup và \endgroup để việc nới rộng dòng không ảnh hưởng tới bảng khác
+\begingroup
+\renewcommand{\arraystretch}{1.5}
+
+% Thay vì dùng \begin{table}[H] và \begin{tabular}, ta dùng \begin{longtable}
+\begin{longtable}{|p{2.7cm}|p{0.8cm}|p{2.6cm}|p{7.3cm}|}
+\hline
+\cellcolor[HTML]{D5F5E3}\textbf{Mã Use case} & \multicolumn{1}{l|}{UC037} & \cellcolor[HTML]{D5F5E3}\textbf{Tên Use case} & Quản lý Master Data (Thực phẩm, Đơn vị tính) \\ \hline
+\cellcolor[HTML]{D5F5E3}\textbf{Tác nhân} & \multicolumn{3}{p{10.7cm}|}{Admin} \\ \hline
+\cellcolor[HTML]{D5F5E3}\textbf{Tiền điều kiện} & \multicolumn{3}{p{10.7cm}|}{Không} \\ \hline
+
+% --- KHỐI LUỒNG SỰ KIỆN CHÍNH ---
+\cellcolor[HTML]{D5F5E3}\textbf{Luồng sự kiện chính} & \cellcolor[HTML]{FDEBD0}\textbf{STT} & \cellcolor[HTML]{FDEBD0}\textbf{Thực hiện bởi} & \multicolumn{1}{c|}{\cellcolor[HTML]{FDEBD0}\textbf{Hành động}} \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 1. & Hệ thống & Vào mục Cấu hình Danh mục. \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 2. & Admin & thêm mới các Đơn vị tính chuẩn (kg, gr, bó, quả...) và Phân loại thực phẩm (Rau củ, Thịt cá...). \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 3. & Hệ thống & lưu lại. Dữ liệu này sẽ làm cơ sở gợi ý cho App của người dùng (tại UC3.4 và UC4.2). \\ \hline
+
+\cellcolor[HTML]{D5F5E3}\textbf{Hậu điều kiện} & \multicolumn{3}{p{10.7cm}|}{Không} \\ \hline
+\end{longtable}
+\endgroup
+
+\subsection{Đặc tả use case UC038 ``Kiểm duyệt công thức nấu ăn''}
+\vspace{0.5cm}
+
+% Dùng \begingroup và \endgroup để việc nới rộng dòng không ảnh hưởng tới bảng khác
+\begingroup
+\renewcommand{\arraystretch}{1.5}
+
+% Thay vì dùng \begin{table}[H] và \begin{tabular}, ta dùng \begin{longtable}
+\begin{longtable}{|p{2.7cm}|p{0.8cm}|p{2.6cm}|p{7.3cm}|}
+\hline
+\cellcolor[HTML]{D5F5E3}\textbf{Mã Use case} & \multicolumn{1}{l|}{UC038} & \cellcolor[HTML]{D5F5E3}\textbf{Tên Use case} & Kiểm duyệt công thức nấu ăn \\ \hline
+\cellcolor[HTML]{D5F5E3}\textbf{Tác nhân} & \multicolumn{3}{p{10.7cm}|}{Admin} \\ \hline
+\cellcolor[HTML]{D5F5E3}\textbf{Tiền điều kiện} & \multicolumn{3}{p{10.7cm}|}{Không} \\ \hline
+
+% --- KHỐI LUỒNG SỰ KIỆN CHÍNH ---
+\cellcolor[HTML]{D5F5E3}\textbf{Luồng sự kiện chính} & \cellcolor[HTML]{FDEBD0}\textbf{STT} & \cellcolor[HTML]{FDEBD0}\textbf{Thực hiện bởi} & \multicolumn{1}{c|}{\cellcolor[HTML]{FDEBD0}\textbf{Hành động}} \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 1. & Hệ thống & Nếu có tính năng User đóng góp công thức, Admin vào mục "Công thức chờ duyệt". \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 2. & Hệ thống & Xem chi tiết công thức. \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 3. & Admin & Nhấn "Duyệt" (Publish) hoặc "Từ chối" (Reject). \\ \hline
+
+\cellcolor[HTML]{D5F5E3}\textbf{Hậu điều kiện} & \multicolumn{3}{p{10.7cm}|}{Không} \\ \hline
+\end{longtable}
+\endgroup
+
+\subsection{Đặc tả use case UC039 ``Xem Dashboard tổng quan''}
+\vspace{0.5cm}
+
+% Dùng \begingroup và \endgroup để việc nới rộng dòng không ảnh hưởng tới bảng khác
+\begingroup
+\renewcommand{\arraystretch}{1.5}
+
+% Thay vì dùng \begin{table}[H] và \begin{tabular}, ta dùng \begin{longtable}
+\begin{longtable}{|p{2.7cm}|p{0.8cm}|p{2.6cm}|p{7.3cm}|}
+\hline
+\cellcolor[HTML]{D5F5E3}\textbf{Mã Use case} & \multicolumn{1}{l|}{UC039} & \cellcolor[HTML]{D5F5E3}\textbf{Tên Use case} & Xem Dashboard tổng quan \\ \hline
+\cellcolor[HTML]{D5F5E3}\textbf{Tác nhân} & \multicolumn{3}{p{10.7cm}|}{Admin} \\ \hline
+\cellcolor[HTML]{D5F5E3}\textbf{Tiền điều kiện} & \multicolumn{3}{p{10.7cm}|}{Không} \\ \hline
+
+% --- KHỐI LUỒNG SỰ KIỆN CHÍNH ---
+\cellcolor[HTML]{D5F5E3}\textbf{Luồng sự kiện chính} & \cellcolor[HTML]{FDEBD0}\textbf{STT} & \cellcolor[HTML]{FDEBD0}\textbf{Thực hiện bởi} & \multicolumn{1}{c|}{\cellcolor[HTML]{FDEBD0}\textbf{Hành động}} \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 1. & Hệ thống & Truy cập Trang chủ Admin. \\ \cline{2-4} 
+\cellcolor[HTML]{D5F5E3} & 2. & Hệ thống & Hiển thị các chỉ số thống kê tổng quan: Tổng số User, User hoạt động trong tháng (MAU), Tổng số Gia đình đang hoạt động, Tổng số Công thức. \\ \hline
+
+\cellcolor[HTML]{D5F5E3}\textbf{Hậu điều kiện} & \multicolumn{3}{p{10.7cm}|}{Admin theo dõi được hiệu suất hoạt động của hệ thống.} \\ \hline
+\end{longtable}
+\endgroup
+
+
+
+\section{Các yêu cầu phi chức năng và yêu cầu khác}
+\subsection{Chức năng (Functionality)}
+\begin{itemize}
+    \item Hệ thống phải xử lý và thông báo rõ ràng khi xảy ra lỗi trong quá trình thao tác với cơ sở dữ liệu, bao gồm lỗi kết nối, lỗi đọc/ghi dữ liệu và lỗi dữ liệu không hợp lệ.
+    \item Các chức năng yêu cầu đăng nhập như quản lý nhóm gia đình, danh sách mua sắm, tủ lạnh/kho thực phẩm, kế hoạch bữa ăn, công thức yêu thích và thống kê chỉ được phép thực hiện sau khi Người dùng được xác thực.
+    \item Các chức năng quản trị như xem danh sách user, khóa/mở khóa tài khoản, quản lý master data, kiểm duyệt công thức và xem dashboard chỉ dành cho Quản trị viên.
+    \item Hệ thống phải đảm bảo dữ liệu của từng nhóm gia đình được tách biệt. Người dùng chỉ được xem và chỉnh sửa dữ liệu thuộc nhóm mà mình có quyền truy cập.
+    \item Các quyền nội bộ trong nhóm gia đình như Owner, Editor, Viewer phải được kiểm tra trước khi cho phép thực hiện các thao tác tạo mã mời, cập nhật phân quyền, chỉnh sửa danh sách mua sắm hoặc chỉnh sửa kho thực phẩm.
+    \item Khi mặt hàng trong danh sách mua sắm được đánh dấu đã mua, hệ thống phải có khả năng chuyển mặt hàng đó vào tủ lạnh/kho thực phẩm.
+    \item Khi Người dùng xác nhận đã nấu ăn, hệ thống phải có khả năng đối chiếu nguyên liệu và trừ số lượng thực phẩm tương ứng trong kho.
+    \item Hệ thống phải kiểm tra dữ liệu đầu vào ở các chức năng quan trọng như đăng ký, đăng nhập, thêm thực phẩm, cập nhật số lượng, hạn sử dụng, tạo lịch trình bữa ăn và quản lý master data.
+    \item Các chức năng sử dụng Hệ thống AI như gợi ý món ăn theo Pantry và chat AI Chef phải xử lý được trường hợp dịch vụ AI không phản hồi, phản hồi lỗi hoặc không tìm được gợi ý phù hợp.
+    \item \textbf{Định dạng hiển thị chung:}
+    \begin{itemize}
+        \item Số lượng, ngày tháng và các chỉ số thống kê phải được hiển thị rõ ràng, thống nhất về đơn vị.
+        \item Tên thực phẩm, tên món ăn, tên nhóm và tên người dùng phải hỗ trợ tiếng Việt có dấu.
+        \item Font chữ, màu sắc và khoảng cách thành phần giao diện phải thống nhất giữa các màn hình.
+        \item Các trạng thái quan trọng như đã mua, sắp hết hạn, đã hết hạn, thiếu nguyên liệu và tài khoản bị khóa phải có cách hiển thị dễ nhận biết.
+    \end{itemize}
+\end{itemize}
+
+\subsection{Tính dễ dùng (Usability)}
+\begin{itemize}
+    \item Giao diện cần được thiết kế theo hướng dễ thao tác trên thiết bị di động, vì Người dùng thường sử dụng hệ thống khi đi chợ, trong siêu thị hoặc trong bếp.
+    \item Các thông báo lỗi phải nêu rõ nguyên nhân và hướng xử lý. Ví dụ: nếu hạn sử dụng không hợp lệ, hệ thống cần chỉ rõ trường dữ liệu cần sửa.
+    \item Các thao tác thường xuyên như thêm mặt hàng, đánh dấu đã mua, tìm kiếm thực phẩm, cập nhật số lượng và xem công thức cần được thực hiện nhanh, ít bước.
+    \item Hệ thống nên hỗ trợ gợi ý hoặc tự động hoàn thành khi nhập tên thực phẩm, tên món ăn và đơn vị tính để giảm thao tác nhập liệu.
+    \item Các màn hình thống kê, dashboard và danh sách dài cần hỗ trợ lọc, tìm kiếm hoặc sắp xếp để Người dùng dễ theo dõi.
+\end{itemize}
+
+\subsection{Các yêu cầu khác}
+
+\subsubsection{Yêu cầu về hiệu năng (Efficiency/Performance)}
+\begin{itemize}
+    \item Các thao tác phổ biến như mở danh sách mua sắm, xem tủ lạnh, đánh dấu đã mua, cập nhật số lượng thực phẩm và xem kế hoạch bữa ăn nên phản hồi trong vòng 2 giây trong điều kiện mạng ổn định.
+    \item Các chức năng tìm kiếm thực phẩm, tìm kiếm công thức và lọc danh sách cần phản hồi đủ nhanh để không làm gián đoạn luồng thao tác của Người dùng.
+    \item Các tác vụ nền như quét thực phẩm sắp hết hạn, tính toán thống kê, tổng hợp dashboard và gọi Hệ thống AI nên được thực hiện theo lịch hoặc xử lý bất đồng bộ khi phù hợp để tránh ảnh hưởng đến trải nghiệm sử dụng trực tiếp.
+    \item Hệ thống cần hỗ trợ nhiều Người dùng thao tác đồng thời trên các nhóm gia đình khác nhau mà không làm sai lệch dữ liệu.
+\end{itemize}
+
+\subsubsection{Tính tin cậy (Reliability)}
+\begin{itemize}
+    \item Hệ thống cần hạn chế mất dữ liệu trong các thao tác quan trọng như tạo danh sách mua sắm, đánh dấu đã mua, thêm thực phẩm và cập nhật kế hoạch bữa ăn.
+    \item Dữ liệu cần được sao lưu định kỳ để giảm rủi ro mất mát thông tin tài khoản, nhóm gia đình, danh sách mua sắm, kho thực phẩm và công thức.
+    \item Khi mất kết nối hoặc lỗi máy chủ, hệ thống phải hiển thị thông báo phù hợp thay vì dừng đột ngột hoặc hiển thị lỗi kỹ thuật khó hiểu.
+    \item Các thao tác cập nhật số lượng thực phẩm và chuyển mặt hàng đã mua vào kho cần đảm bảo tính nhất quán, tránh ghi nhận trùng hoặc mất bản ghi.
+\end{itemize}
+
+\subsubsection{Tính dễ bảo trì (Maintainability)}
+\begin{itemize}
+    \item Hệ thống cần được tổ chức theo các module rõ ràng như xác thực, nhóm gia đình, danh sách mua sắm, kho thực phẩm, kế hoạch bữa ăn, công thức/gợi ý, thống kê và quản trị.
+    \item Mã nguồn cần tuân thủ quy ước đặt tên, cấu trúc thư mục và phong cách lập trình thống nhất để thuận tiện cho việc mở rộng.
+    \item Các lỗi phía hệ thống cần được ghi log với đầy đủ ngữ cảnh cần thiết như thời điểm, loại lỗi, chức năng phát sinh lỗi và thông tin truy vết phù hợp.
+    \item Các logic nghiệp vụ quan trọng như phân quyền, chuyển mặt hàng vào kho, trừ kho khi nấu ăn, kiểm tra hạn sử dụng và gọi Hệ thống AI cần được tách rõ để dễ kiểm thử và bảo trì.
+\end{itemize}
+
+\subsubsection{Tính khả chuyển (Portability)}
+\begin{itemize}
+    \item NaviMart cần hoạt động tốt trên các trình duyệt phổ biến như Google Chrome, Safari và Microsoft Edge.
+    \item Giao diện cần tương thích với nhiều kích thước màn hình, bao gồm điện thoại, máy tính bảng và máy tính cá nhân.
+    \item Backend và các dịch vụ phụ trợ nên có cấu hình triển khai rõ ràng, có thể đóng gói bằng Docker hoặc cơ chế tương đương để đảm bảo đồng nhất giữa môi trường phát triển và triển khai.
+    \item Các cấu hình nhạy cảm như thông tin kết nối cơ sở dữ liệu, khóa bí mật và cấu hình Hệ thống AI phải được tách khỏi mã nguồn.
+\end{itemize}
+
+\subsubsection{Yêu cầu về an toàn bảo mật (Security)}
+\begin{itemize}
+    \item Mật khẩu Người dùng bắt buộc phải được băm an toàn trước khi lưu trữ, không lưu mật khẩu dạng rõ.
+    \item Dữ liệu truyền tải giữa trình duyệt và máy chủ phải được bảo vệ bằng HTTPS trong môi trường triển khai thực tế.
+    \item Hệ thống phải áp dụng cơ chế xác thực và phân quyền cho các chức năng của Người dùng và Quản trị viên.
+    \item Các yêu cầu gửi tới Hệ thống AI không được chứa thông tin nhạy cảm vượt quá phạm vi cần thiết cho việc gợi ý món ăn hoặc phản hồi AI Chef.
+    \item Người dùng chỉ được truy cập dữ liệu nhóm gia đình mà mình thuộc về hoặc được cấp quyền phù hợp.
+    \item Quản trị viên chỉ được sử dụng các chức năng quản trị cần thiết, không được tùy tiện chỉnh sửa dữ liệu riêng tư của nhóm gia đình nếu không có yêu cầu nghiệp vụ rõ ràng.
+    \item Các API quan trọng cần kiểm tra token, quyền truy cập và dữ liệu đầu vào để giảm rủi ro truy cập trái phép hoặc thao tác sai dữ liệu.
+\end{itemize}
+
+\subsubsection{Yêu cầu về giao diện (Interface Requirements)}
+\begin{itemize}
+    \item Giao diện cần ưu tiên thiết bị di động và đáp ứng tốt trên nhiều kích thước màn hình.
+    \item Các trạng thái thực phẩm cần được thể hiện trực quan: thực phẩm sắp hết hạn, đã hết hạn, đã thanh lý hoặc nguyên liệu đã cạn phải dễ phân biệt.
+    \item Các nút thao tác chính như thêm mặt hàng, đánh dấu đã mua, thêm thực phẩm, lưu kế hoạch và thêm nguyên liệu thiếu vào danh sách mua sắm cần nổi bật và dễ thao tác.
+    \item Các danh sách dài như danh sách mua sắm, kho thực phẩm, công thức và danh sách user cần có tìm kiếm, lọc hoặc phân trang khi cần.
+    \item Giao diện quản trị cần tách biệt với giao diện Người dùng thông thường để tránh nhầm lẫn khi thao tác.
+\end{itemize}
+
 
 \end{document}

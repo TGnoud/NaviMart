@@ -6,61 +6,78 @@
 \textbf{SOLID} là viết tắt của 5 chữ cái đầu trong 5 nguyên lý thiết kế hướng đối tượng, giúp lập trình viên viết ra những đoạn mã dễ đọc, dễ hiểu, dễ bảo trì và dễ mở rộng. Hệ thống NaviMart áp dụng triệt để 5 nguyên tắc này, đặc biệt thông qua kiến trúc của framework NestJS ở Backend và React ở Frontend.
 
 \begin{itemize}
-    \item \textbf{S}ingle Responsibility Principle (SRP) - Nguyên lý đơn trách nhiệm
-    \item \textbf{O}pen/Closed Principle (OCP) - Nguyên lý Đóng/Mở
-    \item \textbf{L}iskov Substitution Principle (LSP) - Nguyên lý thay thế Liskov
-    \item \textbf{I}nterface Segregation Principle (ISP) - Nguyên lý phân tách Interface
-    \item \textbf{D}ependency Inversion Principle (DIP) - Nguyên lý đảo ngược phụ thuộc
+    \item \textbf{S}ingle Responsibility Principle - SRP: Nguyên lý đơn trách nhiệm
+    \item \textbf{O}pen/Closed Principle - OCP: Nguyên lý Đóng/Mở
+    \item \textbf{L}iskov Substitution Principle - LSP: Nguyên lý thay thế Liskov
+    \item \textbf{I}nterface Segregation Principle - ISP: Nguyên lý phân tách Interface
+    \item \textbf{D}ependency Inversion Principle - DIP: Nguyên lý đảo ngược phụ thuộc
 \end{itemize}
 
-\textbf{Nguyên tắc số 1}: \textbf{S}ingle Responsibility Principle (SRP)
+\textbf{Nguyên tắc số 1}: \textbf{S}ingle Responsibility Principle - SRP
 
 \textit{Định nghĩa:} Mỗi lớp chỉ nên chịu trách nhiệm về một nhiệm vụ cụ thể mà thôi.
 
 \textit{Minh chứng cụ thể trong dự án NaviMart:} 
 \begin{itemize}
-    \item Hệ thống phân chia rõ ràng các tầng: \textbf{Controller} chỉ làm nhiệm vụ tiếp nhận HTTP Request, trích xuất tham số, gọi hàm tương ứng và trả về Response (ví dụ lớp \texttt{ShoppingListsController}). \textbf{Service} chỉ tập trung vào xử lý logic nghiệp vụ và giao tiếp cơ sở dữ liệu (ví dụ lớp \texttt{ShoppingListsService}).
-    \item Đối tượng Mapper (ví dụ \texttt{ShoppingListMapper}) chỉ đảm nhận duy nhất một việc: chuyển đổi dữ liệu từ dạng Entity của Database sang cấu trúc DTO trả về cho Client.
+    \item Hệ thống phân chia rõ ràng các tầng: \textbf{Controller} chỉ làm nhiệm vụ tiếp nhận HTTP Request, trích xuất tham số, gọi hàm tương ứng và trả về Response, ví dụ lớp \texttt{ShoppingListsController}. \textbf{Service} chỉ tập trung vào xử lý logic nghiệp vụ và giao tiếp cơ sở dữ liệu, tiêu biểu là lớp \texttt{ShoppingListsService}.
+    \item Đối tượng Mapper, điển hình là \texttt{ShoppingListMapper}, chỉ đảm nhận duy nhất một việc: chuyển đổi dữ liệu từ dạng Entity của Database sang cấu trúc DTO trả về cho Client.
 \end{itemize}
 
-\textbf{Nguyên tắc số 2}: \textbf{O}pen/Closed Principle (OCP)
+\textbf{Nguyên tắc số 2}: \textbf{O}pen/Closed Principle - OCP
 
-\textit{Định nghĩa:} Không được sửa đổi một Class có sẵn, nhưng có thể dễ dàng mở rộng chức năng (bằng kế thừa hoặc tiêm thành phần mới). Nguyên lý này giúp hạn chế tối đa việc gây ra lỗi cho những đoạn mã đang hoạt động ổn định khi có yêu cầu thêm tính năng mới.
+\textit{Định nghĩa:} Không được sửa đổi một Class có sẵn, nhưng có thể dễ dàng mở rộng chức năng thông qua kế thừa hoặc tiêm thành phần mới. Nguyên lý này giúp hạn chế tối đa việc gây ra lỗi cho những đoạn mã đang hoạt động ổn định khi có yêu cầu thêm tính năng mới.
 
 \textit{Minh chứng cụ thể trong dự án NaviMart:}
 \begin{itemize}
-    \item Dự án sử dụng triệt để các \textbf{Guard} và \textbf{Decorator} trong NestJS. Ví dụ: khi cần áp dụng quy tắc kiểm tra phân quyền (chỉ cho phép thành viên có quyền sửa danh sách được gọi API), thay vì chèn thêm các câu lệnh \texttt{if-else} vào bên trong thân hàm của Controller, ta chỉ cần định nghĩa các Guard ở ngoài và gắn Decorator \texttt{@UseGuards(JwtAuthGuard, FamilyPermissionGuard)} và \texttt{@FamilyPermissions('edit\_lists')} lên phía trên khai báo hàm.
+    \item Dự án sử dụng triệt để các \textbf{Guard} và \textbf{Decorator} trong NestJS. Ví dụ: khi cần áp dụng quy tắc kiểm tra phân quyền, tức là chỉ cho phép thành viên có quyền sửa danh sách được gọi API, thay vì chèn thêm các câu lệnh \texttt{if-else} vào bên trong thân hàm của Controller, ta chỉ cần định nghĩa các Guard ở ngoài và gắn Decorator \texttt{@UseGuards(JwtAuthGuard, FamilyPermissionGuard)} và \texttt{@FamilyPermissions('edit\_lists')} lên phía trên khai báo hàm.
     \item Nhờ vậy, phương thức gốc đã được "mở rộng" thêm một lớp rào chắn bảo mật mới một cách hoàn hảo, trong khi toàn bộ mã nguồn xử lý logic bên trong hàm vẫn được "đóng" và không hề bị can thiệp.
 \end{itemize}
 
-\textbf{Nguyên tắc số 3}: \textbf{L}iskov Substitution Principle (LSP)
+\textbf{Nguyên tắc số 3}: \textbf{L}iskov Substitution Principle - LSP
 
-\textit{Định nghĩa:} Các đối tượng (instance) kiểu class con có thể thay thế các đối tượng kiểu class cha mà không gây ra lỗi.
+\textit{Định nghĩa:} Các đối tượng kiểu class con có thể thay thế các đối tượng kiểu class cha mà không gây ra lỗi.
 
 \textit{Minh chứng cụ thể trong dự án NaviMart:}
 \begin{itemize}
-    \item Ở Backend, các lớp Service ngoại lệ (Exception) đều kế thừa lớp ngoại lệ tiêu chuẩn của hệ thống (như \texttt{HttpException}). Nhờ đó, middleware xử lý lỗi toàn cục có thể đón và xử lý tất cả các ngoại lệ tùy chỉnh như một \texttt{HttpException} thông thường mà không cần biết chính xác loại lỗi con là gì.
-    \item Ở Frontend, các Component con kế thừa và mở rộng từ các component gốc (Base Component). Bất cứ chỗ nào tái sử dụng cần component gốc, việc đưa component con vào thay thế vẫn đáp ứng đủ luồng dữ liệu (props) mà không phá vỡ UI.
+    \item Ở Backend, các lớp Service ngoại lệ đều kế thừa lớp ngoại lệ tiêu chuẩn của hệ thống như \texttt{HttpException}. Nhờ đó, middleware xử lý lỗi toàn cục có thể đón và xử lý tất cả các ngoại lệ tùy chỉnh như một \texttt{HttpException} thông thường mà không cần biết chính xác loại lỗi con là gì.
+    \item Ở Frontend, các Component con kế thừa và mở rộng từ các component gốc. Bất cứ chỗ nào tái sử dụng cần component gốc, việc đưa component con vào thay thế vẫn đáp ứng đủ luồng dữ liệu truyền vào mà không phá vỡ giao diện người dùng.
 \end{itemize}
 
-\textbf{Nguyên tắc số 4}: \textbf{I}nterface Segregation Principle (ISP)
+\textbf{Nguyên tắc số 4}: \textbf{I}nterface Segregation Principle - ISP
 
 \textit{Định nghĩa:} Thay vì dùng 1 interface lớn, ta nên tách thành nhiều interface nhỏ, với nhiều mục đích cụ thể để Client không bị phụ thuộc vào những phương thức không dùng tới.
 
 \textit{Minh chứng cụ thể trong dự án NaviMart:}
 \begin{itemize}
-    \item Thay vì dùng một đối tượng Data Transfer Object (DTO) khổng lồ chứa tất cả các trường dữ liệu của danh sách mua sắm cho mọi trường hợp, hệ thống đã phân tách thành các DTO nhỏ biệt lập: \texttt{CreateShoppingListDto} (áp dụng khi tạo mới), \texttt{UpdateShoppingListDto} (áp dụng khi cập nhật nội dung), \texttt{CompleteShoppingListDto} (áp dụng khi đánh dấu đi chợ xong).
+    \item Thay vì dùng một đối tượng Data Transfer Object khổng lồ chứa tất cả các trường dữ liệu của danh sách mua sắm cho mọi trường hợp, hệ thống đã phân tách thành các DTO nhỏ biệt lập: \texttt{CreateShoppingListDto} dùng khi tạo mới, \texttt{UpdateShoppingListDto} dùng khi cập nhật nội dung, \texttt{CompleteShoppingListDto} dùng khi đánh dấu đi chợ xong.
     \item Điều này đảm bảo mỗi phương thức API chỉ phải nhận những trường dữ liệu mà nó thực sự cần, mã nguồn trở nên tinh gọn và chính xác hơn.
 \end{itemize}
 
-\textbf{Nguyên tắc số 5}: \textbf{D}ependency Inversion Principle (DIP)
+\textbf{Nguyên tắc số 5}: \textbf{D}ependency Inversion Principle - DIP
 
-\textit{Định nghĩa:} Các module cấp cao không nên phụ thuộc vào các module cấp thấp. Cả hai nên phụ thuộc vào abstraction (interface). Code giao tiếp thông qua abstraction, không phải qua implementation chi tiết.
+\textit{Định nghĩa:} Các module cấp cao không nên phụ thuộc vào các module cấp thấp. Cả hai nên phụ thuộc vào abstraction. Code giao tiếp thông qua abstraction, không phải qua implementation chi tiết.
 
 \textit{Minh chứng cụ thể trong dự án NaviMart:}
 \begin{itemize}
-    \item Hệ thống áp dụng triệt để cơ chế \textbf{Dependency Injection (DI)} của framework NestJS. Trong \texttt{ShoppingListsController}, thay vì khởi tạo service bằng lệnh \texttt{new ShoppingListsService()}, service được khai báo qua tham số của \texttt{constructor}. Framework sẽ tự động "tiêm" (inject) thể hiện (instance) của class vào lúc runtime.
-    \item Điều này giúp Controller và Service không bị kết dính chặt chẽ (tight-coupling). Nhờ đó, có thể dễ dàng tiêm một Mock Service vào Controller khi viết Unit Test để kiểm tra độc lập mà không cần kết nối tới Database thật.
+    \item Hệ thống áp dụng triệt để cơ chế \textbf{Dependency Injection} của framework NestJS. Trong \texttt{ShoppingListsController}, thay vì khởi tạo service bằng lệnh \texttt{new ShoppingListsService()}, service được khai báo qua tham số của \texttt{constructor}. Framework sẽ tự động tiêm thể hiện của class vào lúc runtime.
+    \item Điều này giúp Controller và Service không bị kết dính chặt chẽ. Nhờ đó, có thể dễ dàng tiêm một Mock Service vào Controller khi viết Unit Test để kiểm tra độc lập mà không cần kết nối tới Database thật.
+\end{itemize}\vspace{1em}
+\textbf{Độ kết dính và Độ phụ thuộc}
+
+Hệ thống NaviMart được thiết kế với mục tiêu \textbf{Tối đa hóa độ kết dính} và \textbf{Tối thiểu hóa độ phụ thuộc}.
+\begin{itemize}
+    \item \textbf{Độ kết dính cao:} Thể hiện qua việc các thành phần trong một module hoặc lớp có liên quan chặt chẽ và phục vụ chung một mục đích. Ví dụ: \texttt{ShoppingListsService} chỉ chứa các phương thức xử lý nghiệp vụ liên quan đến danh sách mua sắm, không chứa logic xác thực người dùng hay thao tác với bảng dữ liệu không liên quan. Các Component ở Frontend cũng được thiết kế theo hướng tập trung vào một phần tử UI duy nhất như \texttt{ListItem} hay \texttt{AddButton} giúp dễ tái sử dụng.
+    \item \textbf{Độ phụ thuộc thấp:} Thể hiện qua việc giảm thiểu sự phụ thuộc trực tiếp giữa các module với nhau. Việc sử dụng Dependency Injection trong NestJS giúp các Controller không tự tạo ra Service, từ đó giảm sự phụ thuộc cứng. Ở Frontend, các Component con nhận dữ liệu qua thuộc tính truyền vào thay vì phụ thuộc trực tiếp vào trạng thái toàn cục, giúp các component hoạt động độc lập hơn.
+\end{itemize}
+
+\vspace{1em}
+\textbf{Một số quyết định thiết kế và chiến lược Refactoring quan trọng}
+
+\begin{itemize}
+    \item \textbf{Sử dụng DTO và Validation Pipe:} Thay vì nhận trực tiếp dữ liệu thô từ request, hệ thống luôn ép kiểu dữ liệu đầu vào thông qua DTO và dùng \texttt{ValidationPipe} để kiểm tra tính hợp lệ của dữ liệu ngay tại cổng vào của API. Quyết định này giúp loại bỏ các câu lệnh \texttt{if-else} kiểm tra dữ liệu rườm rà trong Service, làm cho mã nguồn trở nên sạch và an toàn hơn.
+    \item \textbf{Phân quyền linh hoạt bằng Custom Guard:} Việc xử lý quyền truy cập không được viết cứng trong logic nghiệp vụ. Dự án đã tách riêng việc kiểm tra quyền bằng cách tạo các \texttt{Guard} tiêu biểu là \texttt{FamilyPermissionGuard}. Bất cứ lúc nào cần đổi luật phân quyền, lập trình viên chỉ cần thay đổi ở Guard mà không ảnh hưởng tới logic nghiệp vụ của Service.
+    \item \textbf{Kiến trúc theo Module:} Hệ thống được chia nhỏ thành các feature module độc lập như \texttt{AuthModule}, \texttt{UsersModule}, \texttt{ShoppingListsModule}... Mỗi module tự đóng gói các Controller, Service, và Repository có liên quan. Việc này không chỉ giúp tổ chức mã nguồn gọn gàng mà còn hạn chế hiện tượng rác mã nguồn trong một dự án lớn.
+    \item \textbf{Xử lý lỗi tập trung:} Việc tạo ra các \texttt{Exception Filter} toàn cục giúp bắt và chuẩn hóa toàn bộ các lỗi sinh ra trong quá trình xử lý thành một format JSON nhất quán trả về cho Client. Điều này hạn chế việc lặp lại mã \texttt{try-catch} ở từng hàm riêng lẻ.
 \end{itemize}
 
 \end{document}

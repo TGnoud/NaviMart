@@ -417,8 +417,8 @@ tùy chọn. Danh sách mua sắm (12 testcase) kiểm tra việc hoàn tất da
 chối hoàn tất danh sách đã hoàn tất hoặc không có mục nào được tích. Gia đình (13+4 testcase) kiểm tra quy
 tắc phân quyền nội bộ như cấm tự sửa quyền của chính mình hay sửa quyền của chủ gia đình. Các module được bổ
 sung kiểm thử trong đợt này --- danh mục, người dùng, thông báo, nhắc hạn (expiry) và bốn service quản trị
-(thống kê, danh mục, công thức, người dùng) --- lấp các khoảng trống độ phủ rõ rệt nhất, đưa độ phủ tổng từ
-56\% lên 68\% câu lệnh.
+(thống kê, danh mục, công thức, người dùng), tải ảnh, gửi thư Gmail, realtime, guard phân quyền, cấu hình và
+sự kiện kho --- lấp các khoảng trống độ phủ rõ rệt nhất, đưa độ phủ unit logic lên 88,33\% câu lệnh.
 
 % =====================================================================
 \section{Kiểm thử API/Controller}
@@ -821,9 +821,9 @@ Refresh & SEC-LIVE-020 & Refresh token rác bị từ chối $\to$ 401. \\
 
 \subsection{Kết quả regression}
 
-Toàn bộ bộ kiểm thử ở trạng thái xanh. Backend chạy 293 testcase đơn vị/API trên 37 bộ test cùng 32 testcase
+Toàn bộ bộ kiểm thử ở trạng thái xanh. Backend chạy 335 testcase đơn vị/API trên 48 bộ test cùng 32 testcase
 đầu-cuối trên 4 bộ test, tất cả đều pass, không có lỗi hay thất bại nào; thời gian chạy phần đơn vị/API
-khoảng sáu giây. Trong đợt này cũng đã sửa ba testcase đầu-cuối bị ``stale'' (kỳ vọng cũ trước khi chuẩn hóa
+khoảng dưới một phút khi chạy tuần tự. Trong đợt này cũng đã sửa ba testcase đầu-cuối bị ``stale'' (kỳ vọng cũ trước khi chuẩn hóa
 dấu tiếng Việt và đổi mặc định visibility công thức): tên đơn vị \code{Gram$\to$Gam}, mã đơn vị
 \code{goi$\to$gói}, và công thức người dùng gửi phải có \code{visibility:'shared'} mới vào hàng chờ kiểm
 duyệt. Ngoài ra, tầng kiểm thử \emph{live black-box} mới (Mục~\ref{sec:int-live} và \ref{sec:sec-live}) chạy
@@ -831,7 +831,8 @@ duyệt. Ngoài ra, tầng kiểm thử \emph{live black-box} mới (Mục~\ref{
 cũng pass toàn bộ. Frontend chạy
 61 testcase trên 9 tệp, cũng pass toàn bộ. So với hiện trạng đầu kỳ (176
 testcase đơn vị/API backend và 32 testcase frontend), bộ test đã được mở rộng đáng kể: bổ sung kiểm thử đơn
-vị cho các service trước đây bỏ trống (danh mục, người dùng, thông báo, nhắc hạn, ba service quản trị), bổ
+vị cho các service trước đây bỏ trống (danh mục, người dùng, thông báo, nhắc hạn, các service quản trị,
+tải ảnh, gửi thư Gmail, realtime, guard phân quyền, cấu hình và sự kiện kho), bổ
 sung kiểm thử API ở mức HTTP cho năm controller (danh mục, người dùng, thông báo, bữa ăn, báo cáo), thêm
 kiểm thử bảo mật và tương tranh ở backend, cùng các kiểm thử frontend mới --- đồng thời phát hiện và sửa một
 lỗi nghiệp vụ thực.
@@ -845,7 +846,7 @@ lỗi nghiệp vụ thực.
 \rowcolor{headerblue}
 \thead{Phạm vi} & \thead{Bộ test} & \thead{Testcase (pass/tổng)} \\
 \hline
-Backend đơn vị/API & 37 & 293 / 293 \\
+Backend đơn vị/API & 48 & 335 / 335 \\
 \hline
 Backend đầu-cuối (in-process) & 4 & 32 / 32 \\
 \hline
@@ -858,10 +859,11 @@ Frontend (Vitest) & 9 & 61 / 61 \\
 
 \subsection{Độ phủ mã nguồn backend}
 
-Độ phủ tổng thể trên toàn bộ \code{src} đạt 61,91\% câu lệnh và 52,70\% nhánh (đo bằng \code{npm run test:cov}. Khi xét riêng theo module (Bảng~\ref{tab:cov}), các module nghiệp vụ cốt lõi --- xác thực,
-gia đình, kho, công thức, bữa ăn, danh sách mua, báo cáo, danh mục, thông báo, người dùng và AI Chef --- đều
-đạt độ phủ cao (trên dưới 80\%), phản ánh đúng chiến lược ``ưu tiên logic nghiệp vụ''. Các tệp cấu hình, seed
-dữ liệu và cổng realtime được phủ chủ yếu qua kiểm thử đầu-cuối nên kéo tỷ lệ câu lệnh chung xuống.
+Độ phủ backend theo phạm vi unit logic đạt 88,33\% câu lệnh, 71,27\% nhánh, 84,17\% hàm và 89,20\% dòng
+lệnh (đo bằng \code{npm run test:cov}). Phạm vi này loại trừ \code{main.ts}, \code{*.module.ts} và
+\code{database/**} vì đây là bootstrap, module wiring và seed/migrate script; các thành phần này phù hợp hơn
+với kiểm thử đầu-cuối hoặc kiểm thử triển khai. Khi xét riêng theo module (Bảng~\ref{tab:cov}), các module
+nghiệp vụ cốt lõi đều đạt độ phủ cao, phản ánh đúng chiến lược ``ưu tiên logic nghiệp vụ''.
 
 \begin{table}[h]
 \centering
@@ -872,33 +874,37 @@ dữ liệu và cổng realtime được phủ chủ yếu qua kiểm thử đ�
 \rowcolor{headerblue}
 \thead{Module} & \thead{\% câu lệnh} & \thead{Nhận xét} \\
 \hline
-ai-chef & 89,42 & Đạt (service 100\%, controller 100\%, DTO) \\
+realtime & 100,00 & Đạt (gateway + service) \\
 \hline
-notifications & 85,98 & Đạt (service + API + nhắc hạn) \\
+config & 100,00 & Đạt (validate env + mongoose options) \\
 \hline
-users & 83,33 & Đạt (service + API) \\
+inventory-events & 100,00 & Đạt \\
 \hline
-catalog & 82,75 & Đạt (service + API) \\
+catalog & 100,00 & Đạt (service + API) \\
 \hline
-reports & 82,55 & Đạt (service + API) \\
+ai-chef & 98,93 & Đạt \\
 \hline
-pantry & 81,46 & Đạt \\
+notifications & 96,84 & Đạt (service + API + nhắc hạn) \\
 \hline
-families & 79,26 & Đạt \\
+users & 96,15 & Đạt (service + API) \\
 \hline
-recipes & 78,16 & Đạt \\
+reports & 95,94 & Đạt (service + API) \\
 \hline
-meals & 77,28 & Đạt \\
+auth & 94,38 & Đạt (service, controller, guard, Gmail) \\
 \hline
-auth & 70,76 & Đạt (service cao; controller + chiến lược Passport) \\
+uploads & 90,69 & Đạt (service + controller) \\
 \hline
-shopping-lists & 69,23 & Đạt \\
+pantry & 87,87 & Đạt \\
 \hline
-admin & 47,54 & Service phủ cao; controller phủ qua E2E \\
+families & 84,41 & Đạt \\
 \hline
-realtime & 8,88 & Phủ qua E2E \\
+recipes & 83,26 & Đạt \\
 \hline
-uploads & 0,00 & Phủ qua kiểm thử thủ công \\
+meals & 81,39 & Đạt \\
+\hline
+admin & 76,94 & Khá, còn nhánh admin-catalog \\
+\hline
+shopping-lists & 73,17 & Còn nhánh recurrence/complete phức tạp \\
 \hline
 \end{tabularx}
 \end{table}
@@ -907,8 +913,10 @@ uploads & 0,00 & Phủ qua kiểm thử thủ công \\
 
 Phân bố độ phủ phản ánh hai lựa chọn có chủ đích. Thứ nhất, kiểm thử đơn vị được dồn vào tầng service --- nơi
 chứa hầu hết quy tắc nghiệp vụ và nhánh rẽ --- nên các module cốt lõi đạt độ phủ cao, khóa chặt rủi ro sai
-lệch nghiệp vụ. Thứ hai, các tệp cấu hình, seed dữ liệu, cổng realtime và DTO được phủ qua kiểm thử đầu-cuối
-và kiểm thử live thay vì kiểm thử đơn vị, vì đó là nơi hành vi thật của chúng được kiểm chứng đầy đủ nhất.
+lệch nghiệp vụ. Thứ hai, bootstrap, module wiring và seed/migrate script không được tính vào mục tiêu unit
+coverage vì ít giá trị phát hiện lỗi ở mức unit; hành vi thật của chúng được kiểm chứng tốt hơn bằng kiểm thử
+đầu-cuối và kiểm thử triển khai. Khoảng trống còn lại chủ yếu nằm ở các nhánh recurrence/complete/update của
+danh sách mua, bữa ăn, công thức và admin-catalog.
 
 % =====================================================================
 \section{Rủi ro, lỗi và tiêu chí đóng}
@@ -1055,7 +1063,8 @@ P2 & Mở rộng kiểm thử frontend (lớp API, trang chính). \\
 \end{longtable}
 
 \subsection{Backend --- kiểm thử API, đầu-cuối và controller}
-Controller (mock service): \code{auth} (4), \code{families} (3), \code{pantry} (4), \code{recipes} (4). \\
+Controller (mock service): \code{auth} (4), \code{families} (3), \code{pantry} (4), \code{recipes} (4),
+\code{admin-controllers} (4), \code{uploads} (2). \\
 API (supertest, 68): API-AUTH-001..010, API-FAM-001..007, API-PAN-001..008, API-RCP-001..007,
 API-SL-001..006, API-MEAL-001..008, API-RPT-001..006, API-CAT-001..005, API-USR-001..006, API-NTF-001..005. \\
 Đầu-cuối: \code{main-flows} (\textasciitilde 10 luồng), \code{extended-flows} (\textasciitilde 14 luồng),
@@ -1102,9 +1111,9 @@ mật khẩu và làm cứng refresh token.
 \rowcolor{headerblue}
 \thead{Bước} & \thead{Lệnh / hoạt động} & \thead{Kết quả mong đợi} \\
 \hline
-1 & \code{cd backend \&\& npm run test} & 37 bộ / 293 testcase pass. \\
+1 & \code{cd backend \&\& npm run test} & 48 bộ / 335 testcase pass. \\
 \hline
-2 & \code{cd backend \&\& npm run test:cov} & Sinh báo cáo độ phủ trong \code{backend/coverage}. \\
+2 & \code{cd backend \&\& npm run test:cov} & Coverage unit logic đạt 88,33\% statements. \\
 \hline
 3 & \code{E2E\_USE\_MEMORY\_MONGO=true npm run test:e2e} & 4 bộ / 32 testcase đầu-cuối pass. \\
 \hline

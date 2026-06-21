@@ -378,11 +378,11 @@ Chứng minh controller **ủy quyền đúng tham số** (`user`, dto, id) xu�
 ### 9.1. Kết quả regression chính
 | Bộ test | Suites | Tests | Kết quả |
 |---|---|---|---|
-| Backend unit (service/util/controller‑delegation) | 16 | **138** | ✅ tất cả Pass |
+| Backend unit/API (`npm test`) | 48 | **335** | ✅ tất cả Pass |
 | Frontend unit (`npm test`) | 6 | **32** | ✅ tất cả Pass |
 
-> Ngoài 138 unit test trên, backend còn có **38 API/Controller test mức HTTP** (xem
-> `ApiControllerTestReport.md`). Tổng khi chạy `cd backend && npm test`: **21 suites / 176 tests — Pass**.
+> Bộ backend hiện bao gồm service/util/controller unit test, guard/config/upload/realtime/mail unit test và API/controller spec.
+> Khi chạy `cd backend && npm test -- --runInBand`: **48 suites / 335 tests — Pass**.
 
 ### 9.2. Tổng hợp testcase theo module
 | Module | Số testcase | Loại |
@@ -402,43 +402,37 @@ Chứng minh controller **ủy quyền đúng tham số** (`user`, dto, id) xu�
 | App health (sẵn có) | 1 | Controller |
 | **Frontend** (expiry/Dialog/Auth/ProtectedRoute + sẵn có) | 32 | FE |
 
-### 9.3. Coverage backend (đo bằng Jest, phạm vi các đơn vị đã chọn)
-**Tổng: 87.86% statements · 73.69% branches · 93.87% functions · 88.81% lines.**
+### 9.3. Coverage backend (đo bằng Jest, phạm vi unit logic)
+**Tổng: 88.33% statements · 71.27% branches · 84.17% functions · 89.20% lines.**
 
-| File | % Stmts | % Branch | % Funcs | % Lines |
+Phạm vi `npm run test:cov` hiện loại trừ `main.ts`, `*.module.ts` và `database/**` vì đây là bootstrap/module wiring/seed-migrate script, không phải đơn vị logic phù hợp cho unit test.
+
+| Nhóm/File | % Stmts | % Branch | % Funcs | % Lines |
 |---|---|---|---|---|
+| `realtime/*` | 100 | 84.61 | 100 | 100 |
+| `inventory-events/inventory-events.service.ts` | 100 | 87.50 | 100 | 100 |
+| `config/*` | 100 | 66.66 | 100 | 100 |
+| `uploads/uploads.service.ts` | 100 | 89.47 | 100 | 100 |
+| `auth/guards/*` | 100 | 91.17 | 100 | 100 |
 | `families/family-access.util.ts` | 100 | 100 | 100 | 100 |
 | `meals/missing-ingredients.service.ts` | 100 | 86.95 | 100 | 100 |
 | `pantry/utils/expiry-status.util.ts` | 100 | 93.33 | 100 | 100 |
-| `reports/reports.service.ts` | 94.11 | 77.27 | 86.36 | 93.61 |
-| `auth/auth.service.ts` | 93.39 | 82.60 | 100 | 93.26 |
-| `meals/shopping-list-generation.service.ts` | 92.10 | 78.12 | 87.50 | 91.66 |
-| `meals/meals.service.ts` | 89.28 | 66.66 | 100 | 93.42 |
-| `pantry/pantry.service.ts` | 87.87 | 75.23 | 93.75 | 88.37 |
-| `families/families.service.ts` | 87.37 | 74.57 | 95.65 | 87.12 |
-| `recipes/recipes.service.ts` | 81.56 | 72.15 | 92.68 | 84.52 |
-| `shopping-lists/shopping-lists.service.ts` | 81.81 | 63.96 | 90.32 | 82.00 |
+| `reports/reports.service.ts` | 94.64 | 77.27 | 86.95 | 94.23 |
+| `auth/auth.service.ts` | 92.72 | 82.19 | 95.23 | 92.59 |
+| `pantry/pantry.service.ts` | 85.29 | 73.39 | 93.75 | 85.71 |
+| `families/families.service.ts` | 80.35 | 72.13 | 84.61 | 80.73 |
+| `recipes/recipes.service.ts` | 80.39 | 68.88 | 93.47 | 82.63 |
+| `shopping-lists/shopping-lists.service.ts` | 71.01 | 57.04 | 78.37 | 71.64 |
 
 Lệnh tái lập (scoped):
 ```bash
-cd backend && npx jest --coverage \
-  --collectCoverageFrom='pantry/pantry.service.ts' \
-  --collectCoverageFrom='recipes/recipes.service.ts' \
-  --collectCoverageFrom='meals/missing-ingredients.service.ts' \
-  --collectCoverageFrom='meals/shopping-list-generation.service.ts' \
-  --collectCoverageFrom='meals/meals.service.ts' \
-  --collectCoverageFrom='families/families.service.ts' \
-  --collectCoverageFrom='families/family-access.util.ts' \
-  --collectCoverageFrom='auth/auth.service.ts' \
-  --collectCoverageFrom='shopping-lists/shopping-lists.service.ts' \
-  --collectCoverageFrom='reports/reports.service.ts' \
-  --collectCoverageFrom='pantry/utils/expiry-status.util.ts'
+cd backend && npm run test:cov -- --runInBand
 ```
 
 ### 9.4. Class/khoảng trống coverage đáng chú ý
-- `shopping-lists.service.ts` (branch 64%) và `recipes.service.ts` (branch 72%): còn nhánh `buildShoppingListItem`/`buildIngredients` theo `foodId` và một số nhánh `update` chưa phủ hết.
+- `shopping-lists.service.ts` và `recipes.service.ts`: còn nhánh `buildShoppingListItem`/`buildIngredients` theo `foodId`, recurrence và một số nhánh `update` chưa phủ hết.
 - `meals.service.ts` (branch 67%): nhánh `update` khi đổi `recipeId` chưa test.
-- Các util (`family-access`, `expiry`, `missing-ingredients`) đã phủ ~100%.
+- Các util/guard/config/realtime/upload service quan trọng đã phủ xấp xỉ hoặc đúng 100%.
 
 ---
 
@@ -451,12 +445,13 @@ cd backend && npx jest --coverage \
 | Unit test không thay thế integration | Persistence/rollback/index vẫn cần e2e. |
 
 ### 10.2. Ghi nhận QA / vấn đề môi trường
-- **E2E hiện không chạy được** (`npm run test:e2e`): dependency `cloudinary` được khai báo trong `backend/package.json` nhưng **chưa được cài** (`node_modules/cloudinary` thiếu) → `AppModule` (qua `uploads.service`) không nạp được. Đây là **lỗi môi trường có sẵn**, không phải hồi quy do unit test. **Khắc phục:** chạy `npm install` (hoặc `npm install cloudinary`) trong `backend/`.
+- `npm test -- --runInBand` và `npm run test:cov -- --runInBand` đã chạy xanh trên môi trường hiện tại.
+- E2E không nằm trong lần chạy bổ sung unit test này; tiếp tục dùng bộ e2e hiện có để kiểm chứng persistence/realtime xuyên module.
 
 ### 10.3. Tiêu chí đóng (exit) cho phần Unit Test
-- [x] Toàn bộ backend unit test pass (138/138).
+- [x] Toàn bộ backend unit/API test pass (335/335).
 - [x] Toàn bộ frontend unit test pass (32/32).
-- [x] Coverage trên các đơn vị đã chọn ≥ ~80% statements (đạt 87.86%).
+- [x] Coverage unit backend ≥ 88% statements (đạt 88.33%).
 - [x] Mỗi service có ≥ 1 testcase cho mỗi nhánh ném exception.
 - [x] Không testcase nào chạm MongoDB thật.
 
@@ -465,12 +460,12 @@ cd backend && npx jest --coverage \
 ## 11. Kết luận và kế hoạch cải tiến
 
 ### 11.1. Kết luận
-Phần Unit Test đã phủ đầy đủ **logic nghiệp vụ cốt lõi** của NaviMart ở cả backend và frontend với độ phủ cao (87.86% statements trên các đơn vị chọn), tách bạch khỏi DB nên chạy nhanh và ổn định. Hạ tầng `test-utils` (mock-model + fixtures) cho phép mở rộng test mới với chi phí thấp.
+Phần Unit Test đã phủ đầy đủ **logic nghiệp vụ cốt lõi** của NaviMart ở cả backend và frontend với độ phủ cao (88.33% statements theo phạm vi unit logic), tách bạch khỏi DB nên chạy nhanh và ổn định. Hạ tầng `test-utils` (mock-model + fixtures) cho phép mở rộng test mới với chi phí thấp.
 
 ### 11.2. Roadmap cải tiến
-1. **Cài `cloudinary`** trong `backend/` để khôi phục bộ e2e và bổ sung gate regression đầy đủ.
-2. Nâng branch coverage cho `shopping-lists`, `recipes`, `meals` (các nhánh `foodId`/`update`).
-3. Thêm unit test cho các module còn lại: `admin-*`, `notifications`, `catalog`, `users`, `ai-chef`, `uploads`.
+1. Nâng branch coverage cho `shopping-lists`, `recipes`, `meals` (các nhánh `foodId`/`recurrence`/`update`).
+2. Bổ sung test frontend cho các trang nhiều logic (`ListDetail`, `PantryDashboard`, `MealPlanner`).
+3. Cấu hình `coverageThreshold` trong Jest và thêm CI (GitHub Actions) chạy `npm test` cho cả hai package.
 4. Cấu hình `coverageThreshold` trong Jest và thêm CI (GitHub Actions) chạy `npm test` cho cả hai package.
 5. Bổ sung test FE cho các trang nhiều logic (`ListDetail`, `PantryDashboard`, `MealPlanner`).
 

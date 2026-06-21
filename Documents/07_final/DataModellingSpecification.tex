@@ -1,0 +1,586 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[vietnamese]{babel}
+\usepackage[T5]{fontenc}
+\usepackage{lmodern}
+\usepackage{geometry}
+\geometry{a4paper, top=2.5cm, bottom=2.5cm, left=3cm, right=2cm}
+\emergencystretch=1.5em
+\usepackage[hidelinks]{hyperref}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage{indentfirst}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{longtable}
+\usepackage{amsmath}
+
+% Define colors for code listing
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+% Configuration for listings
+\lstdefinestyle{mysqlstyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{blue},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2,
+    language=SQL
+}
+\lstset{style=mysqlstyle}
+
+\begin{document}
+
+\begin{titlepage}
+    \begin{center}
+        \textbf{\Large ĐẠI HỌC BÁCH KHOA HÀ NỘI} \\
+        \textbf{\Large TRƯỜNG CÔNG NGHỆ THÔNG TIN VÀ TRUYỀN THÔNG} \\
+        \vskip 3cm
+        \noindent\rule{\textwidth}{2pt} \\
+        \vskip 0.6cm
+        \textbf{\Huge DATA MODELLING SPECIFICATION} \\[0.5em]
+        \textbf{\huge THIẾT KẾ CƠ SỞ DỮ LIỆU} \\[0.5em]
+        \textbf{\Large HỆ THỐNG ĐI CHỢ TIỆN LỢI - NAVIMART} \\
+        \noindent\rule{\textwidth}{2pt} \\
+        \vskip 1.5cm
+        \textbf{\large Môn học: Phát triển phần mềm theo chuẩn kỹ năng ITSS} \\
+        \textbf{\large Giảng viên hướng dẫn: ThS. Nguyễn Mạnh Tuấn} \\
+        \textbf{\large Nhóm thực hiện: Nhóm 5} \\
+        \vskip 1.5cm
+        \textbf{\large DANH SÁCH THÀNH VIÊN} \\
+        \vskip 0.4cm
+        \begin{tabular}{|c|l|c|}
+            \hline
+            \textbf{STT} & \textbf{Họ và tên} & \textbf{MSSV} \\
+            \hline
+            1 & Trịnh Thành An & 20235633 \\
+            \hline
+            2 & Nguyễn Mạnh Đức & 20235681 \\
+            \hline
+            3 & Đỗ Danh Dũng & 20235685 \\
+            \hline
+            4 & Đinh Xuân Thái Dương & 20235689 \\
+            \hline
+            5 & Nguyễn Hồng Dương & 20235693 \\
+            \hline
+        \end{tabular}
+        \vfill
+        \textbf{Hà Nội, 2026}
+    \end{center}
+\end{titlepage}
+
+\tableofcontents
+\newpage
+
+\section{Giới thiệu chung và Kiến trúc Dữ liệu}
+Tài liệu này đặc tả thiết kế mô hình dữ liệu vật lý (Physical Data Model) cho hệ thống đi chợ tiện lợi \textbf{NaviMart}. Mô hình được thiết kế nhằm đáp ứng các yêu cầu quản lý thông tin gia đình, danh sách đi chợ, quản lý thực phẩm tồn kho và lên thực đơn ăn uống hàng ngày.
+
+Cơ sở dữ liệu được tổ chức thành 10 bảng dữ liệu vật lý, phân bố theo các phân hệ nghiệp vụ chính:
+\begin{enumerate}
+    \item \textbf{Phân hệ Xác thực \& Nhóm (Auth \& Group Domain):} Gồm bảng \texttt{users} và \texttt{family\_groups}. Quản lý tài khoản, vai trò và mối liên kết nhóm thành viên gia đình.
+    \item \textbf{Phân hệ Danh mục Thực phẩm (Catalog Domain):} Gồm bảng \texttt{categories} và \texttt{food\_catalog}. Định nghĩa từ điển thực phẩm chuẩn của hệ thống giúp chuẩn hóa đầu vào.
+    \item \textbf{Phân hệ Đi chợ (Shopping Domain):} Gồm bảng \texttt{shopping\_}\allowbreak\texttt{lists} và \texttt{shopping\_}\allowbreak\texttt{list\_}\allowbreak\texttt{items}. Lưu trữ thông tin lên kế hoạch mua sắm và mua sắm thực tế của các gia đình.
+    \item \textbf{Phân hệ Kho thực phẩm (Pantry Domain):} Gồm bảng \texttt{inventory}. Theo dõi lượng thực phẩm đang có trong tủ lạnh/kệ bếp, bao gồm hạn sử dụng và vị trí lưu trữ cụ thể.
+    \item \textbf{Phân hệ Thực đơn \& Nấu ăn (Meal \& Recipe Domain):} Gồm bảng \texttt{recipes}, \texttt{recipe\_ingredients} và \texttt{meal\_plans}. Hỗ trợ lưu trữ công thức nấu ăn chi tiết, định lượng nguyên liệu và lên lịch bữa ăn hàng ngày.
+\end{enumerate}
+
+\section{Sơ đồ thực thể liên kết (Physical ERD)}
+Mô hình quan hệ giữa các thực thể trong cơ sở dữ liệu NaviMart được thiết lập dựa trên các ràng buộc toàn vẹn dữ liệu (Khóa chính - Primary Key, Khóa ngoại - Foreign Key). 
+
+Dưới đây mô tả chi tiết các quan hệ chính:
+\begin{itemize}
+    \item \textbf{Quan hệ giữa \texttt{users} và \texttt{family\_groups}:} 
+    Đây là mối quan hệ đặc biệt hai chiều (circular reference):
+    \begin{itemize}
+        \item Một nhóm gia đình (\texttt{family\_groups}) có một chủ sở hữu duy nhất (\texttt{owner\_id} trỏ đến \texttt{users}). Mối quan hệ là $1 - 1$ hoặc $1 - N$ tùy thuộc nghiệp vụ sở hữu nhóm.
+        \item Một người dùng (\texttt{users}) thuộc về tối đa một nhóm gia đình (\texttt{group\_id} trỏ đến \texttt{family\_groups}). Mối quan hệ là $1 - N$ (một nhóm có nhiều thành viên).
+    \end{itemize}
+    \item \textbf{Quan hệ danh mục thực phẩm:} 
+    \texttt{categories} có mối quan hệ $1 - N$ với \texttt{food\_catalog}. Mỗi loại thực phẩm chuẩn bắt buộc phải thuộc về một danh mục chuẩn duy nhất.
+    \item \textbf{Quan hệ đi chợ:}
+    \texttt{family\_groups} có quan hệ $1 - N$ với \texttt{shopping\_}\allowbreak\texttt{lists} (một gia đình có nhiều đợt đi chợ). \texttt{shopping\_}\allowbreak\texttt{lists} có quan hệ $1 - N$ với \texttt{shopping\_}\allowbreak\texttt{list\_}\allowbreak\texttt{items} (một danh sách đi chợ có nhiều mặt hàng). Các mặt hàng này tham chiếu đến từ điển thực phẩm qua khóa ngoại \texttt{food\_id}.
+    \item \textbf{Quan hệ kho thực phẩm:}
+    \texttt{family\_groups} quản lý kho của mình qua \texttt{inventory} (quan hệ $1 - N$). Mỗi dòng tồn kho trong tủ lạnh liên kết với \texttt{food\_catalog} qua \texttt{food\_id} để biết đơn vị tính chuẩn.
+    \item \textbf{Quan hệ công thức và nguyên liệu:}
+    \texttt{recipes} được tạo bởi một tác giả (\texttt{author\_id} trỏ đến \texttt{users}). Một công thức có nhiều nguyên liệu, và một nguyên liệu chuẩn có thể nằm trong nhiều công thức. Mối quan hệ nhiều - nhiều ($N - N$) này được giải quyết thông qua bảng liên kết trung gian \texttt{recipe\_ingredients}.
+    \item \textbf{Quan hệ kế hoạch bữa ăn:}
+    Kế hoạch bữa ăn (\texttt{meal\_plans}) được lên lịch cho từng gia đình (\texttt{group\_id} trỏ đến \texttt{family\_groups}) và áp dụng một công thức món ăn (\texttt{recipe\_id} trỏ đến \texttt{recipes}).
+\end{itemize}
+
+\newpage
+\section{Mô tả chi tiết các Bảng Dữ liệu}
+Phần này trình bày cấu trúc chi tiết của từng bảng trong cơ sở dữ liệu vật lý bao gồm tên cột, kiểu dữ liệu, các ràng buộc và mô tả ý nghĩa.
+
+\subsection{Bảng \texttt{users}}
+Bảng \texttt{users} lưu trữ thông tin tài khoản cá nhân, thông tin liên lạc và trạng thái tài khoản của người dùng.
+
+\begin{longtable}{|p{0.5cm}|p{3.4cm}|p{3.2cm}|p{0.7cm}|p{0.7cm}|p{3.6cm}|}
+\hline
+\textbf{\#} & \textbf{Tên cột} & \textbf{Kiểu dữ liệu} & \textbf{PK} & \textbf{FK} & \textbf{Mô tả} \\ \hline
+\endhead
+1 & user\_id & INT & x & & Mã định danh người dùng (Tự tăng) \\ \hline
+2 & email & VARCHAR(150) & & & Email đăng nhập (Duy nhất, Bắt buộc) \\ \hline
+3 & phone & VARCHAR(20) & & & Số điện thoại (Tùy chọn) \\ \hline
+4 & password\_hash & VARCHAR(255) & & & Chuỗi mật khẩu băm (Bắt buộc) \\ \hline
+5 & first\_name & VARCHAR(50) & & & Tên (Bắt buộc) \\ \hline
+6 & last\_name & VARCHAR(50) & & & Họ (Bắt buộc) \\ \hline
+7 & dob & DATE & & & Ngày sinh (Bắt buộc) \\ \hline
+8 & gender & VARCHAR(10) & & & Giới tính (Bắt buộc) \\ \hline
+9 & role & VARCHAR(20) & & & Vai trò: Admin, Housewife, Member \\ \hline
+10 & group\_id & INT & & x & Mã nhóm gia đình \\ \hline
+11 & status & VARCHAR(20) & & & Trạng thái: Active, Banned \\ \hline
+\end{longtable}
+
+\paragraph{Quy tắc ràng buộc đặc biệt:}
+\begin{itemize}
+    \item \texttt{email} phải tuân thủ định dạng email chuẩn và có ràng buộc \texttt{UNIQUE} để chống trùng lặp tài khoản.
+    \item \texttt{group\_id} tham chiếu đến bảng \texttt{family\_groups(group\_id)}. Cho phép \texttt{NULL} trong trường hợp người dùng chưa tham gia nhóm gia đình nào.
+\end{itemize}
+
+\vskip 0.5cm
+\noindent\rule{\textwidth}{0.5pt}
+\vskip 0.5cm
+
+\subsection{Bảng \texttt{family\_groups}}
+Bảng \texttt{family\_groups} định nghĩa thông tin nhóm gia đình. Các thành viên trong nhóm sẽ chia sẻ chung tủ lạnh (kho thực phẩm), danh sách đi chợ và lịch trình ăn uống.
+
+\begin{longtable}{|p{0.5cm}|p{3.4cm}|p{3.2cm}|p{0.7cm}|p{0.7cm}|p{3.6cm}|}
+\hline
+\textbf{\#} & \textbf{Tên cột} & \textbf{Kiểu dữ liệu} & \textbf{PK} & \textbf{FK} & \textbf{Mô tả} \\ \hline
+\endhead
+1 & group\_id & INT & x & & Mã nhóm gia đình (Tự tăng) \\ \hline
+2 & group\_name & VARCHAR(100) & & & Tên nhóm gia đình (Bắt buộc) \\ \hline
+3 & owner\_id & INT & & x & Mã người tạo/quản lý nhóm (Bắt buộc) \\ \hline
+4 & invite\_code & VARCHAR(50) & & & Mã mời tham gia nhóm (Duy nhất) \\ \hline
+\end{longtable}
+
+\paragraph{Quy tắc ràng buộc đặc biệt:}
+\begin{itemize}
+    \item \texttt{owner\_id} tham chiếu đến \texttt{users(user\_id)}. Đây là tài khoản có quyền cao nhất trong nhóm (thêm/bớt thành viên, đổi tên nhóm).
+    \item \texttt{invite\_code} có ràng buộc \texttt{UNIQUE} dùng để sinh mã mời ngẫu nhiên, giúp các thành viên khác tham gia vào nhóm bằng cách nhập mã này.
+\end{itemize}
+
+\vskip 0.5cm
+\noindent\rule{\textwidth}{0.5pt}
+\vskip 0.5cm
+
+\subsection{Bảng \texttt{categories}}
+Bảng \texttt{categories} định nghĩa danh mục phân loại thực phẩm chuẩn (ví dụ: Rau củ, Trái cây, Hải sản, Thịt gia cầm, Đồ uống...).
+
+\begin{longtable}{|p{0.5cm}|p{3.4cm}|p{3.2cm}|p{0.7cm}|p{0.7cm}|p{3.6cm}|}
+\hline
+\textbf{\#} & \textbf{Tên cột} & \textbf{Kiểu dữ liệu} & \textbf{PK} & \textbf{FK} & \textbf{Mô tả} \\ \hline
+\endhead
+1 & category\_id & INT & x & & Mã danh mục thực phẩm (Tự tăng) \\ \hline
+2 & name & VARCHAR(100) & & & Tên danh mục (Bắt buộc) \\ \hline
+\end{longtable}
+
+\vskip 0.5cm
+\noindent\rule{\textwidth}{0.5pt}
+\vskip 0.5cm
+
+\subsection{Bảng \texttt{food\_catalog}}
+Bảng \texttt{food\_catalog} đóng vai trò là từ điển thực phẩm chuẩn của hệ thống do quản trị viên quản lý. Giúp người dùng khi thêm thực phẩm vào kho hoặc danh sách đi chợ không bị nhập sai tên, sai đơn vị tính.
+
+\begin{longtable}{|p{0.5cm}|p{3.4cm}|p{3.2cm}|p{0.7cm}|p{0.7cm}|p{3.6cm}|}
+\hline
+\textbf{\#} & \textbf{Tên cột} & \textbf{Kiểu dữ liệu} & \textbf{PK} & \textbf{FK} & \textbf{Mô tả} \\ \hline
+\endhead
+1 & food\_id & INT & x & & Mã thực phẩm chuẩn (Tự tăng) \\ \hline
+2 & name & VARCHAR(150) & & & Tên thực phẩm chuẩn (Bắt buộc) \\ \hline
+3 & category\_id & INT & & x & Mã danh mục (Bắt buộc) \\ \hline
+4 & unit & VARCHAR(20) & & & Đơn vị tính mặc định (kg, quả, bó, chai...) \\ \hline
+\end{longtable}
+
+\paragraph{Quy tắc ràng buộc đặc biệt:}
+\begin{itemize}
+    \item \texttt{category\_id} tham chiếu đến \texttt{categories(category\_id)}.
+\end{itemize}
+
+\vskip 0.5cm
+\noindent\rule{\textwidth}{0.5pt}
+\vskip 0.5cm
+
+\subsection{Bảng \texttt{shopping\_}\allowbreak\texttt{lists}}
+Bảng \texttt{shopping\_}\allowbreak\texttt{lists} quản lý các đợt đi chợ/mua sắm của từng nhóm gia đình.
+
+\begin{longtable}{|p{0.5cm}|p{3.4cm}|p{3.2cm}|p{0.7cm}|p{0.7cm}|p{3.6cm}|}
+\hline
+\textbf{\#} & \textbf{Tên cột} & \textbf{Kiểu dữ liệu} & \textbf{PK} & \textbf{FK} & \textbf{Mô tả} \\ \hline
+\endhead
+1 & list\_id & INT & x & & Mã danh sách đi chợ (Tự tăng) \\ \hline
+2 & group\_id & INT & & x & Mã nhóm gia đình sở hữu \\ \hline
+3 & name & VARCHAR(100) & & & Tên danh sách (Ví dụ: Đi chợ cuối tuần) \\ \hline
+4 & created\_at & DATETIME & & & Ngày giờ tạo danh sách \\ \hline
+5 & type & VARCHAR(20) & & & Loại danh sách (Hàng ngày, Hàng tuần) \\ \hline
+\end{longtable}
+
+\paragraph{Quy tắc ràng buộc đặc biệt:}
+\begin{itemize}
+    \item \texttt{group\_id} tham chiếu đến \texttt{family\_groups(group\_id)}. Khi một nhóm gia đình bị xóa, toàn bộ các danh sách đi chợ của nhóm đó sẽ được xóa thông qua cơ chế Cascade.
+\end{itemize}
+
+\vskip 0.5cm
+\noindent\rule{\textwidth}{0.5pt}
+\vskip 0.5cm
+
+\subsection{Bảng \texttt{shopping\_}\allowbreak\texttt{list\_}\allowbreak\texttt{items}}
+Bảng \texttt{shopping\_}\allowbreak\texttt{list\_}\allowbreak\texttt{items} chứa thông tin chi tiết các mặt hàng cần mua trong một danh sách mua sắm cụ thể.
+
+\begin{longtable}{|p{0.5cm}|p{3.4cm}|p{3.2cm}|p{0.7cm}|p{0.7cm}|p{3.6cm}|}
+\hline
+\textbf{\#} & \textbf{Tên cột} & \textbf{Kiểu dữ liệu} & \textbf{PK} & \textbf{FK} & \textbf{Mô tả} \\ \hline
+\endhead
+1 & item\_id & INT & x & & Mã chi tiết món đồ cần mua (Tự tăng) \\ \hline
+2 & list\_id & INT & & x & Thuộc danh sách đi chợ nào \\ \hline
+3 & food\_id & INT & & x & Mã thực phẩm cần mua \\ \hline
+4 & quantity & DECIMAL(10,2) & & & Số lượng cần mua (Mặc định > 0) \\ \hline
+5 & status & VARCHAR(20) & & & Trạng thái: Pending, Bought \\ \hline
+\end{longtable}
+
+\paragraph{Quy tắc ràng buộc đặc biệt:}
+\begin{itemize}
+    \item \texttt{list\_id} tham chiếu đến \texttt{shopping\_lists(list\_id)}.
+    \item \texttt{food\_id} tham chiếu đến \texttt{food\_catalog(food\_id)}.
+\end{itemize}
+
+\vskip 0.5cm
+\noindent\rule{\textwidth}{0.5pt}
+\vskip 0.5cm
+
+\subsection{Bảng \texttt{inventory}}
+Bảng \texttt{inventory} quản lý kho lưu trữ thực phẩm hiện tại của gia đình. Hệ thống sử dụng dữ liệu này để cảnh báo hạn sử dụng và gợi ý công thức nấu ăn.
+
+\begin{longtable}{|p{0.5cm}|p{3.4cm}|p{3.2cm}|p{0.7cm}|p{0.7cm}|p{3.6cm}|}
+\hline
+\textbf{\#} & \textbf{Tên cột} & \textbf{Kiểu dữ liệu} & \textbf{PK} & \textbf{FK} & \textbf{Mô tả} \\ \hline
+\endhead
+1 & inventory\_id & INT & x & & Mã dòng kho thực phẩm (Tự tăng) \\ \hline
+2 & group\_id & INT & & x & Mã nhóm gia đình sở hữu kho \\ \hline
+3 & food\_id & INT & & x & Mã thực phẩm tương ứng trong từ điển \\ \hline
+4 & quantity & DECIMAL(10,2) & & & Số lượng hiện có trong tủ lạnh \\ \hline
+5 & expiry\_date & DATE & & & Hạn sử dụng thực phẩm \\ \hline
+6 & location & VARCHAR(50) & & & Ngăn mát, Ngăn đông, Tủ khô, Kệ bếp... \\ \hline
+\end{longtable}
+
+\paragraph{Quy tắc ràng buộc đặc biệt:}
+\begin{itemize}
+    \item \texttt{group\_id} tham chiếu đến \texttt{family\_groups(group\_id)}.
+    \item \texttt{food\_id} tham chiếu đến \texttt{food\_catalog(food\_id)}.
+\end{itemize}
+
+\vskip 0.5cm
+\noindent\rule{\textwidth}{0.5pt}
+\vskip 0.5cm
+
+\subsection{Bảng \texttt{recipes}}
+Bảng \texttt{recipes} lưu trữ thông tin các công thức nấu ăn bao gồm tiêu đề, cách nấu và người tạo.
+
+\begin{longtable}{|p{0.5cm}|p{3.4cm}|p{3.2cm}|p{0.7cm}|p{0.7cm}|p{3.6cm}|}
+\hline
+\textbf{\#} & \textbf{Tên cột} & \textbf{Kiểu dữ liệu} & \textbf{PK} & \textbf{FK} & \textbf{Mô tả} \\ \hline
+\endhead
+1 & recipe\_id & INT & x & & Mã công thức nấu ăn (Tự tăng) \\ \hline
+2 & name & VARCHAR(200) & & & Tên món ăn (Bắt buộc, ví dụ: Thịt kho tàu) \\ \hline
+3 & instructions & TEXT & & & Các bước thực hiện chi tiết \\ \hline
+4 & image\_url & VARCHAR(255) & & & Link hình ảnh món ăn hoàn thiện \\ \hline
+5 & author\_id & INT & & x & Mã người đóng góp công thức \\ \hline
+6 & status & VARCHAR(20) & & & Trạng thái duyệt: Pending, Approved \\ \hline
+\end{longtable}
+
+\paragraph{Quy tắc ràng buộc đặc biệt:}
+\begin{itemize}
+    \item \texttt{author\_id} tham chiếu đến \texttt{users(user\_id)}. Khi người dùng đóng góp công thức bị xóa, công thức có thể giữ lại hoặc xóa tùy thuộc thiết lập ON DELETE. Ở đây đặt mặc định để theo dõi.
+\end{itemize}
+
+\vskip 0.5cm
+\noindent\rule{\textwidth}{0.5pt}
+\vskip 0.5cm
+
+\subsection{Bảng \texttt{recipe\_ingredients}}
+Bảng trung gian \texttt{recipe\_ingredients} giải quyết mối quan hệ nhiều - nhiều giữa công thức (\texttt{recipes}) và thực phẩm chuẩn (\texttt{food\_catalog}). Xác định cụ thể một món ăn cần những nguyên liệu gì với định lượng bao nhiêu.
+
+\begin{longtable}{|p{0.5cm}|p{3.4cm}|p{3.2cm}|p{0.7cm}|p{0.7cm}|p{3.6cm}|}
+\hline
+\textbf{\#} & \textbf{Tên cột} & \textbf{Kiểu dữ liệu} & \textbf{PK} & \textbf{FK} & \textbf{Mô tả} \\ \hline
+\endhead
+1 & recipe\_id & INT & x & x & Mã công thức món ăn \\ \hline
+2 & food\_id & INT & x & x & Mã thực phẩm làm nguyên liệu \\ \hline
+3 & quantity\_required & DECIMAL(10,2) & & & Định lượng cần thiết để chế biến \\ \hline
+\end{longtable}
+
+\paragraph{Quy tắc ràng buộc đặc biệt:}
+\begin{itemize}
+    \item Bảng sử dụng khóa chính liên hợp (Composite Primary Key) gồm cả hai cột \texttt{(recipe\_id, food\_id)}.
+    \item \texttt{recipe\_id} tham chiếu đến \texttt{recipes(recipe\_id)}.
+    \item \texttt{food\_id} tham chiếu đến \texttt{food\_catalog(food\_id)}.
+\end{itemize}
+
+\vskip 0.5cm
+\noindent\rule{\textwidth}{0.5pt}
+\vskip 0.5cm
+
+\subsection{Bảng \texttt{meal\_plans}}
+Bảng \texttt{meal\_plans} lưu trữ lịch ăn uống dự kiến của gia đình theo ngày và theo buổi.
+
+\begin{longtable}{|p{0.5cm}|p{3.4cm}|p{3.2cm}|p{0.7cm}|p{0.7cm}|p{3.6cm}|}
+\hline
+\textbf{\#} & \textbf{Tên cột} & \textbf{Kiểu dữ liệu} & \textbf{PK} & \textbf{FK} & \textbf{Mô tả} \\ \hline
+\endhead
+1 & plan\_id & INT & x & & Mã kế hoạch bữa ăn (Tự tăng) \\ \hline
+2 & group\_id & INT & & x & Mã nhóm gia đình áp dụng kế hoạch \\ \hline
+3 & date & DATE & & & Ngày dự kiến ăn món ăn này \\ \hline
+4 & meal\_type & VARCHAR(20) & & & Buổi ăn: Sáng (Breakfast), Trưa (Lunch), Tối (Dinner) \\ \hline
+5 & recipe\_id & INT & & x & Mã món ăn nấu theo công thức \\ \hline
+6 & is\_completed & BOOLEAN & & & Trạng thái hoàn thành bữa ăn \\ \hline
+\end{longtable}
+
+\paragraph{Quy tắc ràng buộc đặc biệt:}
+\begin{itemize}
+    \item \texttt{group\_id} tham chiếu đến \texttt{family\_groups(group\_id)}.
+    \item \texttt{recipe\_id} tham chiếu đến \texttt{recipes(recipe\_id)}.
+\end{itemize}
+
+\newpage
+\section{Kịch bản Tạo bảng dữ liệu (SQL Schema)}
+Dưới đây là kịch bản SQL chi tiết để khởi tạo toàn bộ cấu trúc cơ sở dữ liệu trên hệ quản trị cơ sở dữ liệu MySQL/MariaDB:
+
+\begin{lstlisting}[caption=SQL Schema Definition for NaviMart]
+-- Kich ban khoi tao co so du lieu vat ly cho NaviMart
+
+CREATE TABLE users (
+    user_id INT AUTO_INCREMENT PRIMARY KEY,
+    email VARCHAR(150) NOT NULL UNIQUE,
+    phone VARCHAR(20),
+    password_hash VARCHAR(255) NOT NULL,
+    first_name VARCHAR(50) NOT NULL,
+    last_name VARCHAR(50) NOT NULL,
+    dob DATE NOT NULL,
+    gender VARCHAR(10) NOT NULL,
+    role VARCHAR(20) NOT NULL,
+    group_id INT,
+    status VARCHAR(20) NOT NULL
+);
+
+CREATE TABLE family_groups (
+    group_id INT AUTO_INCREMENT PRIMARY KEY,
+    group_name VARCHAR(100) NOT NULL,
+    owner_id INT NOT NULL,
+    invite_code VARCHAR(50) UNIQUE
+);
+
+CREATE TABLE categories (
+    category_id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL
+);
+
+CREATE TABLE food_catalog (
+    food_id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(150) NOT NULL,
+    category_id INT NOT NULL,
+    unit VARCHAR(20) NOT NULL,
+    FOREIGN KEY (category_id) REFERENCES categories(category_id)
+);
+
+CREATE TABLE shopping_lists (
+    list_id INT AUTO_INCREMENT PRIMARY KEY,
+    group_id INT NOT NULL,
+    name VARCHAR(100) NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    type VARCHAR(20),
+    FOREIGN KEY (group_id) REFERENCES family_groups(group_id)
+);
+
+CREATE TABLE shopping_list_items (
+    item_id INT AUTO_INCREMENT PRIMARY KEY,
+    list_id INT NOT NULL,
+    food_id INT NOT NULL,
+    quantity DECIMAL(10,2) NOT NULL,
+    status VARCHAR(20) DEFAULT 'Pending',
+    FOREIGN KEY (list_id) REFERENCES shopping_lists(list_id),
+    FOREIGN KEY (food_id) REFERENCES food_catalog(food_id)
+);
+
+CREATE TABLE inventory (
+    inventory_id INT AUTO_INCREMENT PRIMARY KEY,
+    group_id INT NOT NULL,
+    food_id INT NOT NULL,
+    quantity DECIMAL(10,2) NOT NULL,
+    expiry_date DATE NOT NULL,
+    location VARCHAR(50) NOT NULL,
+    FOREIGN KEY (group_id) REFERENCES family_groups(group_id),
+    FOREIGN KEY (food_id) REFERENCES food_catalog(food_id)
+);
+
+CREATE TABLE recipes (
+    recipe_id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(200) NOT NULL,
+    instructions TEXT NOT NULL,
+    image_url VARCHAR(255),
+    author_id INT NOT NULL,
+    status VARCHAR(20) DEFAULT 'Pending',
+    FOREIGN KEY (author_id) REFERENCES users(user_id)
+);
+
+CREATE TABLE recipe_ingredients (
+    recipe_id INT NOT NULL,
+    food_id INT NOT NULL,
+    quantity_required DECIMAL(10,2) NOT NULL,
+    PRIMARY KEY (recipe_id, food_id),
+    FOREIGN KEY (recipe_id) REFERENCES recipes(recipe_id),
+    FOREIGN KEY (food_id) REFERENCES food_catalog(food_id)
+);
+
+CREATE TABLE meal_plans (
+    plan_id INT AUTO_INCREMENT PRIMARY KEY,
+    group_id INT NOT NULL,
+    date DATE NOT NULL,
+    meal_type VARCHAR(20) NOT NULL,
+    recipe_id INT NOT NULL,
+    is_completed BOOLEAN DEFAULT FALSE,
+    FOREIGN KEY (group_id) REFERENCES family_groups(group_id),
+    FOREIGN KEY (recipe_id) REFERENCES recipes(recipe_id)
+);
+
+-- Thiet lap quan he khoa ngoai cheo (Circular References)
+ALTER TABLE users ADD FOREIGN KEY (group_id) REFERENCES family_groups(group_id);
+ALTER TABLE family_groups ADD FOREIGN KEY (owner_id) REFERENCES users(user_id);
+\end{lstlisting}
+
+\newpage
+\section{Giải thích các Kịch bản Truy vấn Cơ sở dữ liệu Chi tiết}
+Phần này giải thích chi tiết cơ chế hoạt động của cơ sở dữ liệu NaviMart thông qua các câu lệnh SQL phục vụ các chức năng cốt lõi của ứng dụng.
+
+\subsection{Kịch bản 1: Người dùng tham gia vào Nhóm gia đình}
+Khi một thành viên nhập mã mời (\texttt{invite\_code}) của một nhóm gia đình, hệ thống cần thực hiện:
+\begin{enumerate}
+    \item Tìm kiếm nhóm gia đình tương ứng với \texttt{invite\_code}.
+    \item Cập nhật \texttt{group\_id} của tài khoản người dùng đó bằng \texttt{group\_id} vừa tìm được.
+\end{enumerate}
+
+\begin{lstlisting}[language=SQL, caption=SQL Update User Group on Joining Family]
+-- Buoc 1: Kiem tra su ton tai cua ma moi va lay group_id
+SELECT group_id FROM family_groups WHERE invite_code = 'XYZ123';
+
+-- Buoc 2: Gan group_id cho user (Vi du user_id = 42)
+UPDATE users 
+SET group_id = (SELECT group_id FROM family_groups WHERE invite_code = 'XYZ123')
+WHERE user_id = 42;
+\end{lstlisting}
+
+\subsection{Kịch bản 2: Lọc thực phẩm sắp hết hạn trong tủ lạnh}
+Hệ thống hiển thị cảnh báo cho gia đình (ví dụ nhóm \texttt{group\_id = 5}) về các thực phẩm chuẩn bị hết hạn sử dụng (trong vòng 3 ngày tới) để kịp thời tiêu thụ.
+
+\begin{lstlisting}[language=SQL, caption=Query Expiring Foods in Pantry]
+SELECT 
+    i.inventory_id,
+    fc.name AS food_name,
+    i.quantity,
+    fc.unit,
+    i.expiry_date,
+    i.location,
+    DATEDIFF(i.expiry_date, CURDATE()) AS days_left
+FROM inventory i
+JOIN food_catalog fc ON i.food_id = fc.food_id
+WHERE i.group_id = 5 
+  AND i.expiry_date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 3 DAY)
+ORDER BY i.expiry_date ASC;
+\end{lstlisting}
+
+\subsection{Kịch bản 3: Tự động so khớp nguyên liệu còn thiếu để nấu ăn}
+Khi gia đình chuẩn bị nấu món ăn theo công thức (ví dụ \texttt{recipe\_id = 12}), hệ thống cần so sánh số lượng nguyên liệu yêu cầu trong \texttt{recipe\_ingredients} với số lượng thực tế hiện có trong tủ lạnh (\texttt{inventory} của \texttt{group\_id = 5}) để liệt kê các món bị thiếu hoặc không đủ số lượng.
+
+\begin{lstlisting}[language=SQL, caption=SQL Query to Check Missing Ingredients]
+SELECT 
+    fc.name AS ingredient_name,
+    ri.quantity_required AS qty_needed,
+    COALESCE(SUM(i.quantity), 0) AS qty_in_pantry,
+    fc.unit,
+    CASE 
+        WHEN COALESCE(SUM(i.quantity), 0) >= ri.quantity_required THEN 'Du nguyen lieu'
+        ELSE CONCAT('Thieu ', ri.quantity_required - COALESCE(SUM(i.quantity), 0))
+    END AS status
+FROM recipe_ingredients ri
+JOIN food_catalog fc ON ri.food_id = fc.food_id
+LEFT JOIN inventory i ON ri.food_id = i.food_id AND i.group_id = 5
+WHERE ri.recipe_id = 12
+GROUP BY ri.food_id, fc.name, ri.quantity_required, fc.unit;
+\end{lstlisting}
+
+\subsection{Kịch bản 4: Tự động lập danh sách đi chợ từ kế hoạch bữa ăn}
+Nếu người dùng lên kế hoạch ăn uống cho tuần tới (\texttt{meal\_plans}) và muốn tự động thêm tất cả các nguyên liệu còn thiếu vào một danh sách mua sắm (\texttt{shopping\_}\allowbreak\texttt{lists}):
+\begin{enumerate}
+    \item Hệ thống sẽ quét các món ăn trong kế hoạch bữa ăn của tuần tới.
+    \item Tính toán tổng số lượng nguyên liệu cần thiết.
+    \item Trừ đi số lượng thực phẩm hiện có trong tủ lạnh.
+    \item Thêm phần chênh lệch (nếu thiếu) vào bảng \texttt{shopping\_}\allowbreak\texttt{list\_}\allowbreak\texttt{items}.
+\end{enumerate}
+
+Giải thuật này hoạt động dưới nền (Background Job) thông qua truy vấn tìm nguyên liệu thiếu và chèn trực tiếp vào bảng danh sách đi chợ:
+
+\begin{lstlisting}[language=SQL, caption=Insert Missing Ingredients from Meal Plan to Shopping List]
+-- Vi du: Them nguyen lieu thieu cho cac bua an trong ngay 2026-06-25 cua group 5 
+-- vao danh sach mua sam co list_id = 10
+
+INSERT INTO shopping_list_items (list_id, food_id, quantity, status)
+SELECT 
+    10 AS list_id,
+    needed.food_id,
+    (needed.total_needed - COALESCE(pantry.total_owned, 0)) AS quantity_to_buy,
+    'Pending' AS status
+FROM (
+    -- Lay tong luong nguyen lieu can cho tat ca bua an trong ngay
+    SELECT ri.food_id, SUM(ri.quantity_required) AS total_needed
+    FROM meal_plans mp
+    JOIN recipe_ingredients ri ON mp.recipe_id = ri.recipe_id
+    WHERE mp.group_id = 5 AND mp.date = '2026-06-25'
+    GROUP BY ri.food_id
+) needed
+LEFT JOIN (
+    -- Lay tong luong thuc pham dang co san trong tu lanh
+    SELECT food_id, SUM(quantity) AS total_owned
+    FROM inventory
+    WHERE group_id = 5
+    GROUP BY food_id
+) pantry ON needed.food_id = pantry.food_id
+WHERE needed.total_needed > COALESCE(pantry.total_owned, 0);
+\end{lstlisting}
+
+\subsection{Kịch bản 5: Báo cáo tỷ lệ thực phẩm bị lãng phí}
+Thống kê số lượng thực phẩm đã tiêu thụ thành công so với thực phẩm bị hỏng/bỏ đi để đưa ra báo cáo tỷ lệ lãng phí. Để giải quyết việc thống kê này, hệ thống theo dõi lịch sử thông qua các sự kiện tiêu thụ hoặc ghi nhận rác thải (bảng phụ hoặc trạng thái trong inventory). 
+Ví dụ truy vấn thống kê hao phí thực phẩm dựa trên số lượng thực phẩm được đánh dấu hỏng (\texttt{status = 'Wasted'}) so với đã mua thành công.
+
+\begin{lstlisting}[language=SQL, caption=SQL Query for Consumption Waste Report]
+SELECT 
+    fc.name AS food_name,
+    SUM(CASE WHEN sli.status = 'Wasted' THEN sli.quantity ELSE 0 END) AS total_wasted,
+    SUM(CASE WHEN sli.status = 'Bought' THEN sli.quantity ELSE 0 END) AS total_bought,
+    (SUM(CASE WHEN sli.status = 'Wasted' THEN sli.quantity ELSE 0 END) / 
+     NULLIF(SUM(CASE WHEN sli.status = 'Bought' THEN sli.quantity ELSE 0 END), 0)) * 100 AS waste_percentage
+FROM shopping_list_items sli
+JOIN food_catalog fc ON sli.food_id = fc.food_id
+JOIN shopping_lists sl ON sli.list_id = sl.list_id
+WHERE sl.group_id = 5
+GROUP BY fc.food_id, fc.name
+HAVING total_bought > 0
+ORDER BY waste_percentage DESC;
+\end{lstlisting}
+
+\section{Kết luận}
+Thiết kế cơ sở dữ liệu vật lý của \textbf{NaviMart} đảm bảo tính toàn vẹn dữ liệu cực kỳ chặt chẽ nhờ hệ thống các khóa chính và khóa ngoại liên kết trực quan. Việc phân rã cơ sở dữ liệu thành các miền thực thể chuyên biệt (người dùng, danh mục thực phẩm chuẩn, tồn kho thực tế, công thức món ăn, kế hoạch bữa ăn và danh sách mua sắm) giúp hệ thống dễ dàng tối ưu hiệu năng truy vấn, tránh dư thừa thông tin và sẵn sàng mở rộng các tính năng tích hợp AI gợi ý món ăn sau này.
+
+\end{document}

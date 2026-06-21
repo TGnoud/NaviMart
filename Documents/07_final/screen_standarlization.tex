@@ -1,0 +1,221 @@
+% !TEX TS-program = xelatex
+% =====================================================================
+%  TÀI LIỆU THIẾT KẾ GIAO DIỆN — TIÊU CHUẨN HÓA MÀN HÌNH
+% =====================================================================
+\documentclass[12pt,a4paper]{article}
+
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[utf8]{inputenc}
+  \usepackage[T5]{fontenc}
+\else
+  \usepackage{fontspec}
+\fi
+
+\usepackage[a4paper,margin=2.5cm]{geometry}
+\usepackage{tabularx}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage[table]{xcolor}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{titling}
+\usepackage[hidelinks]{hyperref}
+
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+\renewcommand{\arraystretch}{1.35}
+\setlength{\parskip}{0.6em}
+\setlength{\parindent}{0pt}
+\setlength{\tabcolsep}{8pt}
+
+\newcommand{\code}[1]{\texttt{#1}}
+
+\definecolor{navy}{RGB}{31,78,121}
+\definecolor{headerblue}{RGB}{31,78,121}
+\definecolor{rowalt}{RGB}{234,241,248}
+\arrayrulecolor{navy!55}
+\newcommand{\thead}[1]{\textbf{\textcolor{white}{#1}}}
+
+\titleformat{\section}{\Large\bfseries\color{navy}}{\thesection.}{0.6em}{}
+\titleformat{\subsection}{\large\bfseries\color{navy}}{\thesubsection}{0.6em}{}
+\titlespacing*{\section}{0pt}{1.4em}{0.6em}
+
+\hypersetup{pdftitle={Tiêu chuẩn hóa thiết kế màn hình NaviMart},pdfauthor={Nhóm NaviMart}}
+
+\begin{document}
+
+\begin{titlepage}
+\centering
+\vspace*{1.2cm}
+{\large ĐẠI HỌC BÁCH KHOA HÀ NỘI\par}
+{\large Trường Công nghệ Thông tin và Truyền thông\par}
+\vspace{2.4cm}
+{\large\bfseries TÀI LIỆU THIẾT KẾ CHI TIẾT\par}
+{\normalsize Phân hệ: Thiết kế giao diện người dùng\par}
+\vspace{1.4cm}
+\rule{0.8\linewidth}{0.4pt}\par
+\vspace{0.6cm}
+{\Huge\bfseries\color{navy} HỆ THỐNG NAVIMART\par}
+\vspace{0.5cm}
+{\large Tiêu chuẩn hóa thiết kế màn hình\par}
+\vspace{0.4cm}
+\rule{0.8\linewidth}{0.4pt}\par
+\vspace{1.2cm}
+{\large Môn: Phát triển phần mềm theo chuẩn kỹ năng ITSS\par}
+\vspace{2cm}
+
+\begin{tabular}{|l|l|}
+\hline
+\rowcolor{headerblue}
+\thead{Họ và tên} & \thead{MSSV} \\
+\hline
+\rule{0pt}{2.4ex} Trịnh Thành An  & 20235633\\
+\hline
+\rule{0pt}{2.4ex} Nguyễn Mạnh Đức  & 20235681\\
+\hline
+\rule{0pt}{2.4ex} Đỗ Danh Dũng  & 20235685\\
+\hline
+\rule{0pt}{2.4ex} Đinh Xuân Thái Dương  & 20235689\\
+\hline
+\rule{0pt}{2.4ex}Nguyễn Hồng Dương   & 20235693\\
+\hline
+\end{tabular}
+
+\vfill
+{\itshape Hà Nội, ngày \today\par}
+\end{titlepage}
+
+\tableofcontents
+\newpage
+
+\section{Giao diện và Không gian Trực quan}
+Hệ thống NaviMart hướng tới đối tượng người nội trợ, mang đến một giao diện thân thiện, lịch sự và đáng tin cậy. Thiết kế mang tính hiện đại, rõ ràng thông qua việc sử dụng đồng nhất phông chữ không chân \textbf{Be Vietnam Pro} cho toàn bộ hệ thống. Bảng màu tuân theo triết lý \textbf{Material Design 3}, gọi tắt là MD3, với tông màu xanh lá cây chủ đạo với mã \code{primary} và \code{tertiary}, gợi lên sự tươi mát của thực phẩm, kết hợp với các điểm nhấn phụ màu cam với mã \code{secondary-container} để thu hút sự chú ý vào các tính năng quan trọng như cảnh báo hạn sử dụng hoặc ưu đãi mua sắm.
+
+\textbf{Đặc điểm chính:}
+\begin{itemize}[leftmargin=*]
+  \item Phong cách thiết kế thống nhất, hiện đại, mang hơi hướng Material Design.
+  \item Sử dụng duy nhất phông chữ \code{Be Vietnam Pro} để đảm bảo sự rõ ràng, dễ đọc trên mọi thiết bị di động.
+  \item Bảng màu MD3 hệ thống hóa rõ ràng các vai trò bao gồm Primary, Secondary, Tertiary, Surface và Error.
+  \item Bố cục rõ ràng, rộng rãi, thao tác phù hợp với cảm ứng.
+\end{itemize}
+
+\section{Bảng màu và Vai trò}
+Bảng màu được trích xuất từ cấu hình Tailwind CSS hiện tại của dự án, tuân thủ chặt chẽ hệ thống mẫu của Material Design 3:
+
+\subsection{Nhóm màu chính}
+\begin{itemize}[leftmargin=*]
+  \item \textbf{Primary} với mã \code{\#0d631b}: Màu xanh lá chủ đạo, dùng cho các nút bấm chính, thành phần cần nhấn mạnh nhất.
+  \item \textbf{On Primary} với mã \code{\#ffffff}: Văn bản hoặc biểu tượng hiển thị trên nền Primary.
+  \item \textbf{Primary Container} với mã \code{\#2e7d32}: Nền cho các khối nội dung mang tính chất nhấn mạnh chính.
+  \item \textbf{On Primary Container} với mã \code{\#cbffc2}.
+\end{itemize}
+
+\subsection{Nhóm màu phụ và Tương tác}
+\begin{itemize}[leftmargin=*]
+  \item \textbf{Secondary} với mã \code{\#8b5000}.
+  \item \textbf{Secondary Container} với mã \code{\#ff9800} màu cam. Dùng cho các điểm nhấn, cảnh báo mức độ vừa ví dụ như cảnh báo thực phẩm sắp hết hạn.
+  \item \textbf{On Secondary Container} với mã \code{\#653900}.
+  \item \textbf{Tertiary} với mã \code{\#1f6223} màu xanh lá thẫm. Dùng cho các trạng thái an toàn ví dụ như thực phẩm còn hạn xa.
+  \item \textbf{Tertiary Container} với mã \code{\#3a7b39}.
+\end{itemize}
+
+\subsection{Nền và Khung giao diện}
+\begin{itemize}[leftmargin=*]
+  \item \textbf{Background / Surface / Surface Bright} với mã \code{\#f7fbf0} màu xanh lá cực nhạt. Đây là màu nền chính của toàn bộ trang web và ứng dụng.
+  \item \textbf{Surface Variant} với mã \code{\#e0e4da}: Màu nền cho các thẻ chứa nội dung hoặc vùng phụ.
+  \item \textbf{On Surface} với mã \code{\#181d17} làm màu chữ chính Đen hoặc Xám đậm dùng trên nền sáng.
+  \item \textbf{On Surface Variant} với mã \code{\#40493d} làm màu chữ phụ cho các đoạn mô tả và văn bản hỗ trợ.
+  \item \textbf{Outline} với mã \code{\#73796d}: Màu đường viền chính.
+  \item \textbf{Outline Variant} với mã \code{\#bfcaba}: Màu đường viền nhạt hơn.
+\end{itemize}
+
+\subsection{Trạng thái}
+\begin{itemize}[leftmargin=*]
+  \item \textbf{Error} với mã \code{\#cf2e2e} màu đỏ. Báo lỗi, cảnh báo nghiêm trọng ví dụ như cảnh báo thực phẩm đã hết hạn.
+  \item \textbf{Error Container} với mã \code{\#ffdad6}: Nền khối cảnh báo lỗi.
+  \item \textbf{On Error} với mã \code{\#ffffff}: Chữ trên nền báo lỗi.
+\end{itemize}
+
+\section{Quy tắc Kiểu chữ}
+Hệ thống sử dụng duy nhất một phông chữ cho cả tiêu đề lẫn nội dung để tạo sự đồng nhất và tối ưu hóa tốc độ tải trang.
+
+\textbf{Phông chữ:} \code{Be Vietnam Pro}, không chân
+
+\textbf{Phân cấp Kiểu chữ:}
+
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3.5cm}|p{2cm}|p{2.5cm}|p{2cm}|>{\raggedright\arraybackslash}p{3cm}|}
+\hline
+\rowcolor{headerblue}
+\thead{Vai trò lớp} & \thead{Cỡ chữ} & \thead{Độ đậm} & \thead{Chiều cao dòng} & \thead{Sử dụng cho} \\
+\hline
+\endfirsthead
+\hline
+\rowcolor{headerblue}
+\thead{Vai trò lớp} & \thead{Cỡ chữ} & \thead{Độ đậm} & \thead{Chiều cao dòng} & \thead{Sử dụng cho tiếp} \\
+\hline
+\endhead
+\code{text-display-lg} & 36px & 700 Đậm & 44px & Tiêu đề chính trang web rất lớn \\
+\hline
+\code{text-display-sm} & 32px & 700 Đậm & 40px & Tiêu đề lớn ví dụ như Banner hoặc vùng Hero \\
+\hline
+\code{text-headline-md} & 28px & 700 Đậm & 36px & Tiêu đề cho các trang \\
+\hline
+\code{text-headline-sm} & 22px & 600 Bán đậm & 30px & Tiêu đề từng khu vực \\
+\hline
+\code{text-body-lg} & 18px & 400 Thường & 26px & Đoạn văn bản lớn, câu chữ nổi bật \\
+\hline
+\code{text-body-md} & 16px & 500 Vừa & 24px & Nội dung văn bản chính, nhãn của nút bấm chuẩn \\
+\hline
+\code{text-label-sm} & 14px & 400 Thường & 20px & Nhãn nhỏ, chú thích phụ, hạn sử dụng, thông tin ngày tháng \\
+\hline
+\end{longtable}
+
+\section{Thiết kế Thành phần và Bố cục}
+
+\subsection{Độ bo góc}
+Tuân theo chuẩn cấu hình hệ thống hiện tại:
+\begin{itemize}[leftmargin=*]
+  \item \textbf{Mặc định} \code{rounded}: Độ bo góc 4px mặc định cho các thành phần nhỏ bao gồm ô nhập liệu, nhãn và thẻ.
+  \item \textbf{Lớn} \code{rounded-lg}: Độ bo góc 8px chuẩn cho nút bấm và thẻ chứa nội dung.
+  \item \textbf{Rất lớn} \code{rounded-xl}: Độ bo góc 12px cho các khối vùng chứa lớn hoặc cửa sổ nổi.
+  \item \textbf{Đầy đủ} \code{rounded-full}: Độ bo góc 9999px cho ảnh đại diện người dùng, nút biểu tượng tròn, huy hiệu dạng viên thuốc.
+\end{itemize}
+
+\subsection{Hệ thống khoảng cách}
+Các giá trị cố định được khai báo cho bố cục hệ thống:
+\begin{itemize}[leftmargin=*]
+  \item \textbf{\code{stack-sm}} với kích thước 8px: Khoảng cách nhỏ giữa các thành phần liên quan chặt chẽ.
+  \item \textbf{\code{gutter-mobile}} với kích thước 12px: Khoảng cách lề chuẩn giữa các phần tử trên thiết bị di động.
+  \item \textbf{\code{stack-md}} với kích thước 16px: Khoảng cách dọc chuẩn giữa các khối nội dung, khoảng đệm bên trong của các thẻ chứa nội dung.
+  \item \textbf{\code{margin-mobile}} với kích thước 16px: Căn lề ngoài trái phải chuẩn cho màn hình điện thoại.
+  \item \textbf{\code{nav-height}} với kích thước 69px: Chiều cao cố định của thanh điều hướng trên cùng.
+\end{itemize}
+
+\subsection{Trạng thái Hạn sử dụng trong Kho}
+Hệ thống sử dụng các lớp Tailwind động được cấu hình an toàn để thể hiện trực quan trạng thái của thực phẩm:
+\begin{itemize}[leftmargin=*]
+  \item \textbf{Tertiary} với mã \code{text-tertiary} và \code{bg-tertiary}. Dùng cho trạng thái an toàn chỉ thực phẩm còn hạn sử dụng xa.
+  \item \textbf{Secondary} với mã \code{text-secondary} và \code{bg-secondary}. Dùng cho trạng thái cảnh báo khi sắp hết hạn bằng màu cam.
+  \item \textbf{Error} với mã \code{text-error} và \code{bg-error}. Dùng cho trạng thái khẩn cấp khi đã hết hạn bằng màu đỏ.
+\end{itemize}
+
+\section{Quy tắc Thiết kế}
+
+\subsection{Nên làm}
+\begin{itemize}[leftmargin=*]
+  \item \textbf{Sử dụng duy nhất phông chữ \code{Be Vietnam Pro}} cho toàn bộ hệ thống từ tiêu đề đến nội dung để giữ tính hiện đại và đồng bộ.
+  \item \textbf{Sử dụng đúng bộ màu Material Design 3} qua các lớp của Tailwind như \code{text-primary}, \code{bg-surface-variant}, \code{text-on-surface}.
+  \item \textbf{Dùng \code{text-body-md} cỡ 16px} làm phông chữ tiêu chuẩn cho các nội dung văn bản dài và thân nút bấm để đảm bảo độ đọc hiểu.
+  \item \textbf{Dùng bo góc \code{rounded-lg} cỡ 8px} cho các nút bấm và thẻ chứa nội dung để thống nhất trải nghiệm người dùng.
+  \item \textbf{Tận dụng các biến khoảng cách} như \code{gap-stack-md} hay \code{m-margin-mobile} thay vì viết thông số cứng.
+\end{itemize}
+
+\subsection{Không nên làm}
+\begin{itemize}[leftmargin=*]
+  \item \textbf{Không sử dụng phông chữ có chân như Lora} do NaviMart hiện tại đã loại bỏ phông chữ này khỏi hệ thống thiết kế.
+  \item \textbf{Không tự ý thêm mã màu thập lục phân cứng} vào trong tệp giao diện React ngoại trừ trong tệp cấu hình Tailwind. Hãy tham chiếu đến các tên biến màu đã định nghĩa.
+  \item \textbf{Không dùng kích thước phông chữ nhỏ hơn 14px của lớp \code{text-label-sm}}. Đối tượng sử dụng chính là người nội trợ, họ cần thông tin to, rõ ràng và dễ lướt qua trên màn hình điện thoại.
+  \item \textbf{Không lạm dụng bóng đổ} quá dày, hãy sử dụng bóng đổ nhẹ như \code{shadow-sm} hoặc \code{shadow-md} theo tinh thần thiết kế phẳng, hiện đại của Material Design 3.
+\end{itemize}
+
+\end{document}

@@ -124,7 +124,7 @@ Toàn bộ hệ thống kiểm thử tự động của dự án NaviMart đã �
 \hline
 \textbf{Phạm vi kiểm thử} & \textbf{Số lượng bộ thử} & \textbf{Thành công trên Tổng số} \\
 \hline
-Máy chủ Đơn vị và Giao tiếp & 37 & 293 / 293 \\
+Máy chủ Đơn vị và Giao tiếp & 48 & 335 / 335 \\
 \hline
 Máy chủ Đầu cuối trong bộ nhớ & 4 & 32 / 32 \\
 \hline
@@ -134,12 +134,14 @@ Giao diện người dùng & 9 & 61 / 61 \\
 \hline
 \end{longtable}
 
-Về độ phủ mã nguồn, hệ thống máy chủ đạt độ phủ tổng thể trên 61 phần trăm số dòng lệnh. Khi xét riêng các phân hệ cốt lõi, phần lớn đều đạt mức độ phủ an toàn rất cao:
+Về độ phủ mã nguồn, sau khi bổ sung kiểm thử đơn vị cho các nhóm tải ảnh, gửi thư Gmail, kết nối thời gian thực, phân quyền vai trò, phân quyền gia đình, cấu hình môi trường, sự kiện kho và các bộ điều khiển quản trị, hệ thống máy chủ đạt \textbf{88,33 phần trăm statement coverage} và \textbf{89,20 phần trăm line coverage} khi chạy lệnh \texttt{npm run test:cov}. Phạm vi đo độ phủ đơn vị tập trung vào mã logic nghiệp vụ và loại trừ các tệp khởi động hoặc lắp ghép hạ tầng như \texttt{main.ts}, \texttt{*.module.ts} và các kịch bản \texttt{database/seed} hoặc \texttt{database/migrate}.
+
+Khi xét riêng các phân hệ cốt lõi, phần lớn đều đạt mức độ phủ an toàn rất cao:
 \begin{itemize}
-    \item Trợ lý thông minh và thông báo đạt từ 85 đến 90 phần trăm.
-    \item Quản lý người dùng, Danh mục, Báo cáo và Kho thực phẩm đạt từ 81 đến 83 phần trăm.
-    \item Nhóm Gia đình, Công thức, Kế hoạch bữa ăn và Xác thực đạt từ 70 đến 79 phần trăm.
+    \item Trợ lý thông minh, Danh mục, Cấu hình, Thông báo, Báo cáo, Sự kiện kho và Kết nối thời gian thực đạt từ 95 đến 100 phần trăm theo statement coverage.
+    \item Xác thực, Phân quyền, Người dùng, Tải ảnh và Kho thực phẩm đạt xấp xỉ 88 đến 96 phần trăm.
+    \item Nhóm Gia đình, Công thức, Kế hoạch bữa ăn và Danh sách mua sắm vẫn còn một số nhánh nghiệp vụ phức tạp chưa phủ hết, nhưng các luồng chính và nhánh lỗi quan trọng đều đã có kiểm thử tự động.
 \end{itemize}
-Sự chênh lệch giữa độ phủ tổng thể và độ phủ từng phân hệ đến từ việc nhóm bỏ qua kiểm thử đơn vị cho các tệp cấu hình môi trường hoặc bộ thiết lập dữ liệu giả, mà thay vào đó kiểm chứng chúng thông qua môi trường kiểm thử trực tuyến và đầu cuối để tiết kiệm thời gian vận hành. Toàn bộ các tiêu chí nghiệm thu khắt khe đã được thỏa mãn đầy đủ.
+Sự chênh lệch giữa độ phủ đơn vị và độ phủ của toàn bộ cây mã nguồn thô đến từ việc không tính các tệp lắp ghép module, bootstrap ứng dụng và dữ liệu mẫu vào mục tiêu unit test; các thành phần này phù hợp hơn với kiểm thử đầu cuối và kiểm thử triển khai. Toàn bộ các tiêu chí nghiệm thu khắt khe đã được thỏa mãn đầy đủ.
 
 \end{document}

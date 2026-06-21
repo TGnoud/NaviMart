@@ -1,103 +1,752 @@
 \documentclass[../main.tex]{subfiles}
 \begin{document}
 
-\section{\-3.1. Xác định các lớp phân tích}
-Thiết kế lớp phân tích chung
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{mysqlstyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{blue},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2,
+    language=SQL
+}
+
+\lstdefinestyle{jsonstyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{blue},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2
+}
+
+\section{Thiết kế Lớp (Class Design)}
+Phần này mô tả cấu trúc thiết kế hướng đối tượng lớp chi tiết cho hệ thống đi chợ tiện lợi \textbf{NaviMart}. Mô hình thiết kế lớp được xây dựng dựa trên nguyên lý BCE (Boundary - Control - Entity) kết hợp với kiến trúc phân lớp nhằm tối ưu tính độc lập và khả năng bảo trì.
+
+Hệ thống được tổ chức thành 8 mô-đun chính:
+\begin{enumerate}
+    \item \textbf{Mô-đun Xác thực (Auth Module):} Quản lý tài khoản người dùng, băm mật khẩu, phân quyền qua JWT và OTP qua Email.
+    \item \textbf{Mô-đun Nhóm gia đình (Family Module):} Liên kết tài khoản các thành viên trong gia đình để chia sẻ dữ liệu đi chợ và thực phẩm.
+    \item \textbf{Mô-đun Lập Danh sách Mua sắm (Shopping Lists Module):} Quản lý quy trình lập danh sách đi chợ và tiến độ mua sắm thực tế.
+    \item \textbf{Mô-đun Kho Thực phẩm (Pantry Module):} Quản lý thực phẩm hiện có trong tủ lạnh, vị trí bảo quản và cảnh báo hạn sử dụng.
+    \item \textbf{Mô-đun Kế hoạch Ăn uống (Meals Module):} Lên lịch trình ăn uống hàng ngày và theo dõi bữa ăn.
+    \item \textbf{Mô-đun Công thức nấu ăn (Recipes Module):} Kho công thức nấu ăn và gợi ý thực đơn thông minh bằng trí tuệ nhân tạo.
+    \item \textbf{Mô-đun Thống kê và Báo cáo (Reports Module):} Phân tích chi tiêu, biểu đồ xu hướng tiêu thụ thực phẩm và lượng thực phẩm lãng phí.
+    \item \textbf{Mô-đun Quản trị Hệ thống (Admin Module):} Phê duyệt công thức, kiểm duyệt người dùng và quản lý danh mục thực phẩm chuẩn.
+\end{enumerate}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.8\textwidth]{placeholder}
+\includegraphics[width=0.8\textwidth]{image/diagram_tong_quan.png}
+\caption{Biểu đồ lớp phân tích tổng quan}
 \end{figure}
 
-Usecase “Đăng nhập”
+\subsection{Cấu trúc Phân lớp BCE}
+Mỗi mô-đun chức năng tuân thủ nghiêm ngặt các vai trò phân lớp sau:
+\begin{itemize}
+    \item \textbf{Lớp Boundary (Views \& API Clients):}
+    \begin{itemize}
+        \item \textbf{Views (React Components):} Đóng vai trò là thành phần giao diện người dùng hiển thị HTML/CSS, nhận sự kiện tương tác của người dùng.
+        \item \textbf{API Clients (Axios Clients):} Chịu trách nhiệm đóng gói dữ liệu và thực hiện các yêu cầu HTTP (GET, POST, PATCH, DELETE) đồng bộ dữ liệu với Backend.
+    \end{itemize}
+    \item \textbf{Lớp Control (Controllers \& Services):}
+    \begin{itemize}
+        \item \textbf{Controllers (NestJS Controllers):} Tiếp nhận các yêu cầu HTTP từ Client, kiểm tra tính hợp lệ dữ liệu đầu vào (DTO Validation) và điều hướng xuống tầng nghiệp vụ.
+        \item \textbf{Services (NestJS Services):} Nơi tập trung toàn bộ các quy tắc nghiệp vụ (Business Logic), thuật toán phân tích, tính toán, và tương tác với cơ sở dữ liệu.
+    \end{itemize}
+    \item \textbf{Lớp Entity (Database Entities):}
+    \begin{itemize}
+        \item \textbf{Entities (TypeORM/Prisma Entities):} Ánh xạ trực tiếp cấu trúc các bảng cơ sở dữ liệu vật lý thành các đối tượng mã nguồn để thực hiện các thao tác CRUD.
+    \end{itemize}
+\end{itemize}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.8\textwidth]{placeholder}
+\includegraphics[width=1.0\textwidth]{image/bce.jpg}
+\caption{Sơ đồ các lớp phân tích chi tiết theo mô hình BCE}
 \end{figure}
 
-Usecase “Đăng ký”
+\subsection{Tóm tắt các Lớp Core trong Hệ thống}
+Để minh họa thiết kế lớp, dưới đây là bảng đặc tả các lớp Boundary, Control và Entity chính của hệ thống:
+
+\begin{longtable}{|>{\raggedright\arraybackslash}p{4.5cm}|>{\raggedright\arraybackslash}p{2.0cm}|>{\raggedright\arraybackslash}p{1.8cm}|>{\raggedright\arraybackslash}p{5.5cm}|}
+\hline
+\textbf{Tên Lớp} & \textbf{Mô-đun} & \textbf{Stereotype} & \textbf{Vai trò nghiệp vụ chính} \\ \hline
+\endhead
+\texttt{Forgot\-Password} & Auth Module & Boundary & Giao diện lấy lại mật khẩu qua email \\ \hline
+\texttt{Auth\-Api\-Client} & Auth Module & Boundary & API Client gửi thông tin đăng nhập/đăng ký \\ \hline
+\texttt{Auth\-Controller} & Auth Module & Control & Nhận request đăng nhập, cấp JWT token \\ \hline
+\texttt{Auth\-Service} & Auth Module & Control & Băm mật khẩu, tạo access token và gửi OTP \\ \hline
+\texttt{Users\-Entity} & Auth Module & Entity & Ánh xạ bảng thông tin người dùng \texttt{users} \\ \hline
+\texttt{Family\-Sharing} & Family Module & Boundary & Giao diện quản lý thành viên nhóm gia đình \\ \hline
+\texttt{Family\-Controller} & Family Module & Control & NestJS Controller nhận yêu cầu tạo/vào nhóm \\ \hline
+\texttt{Family\-Service} & Family Module & Control & Logic sinh mã mời, thêm thành viên vào nhóm \\ \hline
+\texttt{Family\-Groups\-Entity} & Family Module & Entity & Ánh xạ bảng thông tin nhóm \texttt{family\_groups} \\ \hline
+\texttt{MyLists} & Shopping Lists & Boundary & Giao diện quản lý danh sách đi chợ của gia đình \\ \hline
+\texttt{Shopping\-Lists\-Service}& Shopping Lists & Control & Tính toán số lượng cần mua, lưu tiến độ đi chợ \\ \hline
+\texttt{Shopping\-Lists\-Entity} & Shopping Lists & Entity & Ánh xạ bảng danh sách đi chợ \texttt{shopping\_lists} \\ \hline
+\texttt{Pantry\-Dashboard} & Pantry Module & Boundary & Giao diện quản lý tủ lạnh và hạn sử dụng \\ \hline
+\texttt{Pantry\-Service} & Pantry Module & Control & Tính toán lượng tiêu thụ thực phẩm thực tế \\ \hline
+\texttt{Inventory\-Entity} & Pantry Module & Entity & Ánh xạ bảng kho lưu trữ \texttt{inventory} \\ \hline
+\texttt{Meal\-Planner} & Meals Module & Boundary & Giao diện lập kế hoạch ăn uống hàng ngày \\ \hline
+\texttt{Meals\-Service} & Meals Module & Control & So khớp nguyên liệu tủ lạnh với kế hoạch ăn uống \\ \hline
+\texttt{Meal\-Plans\-Entity} & Meals Module & Entity & Ánh xạ bảng kế hoạch bữa ăn \texttt{meal\_plans} \\ \hline
+\texttt{AIChef} & Recipes Module & Boundary & Giao diện trò chuyện trực quan với trợ lý AI \\ \hline
+\texttt{Recipes\-Service} & Recipes Module & Control & Thuật toán gợi ý món ăn từ thực phẩm có sẵn \\ \hline
+\texttt{Recipes\-Entity} & Recipes Module & Entity & Ánh xạ bảng công thức nấu ăn \texttt{recipes} \\ \hline
+\texttt{Stats\-Dashboard} & Reports Module & Boundary & Giao diện hiển thị biểu đồ phân tích chi tiêu \\ \hline
+\texttt{Reports\-Service} & Reports Module & Control & Chạy các câu lệnh SQL Aggregate thống kê hao phí \\ \hline
+\texttt{Admin\-Dashboard} & Admin Module & Boundary & Giao diện quản trị danh mục, phê duyệt công thức \\ \hline
+\texttt{Admin\-Service} & Admin Module & Control & Quản lý danh mục chuẩn hệ thống, khóa tài khoản \\ \hline
+\texttt{Categories\-Entity} & Admin Module & Entity & Ánh xạ bảng phân loại danh mục \texttt{categories} \\ \hline
+\end{longtable}
+
+\subsection{Sơ đồ Lớp Chi tiết các Phân hệ}
+Dưới đây là các vị trí để chèn sơ đồ lớp chi tiết cho từng phân hệ nghiệp vụ chính của hệ thống NaviMart:
+
+\subsubsection{Sơ đồ lớp Phân hệ Xác thực (Auth Module)}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\textwidth]{"image/Module 1 - Auth"}
+\caption{Biểu đồ lớp chi tiết - Phân hệ Xác thực (Auth Module)}
+\end{figure}
+
+\subsubsection{Sơ đồ lớp Phân hệ Nhóm gia đình (Family Module)}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\textwidth]{"image/Module 2 - Family"}
+\caption{Biểu đồ lớp chi tiết - Phân hệ Nhóm gia đình (Family Module)}
+\end{figure}
+
+\subsubsection{Sơ đồ lớp Phân hệ Lập Danh sách Mua sắm (Shopping Lists Module)}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\textwidth]{"image/Module 3 - Shopping Lists"}
+\caption{Biểu đồ lớp chi tiết - Phân hệ Lập Danh sách Mua sắm (Shopping Lists Module)}
+\end{figure}
+
+\subsubsection{Sơ đồ lớp Phân hệ Kho Thực phẩm (Pantry Module)}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\textwidth]{"image/Module 4 - Pantry"}
+\caption{Biểu đồ lớp chi tiết - Phân hệ Kho Thực phẩm (Pantry Module)}
+\end{figure}
+
+\subsubsection{Sơ đồ lớp Phân hệ Kế hoạch Ăn uống (Meals Module)}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\textwidth]{"image/Module 5 - Meals"}
+\caption{Biểu đồ lớp chi tiết - Phân hệ Kế hoạch Ăn uống (Meals Module)}
+\end{figure}
+
+\subsubsection{Sơ đồ lớp Phân hệ Công thức nấu ăn \& Trợ lý AI (Recipes Module)}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\textwidth]{"image/Module 6 - Recipes"}
+\caption{Biểu đồ lớp chi tiết - Phân hệ Công thức nấu ăn \& Trợ lý AI (Recipes Module)}
+\end{figure}
+
+\subsubsection{Sơ đồ lớp Phân hệ Thống kê và Báo cáo (Reports Module)}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\textwidth]{"image/Module 7 - Reports"}
+\caption{Biểu đồ lớp chi tiết - Phân hệ Thống kê và Báo cáo (Reports Module)}
+\end{figure}
+
+\subsubsection{Sơ đồ lớp Phân hệ Quản trị Hệ thống (Admin Module)}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.5\textwidth]{"image/Module 8 - Admin"}
+\caption{Biểu đồ lớp chi tiết - Phân hệ Quản trị Hệ thống (Admin Module)}
+\end{figure}
+
+\section{Đặc tả Giao tiếp Hệ thống (System Interface Design)}
+Hệ thống \textbf{NaviMart} áp dụng giao tiếp REST API đồng bộ bằng dữ liệu JSON để đảm bảo sự gắn kết lỏng lẻo và khả năng mở rộng. Tất cả các yêu cầu gửi đến các endpoint bảo mật yêu cầu tiêu đề xác thực:
+\begin{verbatim}
+Authorization: Bearer <JWT_Token>
+\end{verbatim}
+
+\subsection{Các Endpoint REST API Nội bộ Cốt lõi}
+Dưới đây đặc tả danh sách các API quan trọng dùng để tương tác dữ liệu giữa Client và Server:
+
+\subsubsection{Mô-đun Xác thực (Auth Module)}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Đăng ký tài khoản (Register):}
+    \begin{itemize}
+        \item \textbf{Method / Path:} \texttt{POST /api/auth/register}
+        \item \textbf{Payload:}
+\begin{lstlisting}[style=jsonstyle]
+{
+  "email": "string",
+  "password": "string",
+  "first_name": "string",
+  "last_name": "string",
+  "dob": "string",
+  "gender": "string"
+}
+\end{lstlisting}
+        \item \textbf{Response (201):}
+\begin{lstlisting}[style=jsonstyle]
+{
+  "message": "User created successfully",
+  "user_id": 1
+}
+\end{lstlisting}
+        \item \textbf{Response (400):}
+\begin{lstlisting}[style=jsonstyle]
+{
+  "statusCode": 400,
+  "message": "Email already exists"
+}
+\end{lstlisting}
+    \end{itemize}
+    \item \textbf{Đăng nhập (Login):}
+    \begin{itemize}
+        \item \textbf{Method / Path:} \texttt{POST /api/auth/login}
+        \item \textbf{Payload:}
+\begin{lstlisting}[style=jsonstyle]
+{
+  "email": "string",
+  "password": "string"
+}
+\end{lstlisting}
+        \item \textbf{Response (200):}
+\begin{lstlisting}[style=jsonstyle]
+{
+  "access_token": "JWT_STRING",
+  "refresh_token": "REFRESH_STRING"
+}
+\end{lstlisting}
+        \item \textbf{Response (401):}
+\begin{lstlisting}[style=jsonstyle]
+{
+  "statusCode": 401,
+  "message": "Invalid credentials"
+}
+\end{lstlisting}
+    \end{itemize}
+\end{itemize}
+
+\subsubsection{Mô-đun Nhóm gia đình (Family Module)}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Tạo nhóm gia đình (Create Group):}
+    \begin{itemize}
+        \item \textbf{Method / Path:} \texttt{POST /api/family}
+        \item \textbf{Payload:}
+\begin{lstlisting}[style=jsonstyle]
+{
+  "group_name": "string"
+}
+\end{lstlisting}
+        \item \textbf{Response (201):}
+\begin{lstlisting}[style=jsonstyle]
+{
+  "group_id": 5,
+  "invite_code": "ABCDEF"
+}
+\end{lstlisting}
+    \end{itemize}
+    \item \textbf{Tham gia nhóm gia đình (Join Group):}
+    \begin{itemize}
+        \item \textbf{Method / Path:} \texttt{POST /api/family/join}
+        \item \textbf{Payload:}
+\begin{lstlisting}[style=jsonstyle]
+{
+  "invite_code": "ABCDEF"
+}
+\end{lstlisting}
+        \item \textbf{Response (200):}
+\begin{lstlisting}[style=jsonstyle]
+{
+  "message": "Joined successfully",
+  "group_id": 5
+}
+\end{lstlisting}
+        \item \textbf{Response (404):}
+\begin{lstlisting}[style=jsonstyle]
+{
+  "statusCode": 404,
+  "message": "Invite code not found"
+}
+\end{lstlisting}
+    \end{itemize}
+\end{itemize}
+
+\subsubsection{Mô-đun Kho thực phẩm (Pantry Module)}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Lấy danh sách thực phẩm trong kho (Get Inventory):}
+    \begin{itemize}
+        \item \textbf{Method / Path:} \texttt{GET /api/pantry}
+        \item \textbf{Response (200):}
+\begin{lstlisting}[style=jsonstyle]
+{
+  "data": [
+    {
+      "inventory_id": 1,
+      "food_name": "Trung",
+      "quantity": 10.0,
+      "unit": "qua",
+      "expiry_date": "2026-07-01",
+      "location": "Ngan mat"
+    }
+  ]
+}
+\end{lstlisting}
+    \end{itemize}
+    \item \textbf{Tiêu thụ thực phẩm (Consume Pantry):}
+    \begin{itemize}
+        \item \textbf{Method / Path:} \texttt{POST /api/pantry/consume}
+        \item \textbf{Payload:}
+\begin{lstlisting}[style=jsonstyle]
+{
+  "inventory_id": 1,
+  "quantity": 2.50
+}
+\end{lstlisting}
+        \item \textbf{Response (200):}
+\begin{lstlisting}[style=jsonstyle]
+{
+  "message": "Consumed successfully",
+  "remaining": 7.50
+}
+\end{lstlisting}
+        \item \textbf{Response (400):}
+\begin{lstlisting}[style=jsonstyle]
+{
+  "statusCode": 400,
+  "message": "Insufficient quantity in pantry"
+}
+\end{lstlisting}
+    \end{itemize}
+\end{itemize}
+
+\subsubsection{Mô-đun Kế hoạch Ăn uống \& Trợ lý AI (Meals \& AI Chef Modules)}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Kiểm tra nguyên liệu thiếu cho kế hoạch bữa ăn (Get Missing Ingredients):}
+    \begin{itemize}
+        \item \textbf{Method / Path:} \texttt{GET /api/meals/missing-ingredients/:planId}
+        \item \textbf{Response (200):}
+\begin{lstlisting}[style=jsonstyle]
+{
+  "plan_id": 12,
+  "missing": [
+    {
+      "food_id": 3,
+      "food_name": "Thit heo",
+      "quantity_required": 0.5,
+      "quantity_owned": 0.0,
+      "unit": "kg"
+    }
+  ]
+}
+\end{lstlisting}
+    \end{itemize}
+    \item \textbf{Trò chuyện nhận gợi ý món ăn (AI Chat):}
+    \begin{itemize}
+        \item \textbf{Method / Path:} \texttt{POST /api/ai-chef/chat}
+        \item \textbf{Payload:}
+\begin{lstlisting}[style=jsonstyle]
+{
+  "message": "Toi nay an gi?",
+  "context": {
+    "pantry_items": ["thit heo", "ca chua"]
+  }
+}
+\end{lstlisting}
+        \item \textbf{Response (200):}
+\begin{lstlisting}[style=jsonstyle]
+{
+  "reply": "Ban co thit heo va ca chua, co the nau mon Thit xot ca chua...",
+  "suggestions": [
+    {
+      "recipe_id": 15,
+      "name": "Thit xot ca chua"
+    }
+  ]
+}
+\end{lstlisting}
+    \end{itemize}
+\end{itemize}
+
+\subsection{Các Dịch vụ Giao tiếp Bên ngoài (External Interfaces)}
+Hệ thống tích hợp 3 cổng giao tiếp dịch vụ bên thứ ba chính:
+\begin{enumerate}
+    \item \textbf{Google OAuth 2.0 API:} Hỗ trợ đăng nhập một chạm từ phía Client, kiểm tra và xác thực danh tính người dùng thông qua Google Identity Services.
+    \item \textbf{Nodemailer \& SMTP Service (Email API):} Gửi email mã OTP xác thực, lấy lại mật khẩu và cảnh báo định kỳ về thực phẩm sắp hết hạn đến hòm thư cá nhân của người dùng.
+    \item \textbf{OpenAI Chat Completion API (GPT-4o):} Kết nối bảo mật bằng API Key từ NestJS Service để truyền nội dung hội thoại, ngữ cảnh kho thực phẩm hiện có để AI sinh câu trả lời gợi ý thực đơn cá nhân hóa thời gian thực.
+\end{enumerate}
+
+\section{Mô hình hóa Dữ liệu (Data Modelling)}
+Mô hình dữ liệu vật lý của \textbf{NaviMart} được xây dựng trên hệ quản trị cơ sở dữ liệu quan hệ MySQL, đảm bảo tính nhất quán dữ liệu cao thông qua các ràng buộc khóa chính, khóa ngoại chặt chẽ.
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.8\textwidth]{placeholder}
+\includegraphics[width=0.8\textwidth]{image/erd.png}
+\caption{Sơ đồ thực thể liên kết vật lý (Physical ERD)}
 \end{figure}
 
-Usecase “Cập nhật thông tin tài khoản”
+\subsection{Danh sách các Bảng Dữ liệu Vật lý}
+Cơ sở dữ liệu NaviMart bao gồm 10 bảng dữ liệu vật lý chính:
+\begin{enumerate}
+    \item \textbf{\texttt{users}:} Lưu trữ tài khoản, email, mật khẩu băm, phân quyền và liên kết nhóm.
+    \item \textbf{\texttt{family\_groups}:} Quản lý thông tin nhóm gia đình, mã mời và chủ sở hữu.
+    \item \textbf{\texttt{categories}:} Phân loại các nhóm thực phẩm (ví dụ: Rau củ, Hải sản).
+    \item \textbf{\texttt{food\_catalog}:} Từ điển thực phẩm chuẩn hệ thống để chuẩn hóa dữ liệu đơn vị tính.
+    \item \textbf{\texttt{shopping\_lists}:} Lịch sử và kế hoạch các danh sách mua sắm.
+    \item \textbf{\texttt{shopping\_list\_items}:} Chi tiết số lượng thực phẩm cần mua và trạng thái đã mua.
+    \item \textbf{\texttt{inventory}:} Thực phẩm tồn kho trong tủ lạnh gia đình kèm vị trí bảo quản và hạn sử dụng.
+    \item \textbf{\texttt{recipes}:} Công thức chế biến món ăn do người dùng/admin đóng góp.
+    \item \textbf{\texttt{recipe\_ingredients}:} Định lượng nguyên liệu yêu cầu cho từng công thức món ăn (bảng trung gian).
+    \item \textbf{\texttt{meal\_plans}:} Kế hoạch ăn uống của gia đình theo ngày và theo buổi ăn.
+\end{enumerate}
 
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.8\textwidth]{placeholder}
-\end{figure}
+\subsection{Đặc tả Thuộc tính các Bảng}
+Dưới đây trình bày đặc tả cột của cả 10 bảng dữ liệu trong cơ sở dữ liệu vật lý:
 
-Usecase “Tìm kiếm”
+\subsubsection{Cấu trúc bảng \texttt{users}}
+\begin{longtable}{|>{\centering\arraybackslash}p{0.5cm}|>{\raggedright\arraybackslash}p{3.4cm}|>{\raggedright\arraybackslash}p{3.2cm}|>{\centering\arraybackslash}p{0.7cm}|>{\centering\arraybackslash}p{0.7cm}|>{\raggedright\arraybackslash}p{3.6cm}|}
+\hline
+\textbf{\#} & \textbf{Tên cột} & \textbf{Kiểu dữ liệu} & \textbf{PK} & \textbf{FK} & \textbf{Mô tả} \\ \hline
+1 & user\_id & INT & x & & Mã người dùng (Tự tăng) \\ \hline
+2 & email & VARCHAR(150) & & & Email đăng nhập (Duy nhất, Bắt buộc) \\ \hline
+3 & phone & VARCHAR(20) & & & Số điện thoại liên hệ \\ \hline
+4 & password\_hash & VARCHAR(255) & & & Mật khẩu băm bảo mật \\ \hline
+5 & first\_name & VARCHAR(50) & & & Tên thành viên \\ \hline
+6 & last\_name & VARCHAR(50) & & & Họ thành viên \\ \hline
+7 & dob & DATE & & & Ngày tháng năm sinh \\ \hline
+8 & gender & VARCHAR(10) & & & Giới tính \\ \hline
+9 & role & VARCHAR(20) & & & Vai trò (Admin, Housewife, Member) \\ \hline
+10 & group\_id & INT & & x & Mã nhóm gia đình liên kết \\ \hline
+11 & status & VARCHAR(20) & & & Trạng thái hoạt động \\ \hline
+\end{longtable}
 
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.8\textwidth]{placeholder}
-\end{figure}
+\subsubsection{Cấu trúc bảng \texttt{family\_groups}}
+\begin{longtable}{|>{\centering\arraybackslash}p{0.5cm}|>{\raggedright\arraybackslash}p{3.4cm}|>{\raggedright\arraybackslash}p{3.2cm}|>{\centering\arraybackslash}p{0.7cm}|>{\centering\arraybackslash}p{0.7cm}|>{\raggedright\arraybackslash}p{3.6cm}|}
+\hline
+\textbf{\#} & \textbf{Tên cột} & \textbf{Kiểu dữ liệu} & \textbf{PK} & \textbf{FK} & \textbf{Mô tả} \\ \hline
+1 & group\_id & INT & x & & Mã nhóm gia đình (Tự tăng) \\ \hline
+2 & group\_name & VARCHAR(100) & & & Tên nhóm gia đình \\ \hline
+3 & owner\_id & INT & & x & Người tạo/quản lý nhóm \\ \hline
+4 & invite\_code & VARCHAR(50) & & & Mã mời tham gia nhóm (Duy nhất) \\ \hline
+\end{longtable}
 
-Usecase “Thao tác các tính năng”
+\subsubsection{Cấu trúc bảng \texttt{categories}}
+\begin{longtable}{|>{\centering\arraybackslash}p{0.5cm}|>{\raggedright\arraybackslash}p{3.4cm}|>{\raggedright\arraybackslash}p{3.2cm}|>{\centering\arraybackslash}p{0.7cm}|>{\centering\arraybackslash}p{0.7cm}|>{\raggedright\arraybackslash}p{3.6cm}|}
+\hline
+\textbf{\#} & \textbf{Tên cột} & \textbf{Kiểu dữ liệu} & \textbf{PK} & \textbf{FK} & \textbf{Mô tả} \\ \hline
+1 & category\_id & INT & x & & Mã danh mục thực phẩm (Tự tăng) \\ \hline
+2 & name & VARCHAR(100) & & & Tên danh mục (Thịt, cá, sữa...) \\ \hline
+\end{longtable}
 
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.8\textwidth]{placeholder}
-\end{figure}
+\subsubsection{Cấu trúc bảng \texttt{food\_catalog}}
+\begin{longtable}{|>{\centering\arraybackslash}p{0.5cm}|>{\raggedright\arraybackslash}p{3.4cm}|>{\raggedright\arraybackslash}p{3.2cm}|>{\centering\arraybackslash}p{0.7cm}|>{\centering\arraybackslash}p{0.7cm}|>{\raggedright\arraybackslash}p{3.6cm}|}
+\hline
+\textbf{\#} & \textbf{Tên cột} & \textbf{Kiểu dữ liệu} & \textbf{PK} & \textbf{FK} & \textbf{Mô tả} \\ \hline
+1 & food\_id & INT & x & & Mã thực phẩm chuẩn (Tự tăng) \\ \hline
+2 & name & VARCHAR(150) & & & Tên thực phẩm chuẩn \\ \hline
+3 & category\_id & INT & & x & Danh mục thực phẩm chuẩn \\ \hline
+4 & unit & VARCHAR(20) & & & Đơn vị tính chuẩn \\ \hline
+\end{longtable}
 
-\section{Biểu đồ trình tự}
-Usecase “Đăng nhập”
+\subsubsection{Cấu trúc bảng \texttt{shopping\_lists}}
+\begin{longtable}{|>{\centering\arraybackslash}p{0.5cm}|>{\raggedright\arraybackslash}p{3.4cm}|>{\raggedright\arraybackslash}p{3.2cm}|>{\centering\arraybackslash}p{0.7cm}|>{\centering\arraybackslash}p{0.7cm}|>{\raggedright\arraybackslash}p{3.6cm}|}
+\hline
+\textbf{\#} & \textbf{Tên cột} & \textbf{Kiểu dữ liệu} & \textbf{PK} & \textbf{FK} & \textbf{Mô tả} \\ \hline
+1 & list\_id & INT & x & & Mã danh sách mua sắm (Tự tăng) \\ \hline
+2 & group\_id & INT & & x & Mã nhóm gia đình sở hữu \\ \hline
+3 & name & VARCHAR(100) & & & Tên danh sách (Ví dụ: Đi chợ Tết) \\ \hline
+4 & created\_at & DATETIME & & & Ngày tạo danh sách đi chợ \\ \hline
+5 & type & VARCHAR(20) & & & Loại danh sách (Hàng tuần/đột xuất) \\ \hline
+\end{longtable}
 
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.8\textwidth]{placeholder}
-\end{figure}
+\subsubsection{Cấu trúc bảng \texttt{shopping\_list\_items}}
+\begin{longtable}{|>{\centering\arraybackslash}p{0.5cm}|>{\raggedright\arraybackslash}p{3.4cm}|>{\raggedright\arraybackslash}p{3.2cm}|>{\centering\arraybackslash}p{0.7cm}|>{\centering\arraybackslash}p{0.7cm}|>{\raggedright\arraybackslash}p{3.6cm}|}
+\hline
+\textbf{\#} & \textbf{Tên cột} & \textbf{Kiểu dữ liệu} & \textbf{PK} & \textbf{FK} & \textbf{Mô tả} \\ \hline
+1 & item\_id & INT & x & & Mã chi tiết mặt hàng cần mua (Tự tăng) \\ \hline
+2 & list\_id & INT & & x & Thuộc danh sách đi chợ nào \\ \hline
+3 & food\_id & INT & & x & Thực phẩm cụ thể cần mua \\ \hline
+4 & quantity & DECIMAL(10,2) & & & Số lượng cần mua \\ \hline
+5 & status & VARCHAR(20) & & & Trạng thái: Pending, Bought, Wasted \\ \hline
+\end{longtable}
 
-Usecase “Đăng ký”
+\subsubsection{Cấu trúc bảng \texttt{inventory}}
+\begin{longtable}{|>{\centering\arraybackslash}p{0.5cm}|>{\raggedright\arraybackslash}p{3.4cm}|>{\raggedright\arraybackslash}p{3.2cm}|>{\centering\arraybackslash}p{0.7cm}|>{\centering\arraybackslash}p{0.7cm}|>{\raggedright\arraybackslash}p{3.6cm}|}
+\hline
+\textbf{\#} & \textbf{Tên cột} & \textbf{Kiểu dữ liệu} & \textbf{PK} & \textbf{FK} & \textbf{Mô tả} \\ \hline
+1 & inventory\_id & INT & x & & Mã dòng kho thực phẩm (Tự tăng) \\ \hline
+2 & group\_id & INT & & x & Nhóm gia đình sở hữu kho \\ \hline
+3 & food\_id & INT & & x & Loại thực phẩm tương ứng trong từ điển \\ \hline
+4 & quantity & DECIMAL(10,2) & & & Số lượng tồn kho hiện tại \\ \hline
+5 & expiry\_date & DATE & & & Hạn sử dụng thực phẩm \\ \hline
+6 & location & VARCHAR(50) & & & Vị trí: Ngăn đông, Ngăn mát, Kệ bếp... \\ \hline
+\end{longtable}
 
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.8\textwidth]{placeholder}
-\end{figure}
+\subsubsection{Cấu trúc bảng \texttt{recipes}}
+\begin{longtable}{|>{\centering\arraybackslash}p{0.5cm}|>{\raggedright\arraybackslash}p{3.4cm}|>{\raggedright\arraybackslash}p{3.2cm}|>{\centering\arraybackslash}p{0.7cm}|>{\centering\arraybackslash}p{0.7cm}|>{\raggedright\arraybackslash}p{3.6cm}|}
+\hline
+\textbf{\#} & \textbf{Tên cột} & \textbf{Kiểu dữ liệu} & \textbf{PK} & \textbf{FK} & \textbf{Mô tả} \\ \hline
+1 & recipe\_id & INT & x & & Mã công thức nấu ăn (Tự tăng) \\ \hline
+2 & name & VARCHAR(200) & & & Tên món ăn \\ \hline
+3 & instructions & TEXT & & & Các bước nấu chi tiết \\ \hline
+4 & image\_url & VARCHAR(255) & & & Link ảnh minh họa món ăn \\ \hline
+5 & author\_id & INT & & x & Người đóng góp công thức \\ \hline
+6 & status & VARCHAR(20) & & & Trạng thái duyệt (Pending, Approved) \\ \hline
+\end{longtable}
 
-Usecase “Đăng xuất”
+\subsubsection{Cấu trúc bảng \texttt{recipe\_ingredients}}
+\begin{longtable}{|>{\centering\arraybackslash}p{0.5cm}|>{\raggedright\arraybackslash}p{3.4cm}|>{\raggedright\arraybackslash}p{3.2cm}|>{\centering\arraybackslash}p{0.7cm}|>{\centering\arraybackslash}p{0.7cm}|>{\raggedright\arraybackslash}p{3.6cm}|}
+\hline
+\textbf{\#} & \textbf{Tên cột} & \textbf{Kiểu dữ liệu} & \textbf{PK} & \textbf{FK} & \textbf{Mô tả} \\ \hline
+1 & recipe\_id & INT & x & x & Mã công thức liên quan \\ \hline
+2 & food\_id & INT & x & x & Mã nguyên liệu trong từ điển \\ \hline
+3 & quantity\_required & DECIMAL(10,2) & & & Số lượng nguyên liệu yêu cầu \\ \hline
+\end{longtable}
 
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.8\textwidth]{placeholder}
-\end{figure}
+\subsubsection{Cấu trúc bảng \texttt{meal\_plans}}
+\begin{longtable}{|>{\centering\arraybackslash}p{0.5cm}|>{\raggedright\arraybackslash}p{3.4cm}|>{\raggedright\arraybackslash}p{3.2cm}|>{\centering\arraybackslash}p{0.7cm}|>{\centering\arraybackslash}p{0.7cm}|>{\raggedright\arraybackslash}p{3.6cm}|}
+\hline
+\textbf{\#} & \textbf{Tên cột} & \textbf{Kiểu dữ liệu} & \textbf{PK} & \textbf{FK} & \textbf{Mô tả} \\ \hline
+1 & plan\_id & INT & x & & Mã kế hoạch bữa ăn (Tự tăng) \\ \hline
+2 & group\_id & INT & & x & Gia đình áp dụng kế hoạch \\ \hline
+3 & date & DATE & & & Ngày dự kiến ăn món này \\ \hline
+4 & meal\_type & VARCHAR(20) & & & Buổi ăn (Breakfast, Lunch, Dinner) \\ \hline
+5 & recipe\_id & INT & & x & Nấu món ăn theo công thức nào \\ \hline
+6 & is\_completed & BOOLEAN & & & Trạng thái nấu xong hay chưa \\ \hline
+\end{longtable}
 
-Usecase “Cập nhật thông tin tài khoản”
+\subsection{Kịch bản khởi tạo Cơ sở dữ liệu vật lý (SQL Schema)}
+\begin{lstlisting}[style=mysqlstyle, caption=SQL Schema Definition for NaviMart]
+-- Kich ban khoi tao he thong co so du lieu cua NaviMart
 
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.8\textwidth]{placeholder}
-\end{figure}
+CREATE TABLE users (
+    user_id INT AUTO_INCREMENT PRIMARY KEY,
+    email VARCHAR(150) NOT NULL UNIQUE,
+    phone VARCHAR(20),
+    password_hash VARCHAR(255) NOT NULL,
+    first_name VARCHAR(50) NOT NULL,
+    last_name VARCHAR(50) NOT NULL,
+    dob DATE NOT NULL,
+    gender VARCHAR(10) NOT NULL,
+    role VARCHAR(20) NOT NULL,
+    group_id INT,
+    status VARCHAR(20) NOT NULL
+);
 
-Usecase “Tìm kiếm”
+CREATE TABLE family_groups (
+    group_id INT AUTO_INCREMENT PRIMARY KEY,
+    group_name VARCHAR(100) NOT NULL,
+    owner_id INT NOT NULL,
+    invite_code VARCHAR(50) UNIQUE
+);
 
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.8\textwidth]{placeholder}
-\end{figure}
+CREATE TABLE categories (
+    category_id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL
+);
 
-Usecase “Thao tác tính năng không yêu cầu đăng nhập”
+CREATE TABLE food_catalog (
+    food_id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(150) NOT NULL,
+    category_id INT NOT NULL,
+    unit VARCHAR(20) NOT NULL,
+    FOREIGN KEY (category_id) REFERENCES categories(category_id)
+);
 
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.8\textwidth]{placeholder}
-\end{figure}
+CREATE TABLE shopping_lists (
+    list_id INT AUTO_INCREMENT PRIMARY KEY,
+    group_id INT NOT NULL,
+    name VARCHAR(100) NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    type VARCHAR(20),
+    FOREIGN KEY (group_id) REFERENCES family_groups(group_id)
+);
 
-Usecase “Thao tác tính năng yêu cầu đăng nhập”
+CREATE TABLE shopping_list_items (
+    item_id INT AUTO_INCREMENT PRIMARY KEY,
+    list_id INT NOT NULL,
+    food_id INT NOT NULL,
+    quantity DECIMAL(10,2) NOT NULL,
+    status VARCHAR(20) DEFAULT 'Pending',
+    FOREIGN KEY (list_id) REFERENCES shopping_lists(list_id),
+    FOREIGN KEY (food_id) REFERENCES food_catalog(food_id)
+);
 
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.8\textwidth]{placeholder}
-\end{figure}
+CREATE TABLE inventory (
+    inventory_id INT AUTO_INCREMENT PRIMARY KEY,
+    group_id INT NOT NULL,
+    food_id INT NOT NULL,
+    quantity DECIMAL(10,2) NOT NULL,
+    expiry_date DATE NOT NULL,
+    location VARCHAR(50) NOT NULL,
+    FOREIGN KEY (group_id) REFERENCES family_groups(group_id),
+    FOREIGN KEY (food_id) REFERENCES food_catalog(food_id)
+);
 
-\section{Biểu đồ lớp}
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.8\textwidth]{placeholder}
-\end{figure}
+CREATE TABLE recipes (
+    recipe_id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(200) NOT NULL,
+    instructions TEXT NOT NULL,
+    image_url VARCHAR(255),
+    author_id INT NOT NULL,
+    status VARCHAR(20) DEFAULT 'Pending',
+    FOREIGN KEY (author_id) REFERENCES users(user_id)
+);
+
+CREATE TABLE recipe_ingredients (
+    recipe_id INT NOT NULL,
+    food_id INT NOT NULL,
+    quantity_required DECIMAL(10,2) NOT NULL,
+    PRIMARY KEY (recipe_id, food_id),
+    FOREIGN KEY (recipe_id) REFERENCES recipes(recipe_id),
+    FOREIGN KEY (food_id) REFERENCES food_catalog(food_id)
+);
+
+CREATE TABLE meal_plans (
+    plan_id INT AUTO_INCREMENT PRIMARY KEY,
+    group_id INT NOT NULL,
+    date DATE NOT NULL,
+    meal_type VARCHAR(20) NOT NULL,
+    recipe_id INT NOT NULL,
+    is_completed BOOLEAN DEFAULT FALSE,
+    FOREIGN KEY (group_id) REFERENCES family_groups(group_id),
+    FOREIGN KEY (recipe_id) REFERENCES recipes(recipe_id)
+);
+
+-- Thiet lap moi lien ket khoa ngoai cheo nguoi dung - gia dinh
+ALTER TABLE users ADD FOREIGN KEY (group_id) REFERENCES family_groups(group_id);
+ALTER TABLE family_groups ADD FOREIGN KEY (owner_id) REFERENCES users(user_id);
+\end{lstlisting}
+
+\subsection{Các Kịch bản Truy vấn Cơ sở dữ liệu Chi tiết}
+Dưới đây giải thích cách hoạt động của cơ sở dữ liệu để thực hiện các chức năng chính của hệ thống thông qua các câu lệnh truy vấn SQL:
+
+\subsubsection{Kịch bản 1: Người dùng tham gia vào Nhóm gia đình}
+Khi một người dùng nhập mã mời (\texttt{invite\_code}) của một gia đình từ ứng dụng di động:
+\begin{enumerate}
+    \item Tìm kiếm nhóm gia đình tương ứng với \texttt{invite\_code}.
+    \item Cập nhật trường \texttt{group\_id} của người dùng đó (ví dụ \texttt{user\_id = 42}) bằng khóa ngoại tương ứng.
+\end{enumerate}
+
+\begin{lstlisting}[style=mysqlstyle, caption=SQL Update User Group on Joining Family]
+-- Buoc 1: Kiem tra su ton tai va lay ID nhom gia dinh tu ma moi
+SELECT group_id FROM family_groups WHERE invite_code = 'XYZ123';
+
+-- Buoc 2: Cap nhat thong tin nhom cho nguoi dung
+UPDATE users 
+SET group_id = (SELECT group_id FROM family_groups WHERE invite_code = 'XYZ123')
+WHERE user_id = 42;
+\end{lstlisting}
+
+\subsubsection{Kịch bản 2: Lọc thực phẩm sắp hết hạn trong tủ lạnh}
+Hệ thống chạy dịch vụ quét để cảnh báo cho gia đình (ví dụ nhóm \texttt{group\_id = 5}) về các thực phẩm trong kho chuẩn bị hết hạn (trong vòng 3 ngày tới):
+
+\begin{lstlisting}[style=mysqlstyle, caption=Query Expiring Foods in Pantry]
+SELECT 
+    i.inventory_id,
+    fc.name AS food_name,
+    i.quantity,
+    fc.unit,
+    i.expiry_date,
+    i.location,
+    DATEDIFF(i.expiry_date, CURDATE()) AS days_left
+FROM inventory i
+JOIN food_catalog fc ON i.food_id = fc.food_id
+WHERE i.group_id = 5 
+  AND i.expiry_date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 3 DAY)
+ORDER BY i.expiry_date ASC;
+\end{lstlisting}
+
+\subsubsection{Kịch bản 3: Tự động so khớp nguyên liệu còn thiếu để nấu ăn}
+Khi người dùng chọn nấu một món ăn theo công thức (\texttt{recipe\_id = 12}), hệ thống đối chiếu định lượng nguyên liệu yêu cầu với kho thực tế (\texttt{inventory} của gia đình \texttt{group\_id = 5}):
+
+\begin{lstlisting}[style=mysqlstyle, caption=SQL Query to Check Missing Ingredients]
+SELECT 
+    fc.name AS ingredient_name,
+    ri.quantity_required AS qty_needed,
+    COALESCE(SUM(i.quantity), 0) AS qty_in_pantry,
+    fc.unit,
+    CASE 
+        WHEN COALESCE(SUM(i.quantity), 0) >= ri.quantity_required THEN 'Du nguyen lieu'
+        ELSE CONCAT('Thieu ', ri.quantity_required - COALESCE(SUM(i.quantity), 0))
+    END AS status
+FROM recipe_ingredients ri
+JOIN food_catalog fc ON ri.food_id = fc.food_id
+LEFT JOIN inventory i ON ri.food_id = i.food_id AND i.group_id = 5
+WHERE ri.recipe_id = 12
+GROUP BY ri.food_id, fc.name, ri.quantity_required, fc.unit;
+\end{lstlisting}
+
+\subsubsection{Kịch bản 4: Tự động lập danh sách đi chợ từ kế hoạch bữa ăn}
+Khi gia đình có kế hoạch ăn uống cho ngày cụ thể và muốn hệ thống tự động sinh danh sách đi chợ (\texttt{list\_id = 10}) các món còn thiếu:
+
+\begin{lstlisting}[style=mysqlstyle, caption=Insert Missing Ingredients from Meal Plan to Shopping List]
+INSERT INTO shopping_list_items (list_id, food_id, quantity, status)
+SELECT 
+    10 AS list_id,
+    needed.food_id,
+    (needed.total_needed - COALESCE(pantry.total_owned, 0)) AS quantity_to_buy,
+    'Pending' AS status
+FROM (
+    -- Lay tong luong nguyen lieu can cho tat ca bua an trong ngay 2026-06-25
+    SELECT ri.food_id, SUM(ri.quantity_required) AS total_needed
+    FROM meal_plans mp
+    JOIN recipe_ingredients ri ON mp.recipe_id = ri.recipe_id
+    WHERE mp.group_id = 5 AND mp.date = '2026-06-25'
+    GROUP BY ri.food_id
+) needed
+LEFT JOIN (
+    -- Lay tong luong thuc pham dang co san trong tu lanh
+    SELECT food_id, SUM(quantity) AS total_owned
+    FROM inventory
+    WHERE group_id = 5
+    GROUP BY food_id
+) pantry ON needed.food_id = pantry.food_id
+WHERE needed.total_needed > COALESCE(pantry.total_owned, 0);
+\end{lstlisting}
+
+\subsubsection{Kịch bản 5: Báo cáo tỷ lệ thực phẩm bị lãng phí}
+Hệ thống phân tích báo cáo thống kê cho gia đình (\texttt{group\_id = 5}) về tỷ lệ phần trăm lãng phí thực phẩm (các thực phẩm mua về nhưng hết hạn hoặc hỏng, được đánh dấu là \texttt{Wasted}):
+
+\begin{lstlisting}[style=mysqlstyle, caption=SQL Query for Consumption Waste Report]
+SELECT 
+    fc.name AS food_name,
+    SUM(CASE WHEN sli.status = 'Wasted' THEN sli.quantity ELSE 0 END) AS total_wasted,
+    SUM(CASE WHEN sli.status = 'Bought' THEN sli.quantity ELSE 0 END) AS total_bought,
+    (SUM(CASE WHEN sli.status = 'Wasted' THEN sli.quantity ELSE 0 END) / 
+     NULLIF(SUM(CASE WHEN sli.status = 'Bought' THEN sli.quantity ELSE 0 END), 0)) * 100 AS waste_percentage
+FROM shopping_list_items sli
+JOIN food_catalog fc ON sli.food_id = fc.food_id
+JOIN shopping_lists sl ON sli.list_id = sl.list_id
+WHERE sl.group_id = 5
+GROUP BY fc.food_id, fc.name
+HAVING total_bought > 0
+ORDER BY waste_percentage DESC;
+\end{lstlisting}
 
 \end{document}

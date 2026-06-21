@@ -94,10 +94,10 @@ Dữ liệu lưu trên **MongoDB (Mongoose)**.
 | recipes | Tìm kiếm/gợi ý theo độ phủ kho, favorites, duyệt status (admin), CRUD. | ✓ |
 | shopping-lists | CRUD list/item, hoàn tất list → đẩy vào pantry. | ✓ |
 | reports | Báo cáo tiêu thụ/lãng phí/chi tiêu (aggregate). | ✓ (service) |
-| catalog | Danh mục food/category/unit, tìm theo tên/barcode. | ✗ |
-| notifications | Thông báo, thông báo hết hạn. | ✗ |
-| users | Hồ sơ người dùng, cập nhật profile. | ✗ |
-| admin | Quản trị catalog/recipes/stats/users. | ✗ |
+| catalog | Danh mục food/category/unit, tìm theo tên/barcode. | ✓ |
+| notifications | Thông báo, thông báo hết hạn. | ✓ |
+| users | Hồ sơ người dùng, cập nhật profile. | ✓ |
+| admin | Quản trị catalog/recipes/stats/users. | ✓ |
 | ai-chef | Gợi ý món bằng AI, timely service. | ✗ |
 | realtime | Gateway/Service WebSocket. | ✗ (chỉ qua e2e) |
 | uploads | Upload ảnh. | ✗ |
@@ -213,8 +213,8 @@ NaviMart đã áp dụng tiền tố mã ở tầng API; tài liệu chuẩn hó
 | catalog | ✓ service (6) | ✗ | — | ✓ (đọc trong e2e) |
 | users | ✓ service (7) | ✗ | — | ✓ profile flow |
 | notifications | ✓ service (8) | ✗ | — | một phần |
-| admin | ✓ stats service (2) | ✗ | ✓ (promote trong e2e) | ✓ admin promotion |
-| realtime | ✗ | — | — | ✓ WebSocket flow |
+| admin | ✓ stats/catalog/recipes/users + controller delegation | ✗ | ✓ (promote trong e2e) | ✓ admin promotion |
+| realtime | ✓ gateway/service | — | — | ✓ WebSocket flow |
 | concurrency | ✓ (pantry consume unit) | — | — | ✓ INT-CONC-001 (no-oversell) |
 
 ### 6.3. Kỹ thuật thiết kế testcase
@@ -378,8 +378,8 @@ và kiểm tra bất biến "không oversell" (chỉ 1 request thành công, t�
 
 | Chỉ số | Kết quả |
 |---|---|
-| Test suites (unit/API) | 34 passed / 34 |
-| Testcase (unit/API) | 264 passed / 264 |
+| Test suites (unit/API) | 48 passed / 48 |
+| Testcase (unit/API) | 335 passed / 335 |
 | Test suites (e2e) | 4 passed / 4 |
 | Testcase (e2e) | 32 passed / 32 |
 | Failure / Error | 0 / 0 |
@@ -387,42 +387,41 @@ và kiểm tra bất biến "không oversell" (chỉ 1 request thành công, t�
 
 Frontend (Vitest): **9 file / 61 testcase — pass toàn bộ**, thời gian ~3.7s.
 
-> So với baseline ban đầu (21/176 unit, 6/32 frontend), bộ test đã bổ sung: 4 service spec mới
-> (catalog, users, notifications, admin-stats), security e2e (SEC-JWT/SEC-OBJ), concurrency e2e
-> (INT-CONC-001), và frontend (api/index, Login page).
+> So với baseline ban đầu (21/176 unit, 6/32 frontend), bộ test đã bổ sung unit/API test cho catalog,
+> users, notifications, admin, uploads, Gmail mail, realtime, guards, config, inventory-events,
+> security e2e (SEC-JWT/SEC-OBJ), concurrency e2e (INT-CONC-001), và frontend (api/index, Login page).
 
-### 11.2. Coverage tổng quan backend (Jest — toàn bộ `src`)
+### 11.2. Coverage tổng quan backend (Jest — phạm vi unit logic)
 
 | Metric | Tỷ lệ |
 |---|---|
-| Statements | 68,03% |
-| Branch | 57,97% |
-| Functions | 55,99% |
-| Lines | 56,89% |
+| Statements | 88,33% |
+| Branch | 71,27% |
+| Functions | 84,17% |
+| Lines | 89,20% |
 
-> Lưu ý: tỷ lệ tổng vẫn chưa cao vì coverage tính trên **toàn bộ** `src`, trong đó còn nhiều file chưa có
-> test (ai-chef, uploads, realtime gateway, các admin service còn lại, config, database/seed) bị tính 0%.
-> Các module nghiệp vụ cốt lõi đã test có coverage cao hơn nhiều (bảng 11.3).
+> Lưu ý: phạm vi đo unit coverage loại trừ `main.ts`, `*.module.ts` và `database/**` vì đây là bootstrap,
+> module wiring và seed/migrate script. Các thành phần này phù hợp hơn với e2e/triển khai thay vì unit test.
 
 ### 11.3. Coverage theo module (statements %)
 
 | Module | Stmts % | Đánh giá |
 |---|---|---|
-| families | 84,76% | Đạt |
-| pantry | 83,04% | Đạt |
-| recipes | 78,81% | Đạt |
-| shopping-lists | 76,81% | Đạt |
-| meals | 72,68% | Đạt |
-| auth | 71,05% | Đạt (service cao, controller/strategy kéo xuống) |
-| users | 60,00% | Khá (service test đầy đủ, controller chưa test) |
-| reports | 59,25% | Trung bình (controller chưa test) |
-| catalog | 55,35% | Khá (service test, controller chưa test) |
-| inventory-events | 36,84% | Thấp |
-| notifications | 27,72% | Thấp (service chính đã test; expiry-notifications chưa) |
-| realtime | 9,75% | Thấp (chỉ qua e2e) |
-| admin | 5,46% | Thấp (mới có admin-stats; catalog/recipes/users admin chưa) |
-| ai-chef / uploads | 0% | **Chưa có test đơn vị** |
-| config / database (seed) | 0% | Chấp nhận (cấu hình/seed) |
+| realtime | 100,00% | Đạt |
+| config | 100,00% | Đạt |
+| inventory-events | 100,00% | Đạt |
+| catalog | 100,00% | Đạt |
+| reports | 95,94% | Đạt |
+| users | 96,15% | Đạt |
+| notifications | 96,84% | Đạt |
+| auth | 94,38% | Đạt |
+| uploads | 90,69% | Đạt |
+| pantry | 87,87% | Đạt |
+| families | 84,41% | Đạt |
+| recipes | 83,26% | Đạt |
+| meals | 81,39% | Đạt |
+| admin | 76,94% | Khá |
+| shopping-lists | 73,17% | Còn nhánh recurrence/complete phức tạp |
 
 ### 11.4. Frontend coverage
 
@@ -434,10 +433,10 @@ Hiện **chưa cấu hình** coverage cho Vitest → không đo được tỷ l�
 1. **Business Logic First:** Unit Test dồn vào tầng service — nơi chứa rule nghiệp vụ. Các service cốt
    lõi (families, pantry, recipes, shopping-lists, meals, auth) đều có coverage cao, khóa chặt rủi ro sai
    lệch nghiệp vụ.
-2. **Lợi tức giảm dần ở tầng cấu hình/giao tiếp:** module/seed/gateway/DTO kéo coverage tổng xuống nhưng
-   ép unit test cho chúng ít giá trị phát hiện lỗi; nên phủ bằng E2E.
-3. **Phân tách trách nhiệm:** thiếu hụt ở realtime/catalog/users đang được phủ một phần bởi E2E; phần còn
-   lại là hạng mục ưu tiên khi tăng dần quality gate.
+2. **Tách đúng phạm vi unit:** bootstrap, module wiring và seed/migrate không còn kéo tụt coverage unit vì
+   ít giá trị kiểm thử bằng unit test; chúng được kiểm chứng tốt hơn ở e2e/triển khai.
+3. **Khoảng trống còn lại:** shopping-lists, recipes, meals và admin-catalog còn nhánh nghiệp vụ phức tạp,
+   là hạng mục ưu tiên nếu tiếp tục nâng branch coverage.
 
 ---
 
@@ -449,7 +448,7 @@ Hiện **chưa cấu hình** coverage cho Vitest → không đo được tỷ l�
 |---|---|---|---|---|---|
 | TEST-001 | High | Không có CI (`.github/workflows`) chạy test | PR lỗi vẫn merge được | P0 | Open (Giai đoạn 2) |
 | TEST-002 | Medium | Frontend chưa cấu hình coverage | Không đo được độ phủ FE | P1 | Open (Giai đoạn 2) |
-| TEST-003 | Medium | Một số module backend chưa có unit/API test | Coverage tổng 56% stmt; còn ai-chef/uploads/realtime/admin-* | P1 | Partially mitigated (catalog/users/notifications/admin-stats đã thêm) |
+| TEST-003 | Medium | Một số nhánh backend còn ít unit test | Chủ yếu còn recurrence/complete/update trong shopping-lists, meals, recipes, admin-catalog | P1 | Partially mitigated (đã thêm uploads/realtime/guards/config/inventory/admin controllers) |
 | TEST-004 | High | Concurrency consume có race oversell | Trừ kho vượt mức khi nhiều request đồng thời | P0 | **Closed** (sửa atomic + INT-CONC-001) |
 | TEST-005 | Medium | Security test thiếu JWT negative & object-level | Chưa đủ bằng chứng an toàn API | P1 | **Closed** (SEC-JWT-001…005, SEC-OBJ-000/001) |
 | TEST-006 | Medium | Chưa có coverage quality gate | Coverage có thể tụt mà vẫn xanh | P1 | Open (Giai đoạn 2) |
@@ -487,7 +486,7 @@ Hiện **chưa cấu hình** coverage cho Vitest → không đo được tỷ l�
 ### 14.1. Kết luận
 
 Bộ test NaviMart có nền tảng tốt cho regression ở tầng service/controller và đã có E2E thật với MongoDB
-cô lập + WebSocket. Regression mặc định không failure/error (backend 264/264 unit/API + 32/32 e2e, frontend 61/61). Tuy nhiên
+cô lập + WebSocket. Regression mặc định không failure/error (backend 335/335 unit/API + 32/32 e2e, frontend 61/61). Tuy nhiên
 chưa có CI, chưa có coverage gate, frontend chưa đo coverage và một số module chưa kiểm chứng → chưa nên
 coi là bằng chứng duy nhất cho release gate.
 
@@ -495,7 +494,7 @@ coi là bằng chứng duy nhất cho release gate.
 
 | Ưu tiên | Giai đoạn | Hạng mục | Kết quả mong đợi |
 |---|---|---|---|
-| P1 | 1 | Bổ sung unit/API test cho catalog, users, notifications, admin | Tăng coverage vùng rủi ro |
+| P1 | 1 | Nâng branch coverage cho shopping-lists, recipes, meals, admin-catalog | Tăng coverage vùng rủi ro còn lại |
 | P1 | 1 | Thêm SEC-JWT-001 (JWT negative) + SEC-OBJ-001 (object-level) qua guard thật | Nâng mức Security Test |
 | P1 | 1 | Thêm test concurrency (hoàn tất list / consume) | Chứng minh chống double-spend |
 | P2 | 1 | Mở rộng test frontend (api/index.ts, vài page chính) | Phủ lớp gọi API + UI chính |
@@ -526,13 +525,20 @@ coi là bằng chứng duy nhất cho release gate.
 | `users.service.spec.ts` | getProfile map shape; getProfile NotFound; update fields + save; derive displayName; giữ displayName tường minh; update nested notificationSettings; updateProfile NotFound. (7) |
 | `notifications.service.spec.ts` | findAll scope user + limit 50; findAll unreadOnly; markAsRead stamp readAt; markAsRead null; markAllAsRead modifiedCount; createManyDeduped rỗng→0; createManyDeduped upsert by dedupeKey. (8) |
 | `admin-stats.service.spec.ts` | tổng hợp user/family + recipe theo status; mọi status = 0 khi không có recipe. (2) |
+| `uploads.service.spec.ts` | cấu hình Cloudinary; thiếu cấu hình→InternalServerError; upload stream thành công; stream lỗi→reject. (4) |
+| `gmail-mail.service.spec.ts` | bật/tắt theo mode; thiếu cấu hình; OAuth token + gửi mail + cache; lỗi OAuth; lỗi Gmail send. (5) |
+| `realtime.service.spec.ts` / `realtime.gateway.spec.ts` | emit room family/user; disconnect thiếu/sai token; join room user/family khi token hợp lệ. (7) |
+| `roles.guard.spec.ts` / `family-permission.guard.spec.ts` | role metadata; user thiếu/sai role; family member active; owner/admin bypass; member thiếu/đủ permission. (10) |
+| `env.validation.spec.ts` / `mongoose.config.spec.ts` | default env; parse port; reject env/port sai; map mongoose uri/db/autoIndex. (6) |
+| `inventory-events.service.spec.ts` | create/save event; preserve createdAt; createMany rỗng; insertMany timestamps false. (4) |
 | `pantry.service.spec.ts` (concurrency) | deduct nguyên tử guarded + used_up + event; reject khi request khác đã trừ hết kho. (2 trong 15) |
 | `app.controller.spec.ts` | health status. (1) |
 
 ### A.2. Backend — Controller unit (mock service)
 
 `auth.controller.spec.ts` (4), `families.controller.spec.ts` (3), `pantry.controller.spec.ts` (4),
-`recipes.controller.spec.ts` (4) — kiểm tra forward dto + unwrap tham số + inject user/family context.
+`recipes.controller.spec.ts` (4), `admin-controllers.spec.ts` (4), `uploads.controller.spec.ts` (2)
+— kiểm tra forward dto + unwrap tham số + inject user/family context.
 
 ### A.3. Backend — API (supertest)
 
@@ -567,8 +573,8 @@ API-SL-001…006 (6). (Chi tiết kịch bản: mục 8.2.)
 
 | Bước | Lệnh/hoạt động | Kết quả mong đợi | Bằng chứng |
 |---|---|---|---|
-| 1 | `cd backend && npm run test` | 34 suites / 264 test pass, 0 fail. | Console log Jest. |
-| 2 | `cd backend && npm run test:cov` | Có coverage report. | `backend/coverage` (lcov/clover). |
+| 1 | `cd backend && npm run test` | 48 suites / 335 test pass, 0 fail. | Console log Jest. |
+| 2 | `cd backend && npm run test:cov` | Coverage unit logic đạt 88,33% statements. | `backend/coverage` (lcov/clover). |
 | 3 | `cd backend && cross-env E2E_USE_MEMORY_MONGO=true npm run test:e2e` | Các luồng e2e pass. | Console log e2e. |
 | 4 | `cd frontend && npm run test` | 9 file / 61 test pass. | Console log Vitest. |
 | 5 | (Giai đoạn 2) Kiểm tra CI workflow | BE + FE job chạy test/coverage xanh. | GitHub Actions run/artifacts. |

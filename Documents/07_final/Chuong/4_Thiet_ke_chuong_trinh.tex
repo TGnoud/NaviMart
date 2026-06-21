@@ -8,7 +8,7 @@ Mỗi thành phần trong mô hình MVC đảm nhận một nhiệm vụ riêng 
 
 \begin{itemize}
     \item \textbf{View (Tầng giao diện):} Được xây dựng bằng \textbf{React}. Đây là nơi người dùng trực tiếp tương tác (như điền form đăng nhập, thêm thực phẩm vào kho, đánh dấu danh sách đi chợ). View chịu trách nhiệm hiển thị dữ liệu một cách trực quan và ghi nhận các sự kiện từ người dùng để gửi yêu cầu (HTTP Request) xuống Controller.
-    \item \textbf{Controller (Tầng điều khiển):} Được xây dựng bằng \textbf{NestJS} (kết hợp với Socket.io) ở phía Backend. Controller đóng vai trò là "người nhạc trưởng", tiếp nhận các yêu cầu từ View, kiểm tra tính hợp lệ của dữ liệu đầu vào, gọi các logic nghiệp vụ (Business Logic) để xử lý tính toán và điều phối luồng dữ liệu. Sau khi xử lý xong, Controller sẽ trả kết quả về cho View.
+    \item \textbf{Controller (Tầng điều khiển):} Được xây dựng bằng \textbf{NestJS} (kết hợp với Socket.io) ở phía Backend. Controller đóng vai trò là quản lý, tiếp nhận các yêu cầu từ View, kiểm tra tính hợp lệ của dữ liệu đầu vào, gọi các logic nghiệp vụ (Business Logic) để xử lý tính toán và điều phối luồng dữ liệu. Sau khi xử lý xong, Controller sẽ trả kết quả về cho View.
     \item \textbf{Model (Tầng dữ liệu):} Sử dụng cơ sở dữ liệu NoSQL \textbf{MongoDB} kết hợp với \textbf{Mongoose}. Model là các Schema định nghĩa cấu trúc dữ liệu của hệ thống (như cấu trúc của User, Item, ShoppingList). Tầng này chịu trách nhiệm tương tác trực tiếp với cơ sở dữ liệu để thực hiện các thao tác thêm, đọc, sửa, xóa (CRUD) và trả dữ liệu lại cho Controller.
 \end{itemize}
 
@@ -16,7 +16,7 @@ Việc tách riêng vai trò của Model, View và Controller giúp cho chúng t
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.8\textwidth]{placeholder}
+\includegraphics[width=0.8\textwidth]{image/diagram_tong_quan.png}
 \caption{Mô hình kiến trúc MVC của hệ thống NaviMart}
 \end{figure}
 
@@ -25,7 +25,7 @@ Hệ thống sử dụng cơ sở dữ liệu NoSQL (MongoDB), lưu trữ dữ l
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.8\textwidth]{placeholder}
+\includegraphics[width=0.8\textwidth]{image/erd.png}
 \caption{Sơ đồ thiết kế cơ sở dữ liệu (Database Schema)}
 \end{figure}
 

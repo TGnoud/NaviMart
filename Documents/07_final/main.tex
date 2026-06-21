@@ -1,4 +1,4 @@
-\documentclass[a4paper,13pt,3p]{report}
+\documentclass[a4paper,13pt,3p,oneside]{report}
 \usepackage{scrextend}
 \changefontsizes{13pt}
 \usepackage[utf8]{vietnam}
@@ -94,12 +94,14 @@
 
 % ===================================================
 \usepackage{hyperref}
+\providecommand{\TITLE}{Báo cáo tổng kết dự án NaviMart}
+\providecommand{\AUTHOR}{Nhóm 05}
 \hypersetup{pdfborder = {0 0 0}} 
 \hypersetup{pdftitle={\TITLE}, pdfauthor={\AUTHOR}}
     
 \usepackage[all]{hypcap} % Tham chiếu chính xác đến hình ảnh và bảng biểu
 
-\graphicspath{{figures/}{../figures/}} % Thư mục chứa hình ảnh
+\graphicspath{{figures/}{../figures/}{Chuong/}{../Chuong/}} % Thư mục chứa hình ảnh
 \counterwithin{figure}{chapter} % Đánh số hình ảnh kèm theo chapter
 
 \title{\bf \TITLE}
@@ -115,6 +117,12 @@
 \setlength{\parskip}{6pt}
 % Lùi đầu dòng
 \setlength{\parindent}{15pt}
+% Giảm padding bảng và khoảng trắng quanh hình/bảng để hạn chế tràn lề, trang trắng và thời gian compile.
+\setlength{\tabcolsep}{3pt}
+\raggedbottom
+\setlength{\textfloatsep}{8pt plus 2pt minus 2pt}
+\setlength{\floatsep}{8pt plus 2pt minus 2pt}
+\setlength{\intextsep}{8pt plus 2pt minus 2pt}
 
 % =========================== BODY ===============
 \begin{document}
@@ -122,14 +130,14 @@
 \subfile{Bia} % Phần bìa chính
 
 % ===================================================
-\cleardoublepage
+\clearpage
 \pagenumbering{roman} 
 
 \subfile{Loi_noi_dau}
-\cleardoublepage
+\clearpage
 
 \subfile{Phan_cong}
-\cleardoublepage
+\clearpage
 
 \renewcommand*\contentsname{MỤC LỤC}
 
@@ -158,21 +166,7 @@
 \addtocontents{toc}{\protect\thispagestyle{empty}}
 \tableofcontents 
 \thispagestyle{empty}
-\cleardoublepage
-
-% Tạo danh mục hình vẽ
-\renewcommand{\listfigurename}{DANH MỤC HÌNH VẼ}
-{\let\oldnumberline\numberline
-\renewcommand{\numberline}{Hình~\oldnumberline}
-\listoffigures} 
-\cleardoublepage
-
-% Tạo danh mục bảng biểu
-\renewcommand{\listtablename}{DANH MỤC BẢNG BIỂU}
-{\let\oldnumberline\numberline
-\renewcommand{\numberline}{Bảng~\oldnumberline}
-\listoftables}
-\cleardoublepage
+\clearpage
 
 % ===================================================
 \pagenumbering{arabic}
@@ -185,53 +179,53 @@
 
 % --- Cấu trúc các Chương nội dung ---
 
-\cleardoublepage
+\clearpage
 \chapter{KHẢO SÁT BÀI TOÁN}
 \label{chapter:1}
 \subfile{Chuong/1_Khao_sat_bai_toan}
 
-\cleardoublepage
+\clearpage
 \chapter{ĐẶC TẢ YÊU CẦU}
 \label{chapter:2}
 \subfile{Chuong/2_Dac_ta_yeu_cau}
 
-\cleardoublepage
+\clearpage
 \chapter{PHÂN TÍCH YÊU CẦU}
 \label{chapter:3}
 \subfile{Chuong/3_Phan_tich_yeu_cau}
 
-\cleardoublepage
+\clearpage
 \chapter{THIẾT KẾ CHƯƠNG TRÌNH}
 \label{chapter:4}
 \subfile{Chuong/4_Thiet_ke_chuong_trinh}
 
-\cleardoublepage
+\clearpage
 \chapter{XÂY DỰNG CHƯƠNG TRÌNH MINH HỌA}
 \label{chapter:5}
 \subfile{Chuong/5_Xay_dung_chuong_trinh}
 
-\cleardoublepage
+\clearpage
 \chapter{KIỂM THỬ}
 \label{chapter:6}
 \subfile{Chuong/6_Kiem_thu}
 
-\cleardoublepage
+\clearpage
 \chapter{NGUYÊN LÝ THIẾT KẾ}
 \label{chapter:7}
 \subfile{Chuong/7_Nguyen_ly_thiet_ke}
 
-\cleardoublepage
+\clearpage
 \chapter{HƯỚNG DẪN SỬ DỤNG}
 \label{chapter:8}
 \subfile{Chuong/8_Huong_dan_su_dung}
 
-\cleardoublepage
+\clearpage
 \chapter*{KẾT LUẬN \& HƯỚNG PHÁT TRIỂN}
 \addcontentsline{toc}{chapter}{KẾT LUẬN \& HƯỚNG PHÁT TRIỂN}
 \label{chapter:Ket_luan}
 \subfile{Chuong/Ket_luan}
 
-\cleardoublepage
+\clearpage
 \chapter*{TÀI LIỆU THAM KHẢO}
 \addcontentsline{toc}{chapter}{TÀI LIỆU THAM KHẢO}
 \label{chapter:Tai_lieu_tham_khao}

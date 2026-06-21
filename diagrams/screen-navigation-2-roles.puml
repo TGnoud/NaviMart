@@ -1,0 +1,148 @@
+@startuml
+title NAVIMART - SƠ ĐỒ CHUYỂN MÀN HÌNH THEO 2 ROLE
+
+skinparam backgroundColor #FFFFFF
+skinparam state {
+  BackgroundColor #F5F8F3
+  BorderColor #386A20
+  FontColor #1B1C18
+  ArrowColor #50634A
+}
+skinparam note {
+  BackgroundColor #FFF8E1
+  BorderColor #8D6E00
+}
+
+[*] --> Splash
+Splash --> Onboarding : Chưa đăng nhập\n[Lần đầu sử dụng]
+Splash --> Login : Chưa đăng nhập\n[Đã xem giới thiệu]
+Splash --> UserHome : Đã đăng nhập\n[role = user]
+Splash --> AdminHome : Đã đăng nhập\n[role = admin]
+
+Onboarding --> Login : Bỏ qua / Bắt đầu
+Login --> Register : Chọn Đăng ký
+Register --> Login : Chọn Đăng nhập
+Register --> UserHome : Đăng ký thành công
+Login --> ForgotPassword : Chọn Quên mật khẩu
+ForgotPassword --> Login : Gửi yêu cầu / Quay lại
+Login --> UserHome : Đăng nhập thành công\n[role = user]
+Login --> AdminHome : Đăng nhập thành công\n[role = admin]
+
+state "ROLE: NGƯỜI DÙNG" as USER {
+  state "Trang chủ" as UserHome
+
+  state "QUẢN LÝ KHO" as PANTRY {
+    state "Kho thực phẩm" as Pantry
+    state "Thêm thực phẩm" as AddItem
+    state "Chỉnh sửa thực phẩm" as EditItem
+    state "Quét mã sản phẩm" as Scanner
+
+    Pantry --> AddItem : Chọn Thêm
+    Pantry --> EditItem : Chọn thực phẩm
+    AddItem --> Scanner : Chọn Quét mã
+    Scanner --> AddItem : Quét thành công / Quay lại
+    AddItem --> Pantry : Lưu / Quay lại
+    EditItem --> Pantry : Lưu / Xóa / Quay lại
+  }
+
+  state "DANH SÁCH MUA SẮM" as SHOPPING {
+    state "Danh sách mua sắm" as Lists
+    state "Chi tiết danh sách" as ListDetail
+
+    Lists --> ListDetail : Chọn danh sách
+    ListDetail --> Lists : Quay lại
+  }
+
+  state "CÔNG THỨC" as RECIPE {
+    state "Gợi ý công thức" as Suggestions
+    state "Chi tiết công thức" as RecipeDetail
+    state "Tạo công thức" as CreateRecipe
+    state "Chỉnh sửa công thức" as EditRecipe
+
+    Suggestions --> RecipeDetail : Chọn công thức
+    Suggestions --> CreateRecipe : Chọn Tạo công thức
+    CreateRecipe --> Suggestions : Lưu / Quay lại
+    RecipeDetail --> EditRecipe : Chọn Chỉnh sửa\n[Có quyền sửa]
+    EditRecipe --> Suggestions : Lưu / Quay lại
+  }
+
+  state "Kế hoạch bữa ăn" as Meals
+  state "Chia sẻ gia đình" as Family
+  state "Báo cáo thống kê" as Reports
+
+  state "TÀI KHOẢN" as ACCOUNT {
+    state "Hồ sơ cá nhân" as Profile
+    state "Chỉnh sửa hồ sơ" as EditProfile
+    state "Cài đặt" as Settings
+    state "Thông báo" as Notifications
+
+    Profile --> EditProfile : Chọn Chỉnh sửa
+    EditProfile --> Profile : Lưu / Quay lại
+    Profile --> Settings : Chọn Cài đặt
+    Settings --> Profile : Quay lại
+    Profile --> Notifications : Chọn Thông báo
+    Notifications --> Profile : Quay lại
+  }
+
+  UserHome --> Pantry : Xem kho
+  Pantry --> UserHome : Chọn Trang chủ
+  UserHome --> AddItem : Thêm nhanh thực phẩm
+  UserHome --> Lists : Xem danh sách
+  Lists --> UserHome : Chọn Trang chủ
+  UserHome --> ListDetail : Chọn danh sách đang hoạt động
+  UserHome --> Suggestions : Xem gợi ý món
+  Suggestions --> UserHome : Chọn Trang chủ
+  UserHome --> RecipeDetail : Chọn món được gợi ý
+  UserHome --> Meals : Xem kế hoạch bữa ăn
+  Meals --> UserHome : Chọn Trang chủ
+  Meals --> Suggestions : Tìm món ăn
+  Meals --> RecipeDetail : Chọn món trong lịch
+  RecipeDetail --> Meals : Thêm vào kế hoạch
+  RecipeDetail --> ListDetail : Thêm nguyên liệu\n[vào danh sách một lần]
+  RecipeDetail --> Lists : Thêm nguyên liệu\n[theo lịch]
+  ListDetail --> Pantry : Hoàn tất mua hàng\nvà nhập vào kho
+  UserHome --> Family : Chọn Gia đình
+  Family --> UserHome : Chọn Trang chủ
+  UserHome --> Reports : Chọn Báo cáo
+  Reports --> UserHome : Chọn Trang chủ
+  UserHome --> Profile : Chọn biểu tượng tài khoản
+  Profile --> UserHome : Chọn Trang chủ
+}
+
+state "ROLE: QUẢN TRỊ VIÊN" as ADMIN {
+  state "Trang quản trị" as AdminHome
+  state "Tổng quan" as AdminOverview
+  state "Quản lý người dùng" as AdminUsers
+  state "Quản lý thực phẩm" as AdminFoods
+  state "Quản lý công thức" as AdminRecipes
+  state "Quản lý danh sách" as AdminLists
+  state "Quản lý báo cáo" as AdminReports
+
+  AdminHome --> AdminOverview : Mở trang quản trị
+  AdminOverview --> AdminUsers : Chọn Người dùng
+  AdminOverview --> AdminFoods : Chọn Thực phẩm
+  AdminOverview --> AdminRecipes : Chọn Công thức
+  AdminOverview --> AdminLists : Chọn Danh sách
+  AdminOverview --> AdminReports : Chọn Báo cáo
+  AdminUsers --> AdminOverview : Chọn Tổng quan
+  AdminFoods --> AdminOverview : Chọn Tổng quan
+  AdminRecipes --> AdminOverview : Chọn Tổng quan
+  AdminLists --> AdminOverview : Chọn Tổng quan
+  AdminReports --> AdminOverview : Chọn Tổng quan
+}
+
+Profile --> AdminHome : Chọn Quản trị hệ thống\n[role = admin]
+Profile --> Login : Đăng xuất
+AdminHome --> Login : Đăng xuất
+
+note right of USER
+  Các màn hình người dùng được bảo vệ.
+  Chưa đăng nhập sẽ chuyển về Đăng nhập.
+end note
+
+note right of ADMIN
+  Chỉ tài khoản role = admin được truy cập.
+  User thường sẽ được chuyển về Trang chủ.
+end note
+
+@enduml

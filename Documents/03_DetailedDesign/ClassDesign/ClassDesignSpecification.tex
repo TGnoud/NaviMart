@@ -1,0 +1,2732 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[vietnamese]{babel}
+\usepackage[T5]{fontenc}
+\usepackage{lmodern}
+\usepackage{geometry}
+\geometry{a4paper, margin=1in}
+\usepackage[hidelinks]{hyperref}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage{indentfirst}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{longtable}
+
+\begin{document}
+
+\begin{titlepage}
+    \begin{center}
+        \textbf{\Large ĐẠI HỌC BÁCH KHOA HÀ NỘI} \\
+        \textbf{\Large TRƯỜNG CÔNG NGHỆ THÔNG TIN VÀ TRUYỀN THÔNG} \\
+        \vskip 3cm
+        \noindent\rule{\textwidth}{2pt} \\
+        \vskip 0.6cm
+        \textbf{\Huge CLASS DESIGN SPECIFICATION} \\[0.5em]
+        \textbf{\huge HỆ THỐNG ĐI CHỢ TIỆN LỢI - NAVIMART} \\
+        \noindent\rule{\textwidth}{2pt} \\
+        \vskip 1.5cm
+        \textbf{\large Môn học: Phát triển phần mềm theo chuẩn kỹ năng ITSS} \\
+        \textbf{\large Giảng viên hướng dẫn: ThS. Nguyễn Mạnh Tuấn} \\
+        \textbf{\large Nhóm thực hiện: Nhóm 5} \\
+        \vskip 1.5cm
+        \textbf{\large DANH SÁCH THÀNH VIÊN} \\
+        \vskip 0.4cm
+        \begin{tabular}{|c|l|c|}
+            \hline
+            \textbf{STT} & \textbf{Họ và tên} & \textbf{MSSV} \\
+            \hline
+            1 & Trịnh Thành An & 20235633 \\
+            \hline
+            2 & Nguyễn Mạnh Đức & 20235681 \\
+            \hline
+            3 & Đỗ Danh Dũng & 20235685 \\
+            \hline
+            4 & Đinh Xuân Thái Dương & 20235689 \\
+            \hline
+            5 & Nguyễn Hồng Dương & 20235693 \\
+            \hline
+        \end{tabular}
+        \vfill
+        \textbf{Hà Nội, 2026}
+    \end{center}
+\end{titlepage}
+
+\tableofcontents
+\newpage
+
+\section{Giới thiệu chung}
+Tài liệu này đặc tả thiết kế lớp chi tiết cho hệ thống đi chợ tiện lợi \textbf{NaviMart}. Thiết kế được tổ chức theo kiến trúc phân lớp hướng đối tượng kết hợp với mô hình BCE (Boundary - Control - Entity) để đảm bảo tính liên kết lỏng lẻo (loose coupling) và độ gắn kết chặt chẽ (tight cohesion) trên từng phân hệ chức năng.
+
+Hệ thống được chia thành 9 phân hệ chính:
+\begin{enumerate}
+    \item \textbf{Auth Module:} Quản lý xác thực và thông tin người dùng.
+    \item \textbf{Family Module:} Liên kết nhóm gia đình để chia sẻ thực phẩm và đi chợ.
+    \item \textbf{Shopping Lists Module:} Lập kế hoạch mua sắm và đi chợ.
+    \item \textbf{Pantry Module:} Quản lý kho lưu trữ thực phẩm và tủ lạnh gia đình.
+    \item \textbf{Meals Module:} Lên thực đơn ăn uống và theo dõi phiên nấu nướng.
+    \item \textbf{Recipes Module:} Lưu trữ công thức món ăn và tích hợp AI gợi ý thực đơn.
+    \item \textbf{Reports Module:} Báo cáo chi tiêu, thống kê hao phí thực phẩm.
+    \item \textbf{Admin Module:} Quản trị hệ thống, danh mục thực phẩm chuẩn và phê duyệt công thức.
+    \item \textbf{Shared Module:} Các trang giao diện chính, dịch vụ dùng chung và thông báo đẩy.
+\end{enumerate}
+
+\newpage
+\section{Mô-đun Xác thực và Quản lý Người dùng (Auth Module)}
+
+Mô-đun này chịu trách nhiệm xác thực người dùng, đăng ký, đăng nhập, đặt lại mật khẩu, phân quyền thông qua JWT token và gửi mã OTP qua email.
+
+\subsection{Views}
+
+\subsubsection{Lớp \texttt{ForgotPassword}}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Stereotype:} \texttt{\textless{}\textless{}Boundary\textgreater{}\textgreater{}}
+    \item \textbf{Mô tả:} Component React quản lý giao diện người dùng hiển thị trang quên mật khẩu.
+\end{itemize}
+
+\paragraph{Thuộc tính (Attributes):}
+Không có.
+
+\paragraph{Phương thức (Operations):}
+\begin{longtable}{|c|l|l|p{9.5cm}|}
+\hline
+\textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu trả về} & \textbf{Mô tả (mục đích)} \\ \hline
+\endhead
+1 & render & JSX.Element & Render giao diện HTML/CSS \\ \hline
+\end{longtable}
+
+\paragraph{Tham số (Parameters):}
+Không có.
+
+\paragraph{Ngoại lệ (Exceptions):}
+Không có.
+
+\paragraph{Luồng xử lý (Method details):}
+\begin{itemize}[leftmargin=*]
+    \item Gọi đến các component con để hiển thị giao diện.
+\end{itemize}
+
+
+\paragraph{Trạng thái (States):}
+Không có.
+
+\vskip 0.5cm
+\noindent\rule{\textwidth}{0.5pt}
+\vskip 0.5cm
+
+\subsubsection{Lớp \texttt{Login}}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Stereotype:} \texttt{\textless{}\textless{}Boundary\textgreater{}\textgreater{}}
+    \item \textbf{Mô tả:} Component React quản lý giao diện người dùng hiển thị trang đăng nhập.
+\end{itemize}
+
+\paragraph{Thuộc tính (Attributes):}
+Không có.
+
+\paragraph{Phương thức (Operations):}
+\begin{longtable}{|c|l|l|p{9.5cm}|}
+\hline
+\textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu trả về} & \textbf{Mô tả (mục đích)} \\ \hline
+\endhead
+1 & render & JSX.Element & Render giao diện HTML/CSS \\ \hline
+\end{longtable}
+
+\paragraph{Tham số (Parameters):}
+Không có.
+
+\paragraph{Ngoại lệ (Exceptions):}
+Không có.
+
+\paragraph{Luồng xử lý (Method details):}
+\begin{itemize}[leftmargin=*]
+    \item Cập nhật state khi người dùng nhập liệu, gửi yêu cầu đăng nhập.
+\end{itemize}
+
+
+\paragraph{Trạng thái (States):}
+Không có.
+
+\vskip 0.5cm
+\noindent\rule{\textwidth}{0.5pt}
+\vskip 0.5cm
+
+\subsubsection{Lớp \texttt{Onboarding}}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Stereotype:} \texttt{\textless{}\textless{}Boundary\textgreater{}\textgreater{}}
+    \item \textbf{Mô tả:} Component React quản lý giao diện người dùng hiển thị màn hình hướng dẫn ban đầu.
+\end{itemize}
+
+\paragraph{Thuộc tính (Attributes):}
+Không có.
+
+\paragraph{Phương thức (Operations):}
+\begin{longtable}{|c|l|l|p{9.5cm}|}
+\hline
+\textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu trả về} & \textbf{Mô tả (mục đích)} \\ \hline
+\endhead
+1 & render & JSX.Element & Render giao diện HTML/CSS \\ \hline
+\end{longtable}
+
+\paragraph{Tham số (Parameters):}
+Không có.
+
+\paragraph{Ngoại lệ (Exceptions):}
+Không có.
+
+\paragraph{Luồng xử lý (Method details):}
+\begin{itemize}[leftmargin=*]
+    \item Gọi đến các component con để hiển thị nội dung.
+\end{itemize}
+
+
+\paragraph{Trạng thái (States):}
+Không có.
+
+\vskip 0.5cm
+\noindent\rule{\textwidth}{0.5pt}
+\vskip 0.5cm
+
+\subsubsection{Lớp \texttt{Register}}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Stereotype:} \texttt{\textless{}\textless{}Boundary\textgreater{}\textgreater{}}
+    \item \textbf{Mô tả:} Component React quản lý giao diện người dùng hiển thị trang đăng ký.
+\end{itemize}
+
+\paragraph{Thuộc tính (Attributes):}
+Không có.
+
+\paragraph{Phương thức (Operations):}
+\begin{longtable}{|c|l|l|p{9.5cm}|}
+\hline
+\textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu trả về} & \textbf{Mô tả (mục đích)} \\ \hline
+\endhead
+1 & render & JSX.Element & Render giao diện HTML/CSS \\ \hline
+\end{longtable}
+
+\paragraph{Tham số (Parameters):}
+Không có.
+
+\paragraph{Ngoại lệ (Exceptions):}
+Không có.
+
+\paragraph{Luồng xử lý (Method details):}
+\begin{itemize}[leftmargin=*]
+    \item Cập nhật state khi người dùng nhập liệu, gửi yêu cầu đăng ký.
+\end{itemize}
+
+
+\paragraph{Trạng thái (States):}
+Không có.
+
+\vskip 0.5cm
+\noindent\rule{\textwidth}{0.5pt}
+\vskip 0.5cm
+
+\subsubsection{Lớp \texttt{Splash}}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Stereotype:} \texttt{\textless{}\textless{}Boundary\textgreater{}\textgreater{}}
+    \item \textbf{Mô tả:} Component React quản lý giao diện màn hình chờ lúc khởi động ứng dụng.
+\end{itemize}
+
+\paragraph{Thuộc tính (Attributes):}
+Không có.
+
+\paragraph{Phương thức (Operations):}
+\begin{longtable}{|c|l|l|p{9.5cm}|}
+\hline
+\textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu trả về} & \textbf{Mô tả (mục đích)} \\ \hline
+\endhead
+1 & render & JSX.Element & Render giao diện HTML/CSS \\ \hline
+\end{longtable}
+
+\paragraph{Tham số (Parameters):}
+Không có.
+
+\paragraph{Ngoại lệ (Exceptions):}
+Không có.
+
+\paragraph{Luồng xử lý (Method details):}
+\begin{itemize}[leftmargin=*]
+    \item Xử lý chuyển hướng sau khi hoàn tất hiệu ứng chờ.
+\end{itemize}
+
+
+\paragraph{Trạng thái (States):}
+Không có.
+
+\vskip 0.5cm
+\noindent\rule{\textwidth}{0.5pt}
+\vskip 0.5cm
+
+\subsection{API Clients}
+
+\subsubsection{Lớp \texttt{AuthApiClient}}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Stereotype:} \texttt{\textless{}\textless{}Boundary\textgreater{}\textgreater{}}
+    \item \textbf{Mô tả:} Lớp gọi API bằng Axios để tương tác với hệ thống backend bên ngoài.
+\end{itemize}
+
+\paragraph{Thuộc tính (Attributes):}
+\begin{longtable}{|c|l|l|l|p{7.5cm}|}
+\hline
+\textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu} & \textbf{Giá trị mặc định} & \textbf{Mô tả} \\ \hline
+\endhead
+1 & baseUrl & String & \texttt{""} & URL gốc của backend \\ \hline
+\end{longtable}
+
+\paragraph{Phương thức (Operations):}
+\begin{longtable}{|c|l|l|p{9.5cm}|}
+\hline
+\textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu trả về} & \textbf{Mô tả (mục đích)} \\ \hline
+\endhead
+1 & register & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Gửi HTTP POST request đăng ký \\ \hline
+2 & login & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Gửi HTTP POST request đăng nhập \\ \hline
+3 & refresh & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Gửi HTTP POST request làm mới token \\ \hline
+4 & logout & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Gửi HTTP POST request đăng xuất \\ \hline
+5 & forgotPassword & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Gửi HTTP POST request quên mật khẩu \\ \hline
+6 & resetPassword & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Gửi HTTP POST request đặt lại mật khẩu \\ \hline
+7 & sendVerification & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Gửi HTTP POST request gửi mã xác thực \\ \hline
+8 & verifyEmail & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Gửi HTTP POST request xác thực email \\ \hline
+\end{longtable}
+
+\paragraph{Tham số (Parameters):}
+\begin{itemize}[leftmargin=*]
+    \item \texttt{data} – Đối tượng chứa payload tương ứng cho từng API
+\end{itemize}
+
+
+\paragraph{Ngoại lệ (Exceptions):}
+\begin{itemize}[leftmargin=*]
+    \item Bắn ra ngoại lệ mạng nếu hệ thống không phản hồi
+\end{itemize}
+
+
+\paragraph{Luồng xử lý (Method details):}
+\begin{itemize}[leftmargin=*]
+    \item Sử dụng Axios instance để gửi request HTTP theo cấu hình \texttt{baseUrl}
+\end{itemize}
+
+
+\paragraph{Trạng thái (States):}
+Không có.
+
+\vskip 0.5cm
+\noindent\rule{\textwidth}{0.5pt}
+\vskip 0.5cm
+
+\subsection{Controllers}
+
+\subsubsection{Lớp \texttt{AuthController}}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Stereotype:} \texttt{\textless{}\textless{}Control\textgreater{}\textgreater{}}
+    \item \textbf{Mô tả:} NestJS Controller nhận request từ Frontend và điều phối.
+\end{itemize}
+
+\paragraph{Thuộc tính (Attributes):}
+Không có.
+
+\paragraph{Phương thức (Operations):}
+\begin{longtable}{|c|l|l|p{9.5cm}|}
+\hline
+\textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu trả về} & \textbf{Mô tả (mục đích)} \\ \hline
+\endhead
+1 & register & Response & Gọi hàm Service xử lý đăng ký \\ \hline
+2 & login & Response & Gọi hàm Service xử lý đăng nhập \\ \hline
+3 & refresh & Response & Gọi hàm Service làm mới phiên \\ \hline
+4 & logout & Response & Gọi hàm Service đăng xuất \\ \hline
+5 & forgotPassword & Response & Gọi hàm Service quên mật khẩu \\ \hline
+6 & resetPassword & Response & Gọi hàm Service đặt lại mật khẩu \\ \hline
+7 & sendVerification & Response & Gọi hàm Service gửi lại mã \\ \hline
+8 & verifyEmail & Response & Gọi hàm Service xác thực email \\ \hline
+\end{longtable}
+
+\paragraph{Tham số (Parameters):}
+\begin{itemize}[leftmargin=*]
+    \item \texttt{dto} – Dữ liệu truyền vào từ HTTP request (body/query)
+\end{itemize}
+
+
+\paragraph{Ngoại lệ (Exceptions):}
+\begin{itemize}[leftmargin=*]
+    \item \texttt{BadRequestException} – Dữ liệu không hợp lệ
+    \item \texttt{UnauthorizedException} – Sai tài khoản mật khẩu
+\end{itemize}
+
+
+\paragraph{Luồng xử lý (Method details):}
+\begin{itemize}[leftmargin=*]
+    \item Nhận DTO, validate và truyền xuống AuthService. Trả kết quả HTTP Response
+\end{itemize}
+
+
+\paragraph{Trạng thái (States):}
+Không có.
+
+\vskip 0.5cm
+\noindent\rule{\textwidth}{0.5pt}
+\vskip 0.5cm
+
+\subsection{Services}
+
+\subsubsection{Lớp \texttt{AuthService}}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Stereotype:} \texttt{\textless{}\textless{}Control\textgreater{}\textgreater{}}
+    \item \textbf{Mô tả:} Lớp chứa Business Logic xử lý nghiệp vụ chính về Auth.
+\end{itemize}
+
+\paragraph{Thuộc tính (Attributes):}
+Không có.
+
+\paragraph{Phương thức (Operations):}
+\begin{longtable}{|c|l|l|p{9.5cm}|}
+\hline
+\textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu trả về} & \textbf{Mô tả (mục đích)} \\ \hline
+\endhead
+1 & register & any & Xử lý logic tạo tài khoản mới \\ \hline
+2 & login & any & Xác thực người dùng và cấp token \\ \hline
+3 & refresh & any & Tạo access token mới dựa vào refresh token \\ \hline
+4 & logout & any & Thu hồi token, dọn dẹp phiên \\ \hline
+5 & forgotPassword & any & Gửi token khôi phục mật khẩu \\ \hline
+6 & resetPassword & any & Cập nhật mật khẩu mới \\ \hline
+7 & sendVerification & any & Sinh mã OTP xác minh gửi qua Email \\ \hline
+8 & verifyEmail & any & Kiểm tra mã OTP khớp để đổi trạng thái tài khoản \\ \hline
+\end{longtable}
+
+\paragraph{Tham số (Parameters):}
+\begin{itemize}[leftmargin=*]
+    \item \texttt{data} – Đối tượng chứa thông tin business logic để xử lý
+\end{itemize}
+
+
+\paragraph{Ngoại lệ (Exceptions):}
+\begin{itemize}[leftmargin=*]
+    \item Các ngoại lệ do vi phạm logic nghiệp vụ
+\end{itemize}
+
+
+\paragraph{Luồng xử lý (Method details):}
+\begin{itemize}[leftmargin=*]
+    \item Thực hiện CRUD qua tầng Entity, sinh JWT Token.
+\end{itemize}
+
+
+\paragraph{Trạng thái (States):}
+Không có.
+
+\vskip 0.5cm
+\noindent\rule{\textwidth}{0.5pt}
+\vskip 0.5cm
+
+\subsection{Entities}
+
+\subsubsection{Lớp \texttt{UsersEntity}}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Stereotype:} \texttt{\textless{}\textless{}Entity\textgreater{}\textgreater{}}
+    \item \textbf{Mô tả:} Đối tượng dữ liệu ánh xạ từ Database bảng \texttt{users}.
+\end{itemize}
+
+\paragraph{Thuộc tính (Attributes):}
+\begin{longtable}{|c|l|l|l|p{7.5cm}|}
+\hline
+\textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu} & \textbf{Giá trị mặc định} & \textbf{Mô tả} \\ \hline
+\endhead
+1 & user\_id & INT & \texttt{null} & Mã người dùng (Primary Key) \\ \hline
+2 & email & VARCHAR & \texttt{""} & Địa chỉ email \\ \hline
+3 & phone & VARCHAR & \texttt{""} & Số điện thoại \\ \hline
+4 & password\_hash & VARCHAR & \texttt{""} & Chuỗi mã hóa mật khẩu \\ \hline
+5 & first\_name & VARCHAR & \texttt{""} & Tên \\ \hline
+6 & last\_name & VARCHAR & \texttt{""} & Họ \\ \hline
+7 & dob & DATE & \texttt{null} & Ngày sinh \\ \hline
+8 & gender & VARCHAR & \texttt{""} & Giới tính \\ \hline
+9 & role & VARCHAR & \texttt{""} & Vai trò (User/Admin) \\ \hline
+10 & group\_id & INT & \texttt{null} & ID nhóm \\ \hline
+11 & status & VARCHAR & \texttt{""} & Trạng thái (Active/Inactive) \\ \hline
+\end{longtable}
+
+\paragraph{Phương thức (Operations):}
+Không có.
+
+\paragraph{Tham số (Parameters):}
+Không có.
+
+\paragraph{Ngoại lệ (Exceptions):}
+Không có.
+
+\paragraph{Luồng xử lý (Method details):}
+Không có.
+
+\paragraph{Trạng thái (States):}
+\begin{itemize}[leftmargin=*]
+    \item Mới khởi tạo
+    \item Đã lưu xuống DB
+\end{itemize}
+
+
+\vskip 0.5cm
+\noindent\rule{\textwidth}{0.5pt}
+\vskip 0.5cm
+
+\section{Mô-đun Quản lý Nhóm Gia đình (Family Module)}
+
+Mô-đun này quản lý các kết nối gia đình, cho phép người dùng tạo nhóm, mời thành viên tham gia, phân quyền thành viên và quản lý hồ sơ cá nhân.
+
+\subsection{Views}
+
+\subsubsection{Lớp \texttt{FamilySharing}}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Stereotype:} \texttt{\textless{}\textless{}Boundary\textgreater{}\textgreater{}}
+    \item \textbf{Mô tả:} Component React quản lý giao diện hiển thị gia đình (thành viên, lời mời).
+\end{itemize}
+
+\paragraph{Thuộc tính (Attributes):}
+Không có.
+
+\paragraph{Phương thức (Operations):}
+\begin{longtable}{|c|l|l|p{9.5cm}|}
+\hline
+\textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu trả về} & \textbf{Mô tả (mục đích)} \\ \hline
+\endhead
+1 & render & JSX.Element & Render giao diện HTML/CSS \\ \hline
+\end{longtable}
+
+\paragraph{Tham số (Parameters):}
+Không có.
+
+\paragraph{Ngoại lệ (Exceptions):}
+Không có.
+
+\paragraph{Luồng xử lý (Method details):}
+\begin{itemize}[leftmargin=*]
+    \item Fetch danh sách thành viên và hiển thị.
+\end{itemize}
+
+
+\paragraph{Trạng thái (States):}
+Không có.
+
+\vskip 0.5cm
+\noindent\rule{\textwidth}{0.5pt}
+\vskip 0.5cm
+
+\subsubsection{Lớp \texttt{Profile}}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Stereotype:} \texttt{\textless{}\textless{}Boundary\textgreater{}\textgreater{}}
+    \item \textbf{Mô tả:} Component React quản lý giao diện hồ sơ người dùng.
+\end{itemize}
+
+\paragraph{Thuộc tính (Attributes):}
+Không có.
+
+\paragraph{Phương thức (Operations):}
+\begin{longtable}{|c|l|l|p{9.5cm}|}
+\hline
+\textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu trả về} & \textbf{Mô tả (mục đích)} \\ \hline
+\endhead
+1 & render & JSX.Element & Render giao diện HTML/CSS \\ \hline
+\end{longtable}
+
+\paragraph{Tham số (Parameters):}
+Không có.
+
+\paragraph{Ngoại lệ (Exceptions):}
+Không có.
+
+\paragraph{Luồng xử lý (Method details):}
+\begin{itemize}[leftmargin=*]
+    \item Hiển thị thông tin user đang đăng nhập.
+\end{itemize}
+
+
+\paragraph{Trạng thái (States):}
+Không có.
+
+\vskip 0.5cm
+\noindent\rule{\textwidth}{0.5pt}
+\vskip 0.5cm
+
+\subsubsection{Lớp \texttt{EditProfile}}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Stereotype:} \texttt{\textless{}\textless{}Boundary\textgreater{}\textgreater{}}
+    \item \textbf{Mô tả:} Component React quản lý giao diện chỉnh sửa hồ sơ.
+\end{itemize}
+
+\paragraph{Thuộc tính (Attributes):}
+Không có.
+
+\paragraph{Phương thức (Operations):}
+\begin{longtable}{|c|l|l|p{9.5cm}|}
+\hline
+\textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu trả về} & \textbf{Mô tả (mục đích)} \\ \hline
+\endhead
+1 & render & JSX.Element & Render giao diện HTML/CSS \\ \hline
+\end{longtable}
+
+\paragraph{Tham số (Parameters):}
+Không có.
+
+\paragraph{Ngoại lệ (Exceptions):}
+Không có.
+
+\paragraph{Luồng xử lý (Method details):}
+\begin{itemize}[leftmargin=*]
+    \item Chỉnh sửa và lưu thông tin người dùng.
+\end{itemize}
+
+
+\paragraph{Trạng thái (States):}
+Không có.
+
+\vskip 0.5cm
+\noindent\rule{\textwidth}{0.5pt}
+\vskip 0.5cm
+
+\subsubsection{Lớp \texttt{Settings}}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Stereotype:} \texttt{\textless{}\textless{}Boundary\textgreater{}\textgreater{}}
+    \item \textbf{Mô tả:} Component React quản lý giao diện cài đặt ứng dụng.
+\end{itemize}
+
+\paragraph{Thuộc tính (Attributes):}
+Không có.
+
+\paragraph{Phương thức (Operations):}
+\begin{longtable}{|c|l|l|p{9.5cm}|}
+\hline
+\textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu trả về} & \textbf{Mô tả (mục đích)} \\ \hline
+\endhead
+1 & render & JSX.Element & Render giao diện HTML/CSS \\ \hline
+\end{longtable}
+
+\paragraph{Tham số (Parameters):}
+Không có.
+
+\paragraph{Ngoại lệ (Exceptions):}
+Không có.
+
+\paragraph{Luồng xử lý (Method details):}
+\begin{itemize}[leftmargin=*]
+    \item Cập nhật tuỳ chọn ứng dụng.
+\end{itemize}
+
+
+\paragraph{Trạng thái (States):}
+Không có.
+
+\vskip 0.5cm
+\noindent\rule{\textwidth}{0.5pt}
+\vskip 0.5cm
+
+\subsection{API Clients}
+
+\subsubsection{Lớp \texttt{FamilyApiClient}}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Stereotype:} \texttt{\textless{}\textless{}Boundary\textgreater{}\textgreater{}}
+    \item \textbf{Mô tả:} Lớp gọi API bằng Axios để tương tác với Backend.
+\end{itemize}
+
+\paragraph{Thuộc tính (Attributes):}
+\begin{longtable}{|c|l|l|l|p{7.5cm}|}
+\hline
+\textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu} & \textbf{Giá trị mặc định} & \textbf{Mô tả} \\ \hline
+\endhead
+1 & baseUrl & String & \texttt{""} & URL gốc của backend \\ \hline
+\end{longtable}
+
+\paragraph{Phương thức (Operations):}
+\begin{longtable}{|c|l|l|p{9.5cm}|}
+\hline
+\textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu trả về} & \textbf{Mô tả (mục đích)} \\ \hline
+\endhead
+1 & getCurrentFamily & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Lấy thông tin gia đình hiện tại \\ \hline
+2 & create & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Tạo gia đình mới \\ \hline
+3 & createInvite & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Tạo mã mời \\ \hline
+4 & join & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Tham gia nhóm gia đình \\ \hline
+5 & updateMemberPermissions & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Cập nhật quyền của thành viên \\ \hline
+6 & removeMember & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Xóa thành viên khỏi nhóm \\ \hline
+\end{longtable}
+
+\paragraph{Tham số (Parameters):}
+\begin{itemize}[leftmargin=*]
+    \item \texttt{data} – Đối tượng chứa tham số cho từng request cụ thể
+\end{itemize}
+
+
+\paragraph{Ngoại lệ (Exceptions):}
+\begin{itemize}[leftmargin=*]
+    \item Ngoại lệ mạng nếu không gọi được server.
+\end{itemize}
+
+
+\paragraph{Luồng xử lý (Method details):}
+\begin{itemize}[leftmargin=*]
+    \item Gửi HTTP requests lên \texttt{/api/family} bằng Axios.
+\end{itemize}
+
+
+\paragraph{Trạng thái (States):}
+Không có.
+
+\vskip 0.5cm
+\noindent\rule{\textwidth}{0.5pt}
+\vskip 0.5cm
+
+\subsection{Controllers}
+
+\subsubsection{Lớp \texttt{FamilyController}}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Stereotype:} \texttt{\textless{}\textless{}Control\textgreater{}\textgreater{}}
+    \item \textbf{Mô tả:} NestJS Controller nhận request liên quan đến Family.
+\end{itemize}
+
+\paragraph{Thuộc tính (Attributes):}
+Không có.
+
+\paragraph{Phương thức (Operations):}
+\begin{longtable}{|c|l|l|p{9.5cm}|}
+\hline
+\textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu trả về} & \textbf{Mô tả (mục đích)} \\ \hline
+\endhead
+1 & getCurrentFamily & Response & Nhận request lấy thông tin nhóm \\ \hline
+2 & create & Response & Nhận request tạo nhóm \\ \hline
+3 & createInvite & Response & Nhận request tạo mã mời \\ \hline
+4 & join & Response & Nhận request tham gia nhóm \\ \hline
+5 & updateMemberPermissions & Response & Nhận request phân quyền \\ \hline
+6 & removeMember & Response & Nhận request xóa thành viên \\ \hline
+\end{longtable}
+
+\paragraph{Tham số (Parameters):}
+\begin{itemize}[leftmargin=*]
+    \item \texttt{dto} – Tham số body/params từ request
+\end{itemize}
+
+
+\paragraph{Ngoại lệ (Exceptions):}
+\begin{itemize}[leftmargin=*]
+    \item \texttt{NotFoundException} – Không tìm thấy nhóm
+    \item \texttt{ForbiddenException} – Không có quyền xóa thành viên
+\end{itemize}
+
+
+\paragraph{Luồng xử lý (Method details):}
+\begin{itemize}[leftmargin=*]
+    \item Gọi đến \texttt{FamilyService} để xử lý business logic.
+\end{itemize}
+
+
+\paragraph{Trạng thái (States):}
+Không có.
+
+\vskip 0.5cm
+\noindent\rule{\textwidth}{0.5pt}
+\vskip 0.5cm
+
+\subsection{Services}
+
+\subsubsection{Lớp \texttt{FamilyService}}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Stereotype:} \texttt{\textless{}\textless{}Control\textgreater{}\textgreater{}}
+    \item \textbf{Mô tả:} Lớp chứa Business Logic xử lý Family/Group.
+\end{itemize}
+
+\paragraph{Thuộc tính (Attributes):}
+Không có.
+
+\paragraph{Phương thức (Operations):}
+\begin{longtable}{|c|l|l|p{9.5cm}|}
+\hline
+\textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu trả về} & \textbf{Mô tả (mục đích)} \\ \hline
+\endhead
+1 & getCurrentFamily & any & Trả về thông tin nhóm của user \\ \hline
+2 & create & any & Khởi tạo bảng \texttt{family\_groups} \\ \hline
+3 & createInvite & any & Sinh mã mời ngẫu nhiên \\ \hline
+4 & join & any & Kiểm tra mã và thêm user vào nhóm \\ \hline
+5 & updateMemberPermissions & any & Sửa quyền trong nhóm \\ \hline
+6 & removeMember & any & Cập nhật group\_id của user thành null \\ \hline
+\end{longtable}
+
+\paragraph{Tham số (Parameters):}
+\begin{itemize}[leftmargin=*]
+    \item \texttt{data} – Dữ liệu truyền vào từ Controller
+\end{itemize}
+
+
+\paragraph{Ngoại lệ (Exceptions):}
+\begin{itemize}[leftmargin=*]
+    \item Các lỗi vi phạm logic (mã mời hết hạn, mã sai...)
+\end{itemize}
+
+
+\paragraph{Luồng xử lý (Method details):}
+\begin{itemize}[leftmargin=*]
+    \item CRUD qua các Entity \texttt{FamilyGroupsEntity} và \texttt{UsersEntity}.
+\end{itemize}
+
+
+\paragraph{Trạng thái (States):}
+Không có.
+
+\vskip 0.5cm
+\noindent\rule{\textwidth}{0.5pt}
+\vskip 0.5cm
+
+\subsection{Entities}
+
+\subsubsection{Lớp \texttt{FamilyGroupsEntity}}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Stereotype:} \texttt{\textless{}\textless{}Entity\textgreater{}\textgreater{}}
+    \item \textbf{Mô tả:} Bảng lưu trữ thông tin gia đình \texttt{family\_groups}.
+\end{itemize}
+
+\paragraph{Thuộc tính (Attributes):}
+\begin{longtable}{|c|l|l|l|p{7.5cm}|}
+\hline
+\textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu} & \textbf{Giá trị mặc định} & \textbf{Mô tả} \\ \hline
+\endhead
+1 & group\_id & INT & \texttt{null} & Mã nhóm gia đình \\ \hline
+2 & group\_name & VARCHAR & \texttt{""} & Tên nhóm \\ \hline
+3 & owner\_id & INT & \texttt{null} & Người tạo nhóm \\ \hline
+4 & invite\_code & VARCHAR & \texttt{""} & Mã mời \\ \hline
+\end{longtable}
+
+\paragraph{Phương thức (Operations):}
+Không có.
+
+\paragraph{Tham số (Parameters):}
+Không có.
+
+\paragraph{Ngoại lệ (Exceptions):}
+Không có.
+
+\paragraph{Luồng xử lý (Method details):}
+Không có.
+
+\paragraph{Trạng thái (States):}
+Không có.
+
+\vskip 0.5cm
+\noindent\rule{\textwidth}{0.5pt}
+\vskip 0.5cm
+
+\subsubsection{Lớp \texttt{UsersEntity}}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Stereotype:} \texttt{\textless{}\textless{}Entity\textgreater{}\textgreater{}}
+    \item \textbf{Mô tả:} Bảng thông tin người dùng \texttt{users}.
+\end{itemize}
+
+\paragraph{Thuộc tính (Attributes):}
+\begin{longtable}{|c|l|l|l|p{7.5cm}|}
+\hline
+\textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu} & \textbf{Giá trị mặc định} & \textbf{Mô tả} \\ \hline
+\endhead
+1 & user\_id & INT & \texttt{null} & Mã người dùng \\ \hline
+2 & email & VARCHAR & \texttt{""} & Địa chỉ email \\ \hline
+3 & phone & VARCHAR & \texttt{""} & Số điện thoại \\ \hline
+4 & password\_hash & VARCHAR & \texttt{""} & Chuỗi mã hóa mật khẩu \\ \hline
+5 & first\_name & VARCHAR & \texttt{""} & Tên \\ \hline
+6 & last\_name & VARCHAR & \texttt{""} & Họ \\ \hline
+7 & dob & DATE & \texttt{null} & Ngày sinh \\ \hline
+8 & gender & VARCHAR & \texttt{""} & Giới tính \\ \hline
+9 & role & VARCHAR & \texttt{""} & Vai trò \\ \hline
+10 & group\_id & INT & \texttt{null} & Khóa ngoại chỉ đến nhóm \\ \hline
+11 & status & VARCHAR & \texttt{""} & Trạng thái \\ \hline
+\end{longtable}
+
+\paragraph{Phương thức (Operations):}
+Không có.
+
+\paragraph{Tham số (Parameters):}
+Không có.
+
+\paragraph{Ngoại lệ (Exceptions):}
+Không có.
+
+\paragraph{Luồng xử lý (Method details):}
+Không có.
+
+\paragraph{Trạng thái (States):}
+Không có.
+
+\vskip 0.5cm
+\noindent\rule{\textwidth}{0.5pt}
+\vskip 0.5cm
+
+\section{Mô-đun Lập Danh sách Mua sắm (Shopping Lists Module)}
+
+Mô-đun này hỗ trợ lập kế hoạch đi chợ, tạo danh sách các món đồ cần mua, chia sẻ danh sách giữa các thành viên và đồng bộ tiến độ mua sắm.
+
+\subsection{Views}
+
+\subsubsection{Lớp \texttt{MyLists}}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Stereotype:} \texttt{\textless{}\textless{}Boundary\textgreater{}\textgreater{}}
+    \item \textbf{Mô tả:} Component React quản lý giao diện hiển thị danh sách mua sắm.
+\end{itemize}
+
+\paragraph{Thuộc tính (Attributes):}
+Không có.
+
+\paragraph{Phương thức (Operations):}
+\begin{longtable}{|c|l|l|p{9.5cm}|}
+\hline
+\textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu trả về} & \textbf{Mô tả (mục đích)} \\ \hline
+\endhead
+1 & render & JSX.Element & Render giao diện HTML/CSS \\ \hline
+\end{longtable}
+
+\paragraph{Tham số (Parameters):}
+Không có.
+
+\paragraph{Ngoại lệ (Exceptions):}
+Không có.
+
+\paragraph{Luồng xử lý (Method details):}
+\begin{itemize}[leftmargin=*]
+    \item Hiển thị danh sách các danh sách mua sắm.
+\end{itemize}
+
+
+\paragraph{Trạng thái (States):}
+Không có.
+
+\vskip 0.5cm
+\noindent\rule{\textwidth}{0.5pt}
+\vskip 0.5cm
+
+\subsubsection{Lớp \texttt{ListDetail}}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Stereotype:} \texttt{\textless{}\textless{}Boundary\textgreater{}\textgreater{}}
+    \item \textbf{Mô tả:} Component React quản lý giao diện chi tiết danh sách mua sắm.
+\end{itemize}
+
+\paragraph{Thuộc tính (Attributes):}
+Không có.
+
+\paragraph{Phương thức (Operations):}
+\begin{longtable}{|c|l|l|p{9.5cm}|}
+\hline
+\textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu trả về} & \textbf{Mô tả (mục đích)} \\ \hline
+\endhead
+1 & render & JSX.Element & Render giao diện HTML/CSS \\ \hline
+\end{longtable}
+
+\paragraph{Tham số (Parameters):}
+Không có.
+
+\paragraph{Ngoại lệ (Exceptions):}
+Không có.
+
+\paragraph{Luồng xử lý (Method details):}
+\begin{itemize}[leftmargin=*]
+    \item Hiển thị các item trong danh sách mua sắm cụ thể.
+\end{itemize}
+
+
+\paragraph{Trạng thái (States):}
+Không có.
+
+\vskip 0.5cm
+\noindent\rule{\textwidth}{0.5pt}
+\vskip 0.5cm
+
+\subsection{API Clients}
+
+\subsubsection{Lớp \texttt{ShoppingListsApiClient}}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Stereotype:} \texttt{\textless{}\textless{}Boundary\textgreater{}\textgreater{}}
+    \item \textbf{Mô tả:} Lớp gọi API bằng Axios để tương tác với Backend.
+\end{itemize}
+
+\paragraph{Thuộc tính (Attributes):}
+\begin{longtable}{|c|l|l|l|p{7.5cm}|}
+\hline
+\textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu} & \textbf{Giá trị mặc định} & \textbf{Mô tả} \\ \hline
+\endhead
+1 & baseUrl & String & \texttt{""} & URL gốc của backend \\ \hline
+\end{longtable}
+
+\paragraph{Phương thức (Operations):}
+\begin{longtable}{|c|l|l|p{9.5cm}|}
+\hline
+\textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu trả về} & \textbf{Mô tả (mục đích)} \\ \hline
+\endhead
+1 & findAll & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Lấy tất cả danh sách mua sắm \\ \hline
+2 & create & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Tạo danh sách mới \\ \hline
+3 & findOne & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Lấy chi tiết một danh sách \\ \hline
+4 & update & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Cập nhật thông tin danh sách \\ \hline
+5 & remove & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Xoá danh sách \\ \hline
+6 & complete & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Đánh dấu hoàn tất danh sách \\ \hline
+7 & addItem & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Thêm mặt hàng vào danh sách \\ \hline
+8 & updateItem & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Cập nhật mặt hàng trong danh sách \\ \hline
+9 & removeItem & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Xóa mặt hàng khỏi danh sách \\ \hline
+\end{longtable}
+
+\paragraph{Tham số (Parameters):}
+\begin{itemize}[leftmargin=*]
+    \item \texttt{data} – Đối tượng chứa tham số cho từng request cụ thể
+\end{itemize}
+
+
+\paragraph{Ngoại lệ (Exceptions):}
+\begin{itemize}[leftmargin=*]
+    \item Ngoại lệ mạng nếu server lỗi.
+\end{itemize}
+
+
+\paragraph{Luồng xử lý (Method details):}
+\begin{itemize}[leftmargin=*]
+    \item Gửi HTTP requests tương ứng lên backend.
+\end{itemize}
+
+
+\paragraph{Trạng thái (States):}
+Không có.
+
+\vskip 0.5cm
+\noindent\rule{\textwidth}{0.5pt}
+\vskip 0.5cm
+
+\subsection{Controllers}
+
+\subsubsection{Lớp \texttt{ShoppingListsController}}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Stereotype:} \texttt{\textless{}\textless{}Control\textgreater{}\textgreater{}}
+    \item \textbf{Mô tả:} NestJS Controller nhận request.
+\end{itemize}
+
+\paragraph{Thuộc tính (Attributes):}
+Không có.
+
+\paragraph{Phương thức (Operations):}
+\begin{longtable}{|c|l|l|p{9.5cm}|}
+\hline
+\textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu trả về} & \textbf{Mô tả (mục đích)} \\ \hline
+\endhead
+1 & findAll & Response & Nhận request lấy danh sách \\ \hline
+2 & create & Response & Nhận request tạo danh sách \\ \hline
+3 & findOne & Response & Nhận request lấy chi tiết \\ \hline
+4 & update & Response & Nhận request cập nhật \\ \hline
+5 & remove & Response & Nhận request xóa \\ \hline
+6 & complete & Response & Nhận request hoàn tất \\ \hline
+7 & addItem & Response & Nhận request thêm item \\ \hline
+8 & updateItem & Response & Nhận request cập nhật item \\ \hline
+9 & removeItem & Response & Nhận request xóa item \\ \hline
+\end{longtable}
+
+\paragraph{Tham số (Parameters):}
+\begin{itemize}[leftmargin=*]
+    \item \texttt{dto} – Tham số truyền lên từ Client
+\end{itemize}
+
+
+\paragraph{Ngoại lệ (Exceptions):}
+\begin{itemize}[leftmargin=*]
+    \item \texttt{NotFoundException} – Nếu danh sách không tồn tại
+\end{itemize}
+
+
+\paragraph{Luồng xử lý (Method details):}
+\begin{itemize}[leftmargin=*]
+    \item Điều phối dữ liệu xuống Service xử lý.
+\end{itemize}
+
+
+\paragraph{Trạng thái (States):}
+Không có.
+
+\vskip 0.5cm
+\noindent\rule{\textwidth}{0.5pt}
+\vskip 0.5cm
+
+\subsection{Services}
+
+\subsubsection{Lớp \texttt{ShoppingListsService}}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Stereotype:} \texttt{\textless{}\textless{}Control\textgreater{}\textgreater{}}
+    \item \textbf{Mô tả:} Lớp chứa Business Logic chính.
+\end{itemize}
+
+\paragraph{Thuộc tính (Attributes):}
+Không có.
+
+\paragraph{Phương thức (Operations):}
+\begin{longtable}{|c|l|l|p{9.5cm}|}
+\hline
+\textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu trả về} & \textbf{Mô tả (mục đích)} \\ \hline
+\endhead
+1 & findAll & any & Xử lý lấy danh sách \\ \hline
+2 & create & any & Thêm mới bản ghi vào Database \\ \hline
+3 & findOne & any & Lấy chi tiết bản ghi \\ \hline
+4 & update & any & Sửa thông tin bản ghi \\ \hline
+5 & remove & any & Xoá bản ghi \\ \hline
+6 & complete & any & Sửa đổi trạng thái hoàn tất \\ \hline
+7 & addItem & any & Thêm mới item vào danh sách \\ \hline
+8 & updateItem & any & Cập nhật số lượng item \\ \hline
+9 & removeItem & any & Xóa item khỏi danh sách \\ \hline
+\end{longtable}
+
+\paragraph{Tham số (Parameters):}
+\begin{itemize}[leftmargin=*]
+    \item \texttt{data} – Tham số payload từ Controller truyền sang
+\end{itemize}
+
+
+\paragraph{Ngoại lệ (Exceptions):}
+\begin{itemize}[leftmargin=*]
+    \item Các exception logic nghiệp vụ.
+\end{itemize}
+
+
+\paragraph{Luồng xử lý (Method details):}
+\begin{itemize}[leftmargin=*]
+    \item Thực hiện logic CRUD qua Entity.
+\end{itemize}
+
+
+\paragraph{Trạng thái (States):}
+Không có.
+
+\vskip 0.5cm
+\noindent\rule{\textwidth}{0.5pt}
+\vskip 0.5cm
+
+\subsection{Entities}
+
+\subsubsection{Lớp \texttt{ShoppingListsEntity}}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Stereotype:} \texttt{\textless{}\textless{}Entity\textgreater{}\textgreater{}}
+    \item \textbf{Mô tả:} Ánh xạ từ DB bảng \texttt{shopping\_lists}.
+\end{itemize}
+
+\paragraph{Thuộc tính (Attributes):}
+\begin{longtable}{|c|l|l|l|p{7.5cm}|}
+\hline
+\textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu} & \textbf{Giá trị mặc định} & \textbf{Mô tả} \\ \hline
+\endhead
+1 & list\_id & INT & \texttt{null} & Khóa chính \\ \hline
+2 & group\_id & INT & \texttt{null} & Khóa ngoại tới nhóm \\ \hline
+3 & name & VARCHAR & \texttt{""} & Tên danh sách \\ \hline
+4 & created\_at & DATETIME & \texttt{null} & Ngày tạo \\ \hline
+5 & type & VARCHAR & \texttt{""} & Loại danh sách \\ \hline
+\end{longtable}
+
+\paragraph{Phương thức (Operations):}
+Không có.
+
+\paragraph{Tham số (Parameters):}
+Không có.
+
+\paragraph{Ngoại lệ (Exceptions):}
+Không có.
+
+\paragraph{Luồng xử lý (Method details):}
+Không có.
+
+\paragraph{Trạng thái (States):}
+Không có.
+
+\vskip 0.5cm
+\noindent\rule{\textwidth}{0.5pt}
+\vskip 0.5cm
+
+\subsubsection{Lớp \texttt{ShoppingListItemsEntity}}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Stereotype:} \texttt{\textless{}\textless{}Entity\textgreater{}\textgreater{}}
+    \item \textbf{Mô tả:} Ánh xạ từ DB bảng \texttt{shopping\_list\_items}.
+\end{itemize}
+
+\paragraph{Thuộc tính (Attributes):}
+\begin{longtable}{|c|l|l|l|p{7.5cm}|}
+\hline
+\textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu} & \textbf{Giá trị mặc định} & \textbf{Mô tả} \\ \hline
+\endhead
+1 & item\_id & INT & \texttt{null} & Khóa chính item \\ \hline
+2 & list\_id & INT & \texttt{null} & Thuộc danh sách nào \\ \hline
+3 & food\_id & INT & \texttt{null} & ID món ăn/thực phẩm \\ \hline
+4 & quantity & DECIMAL & \texttt{0} & Số lượng \\ \hline
+5 & status & VARCHAR & \texttt{""} & Trạng thái (Checked/Unchecked) \\ \hline
+\end{longtable}
+
+\paragraph{Phương thức (Operations):}
+Không có.
+
+\paragraph{Tham số (Parameters):}
+Không có.
+
+\paragraph{Ngoại lệ (Exceptions):}
+Không có.
+
+\paragraph{Luồng xử lý (Method details):}
+Không có.
+
+\paragraph{Trạng thái (States):}
+Không có.
+
+\vskip 0.5cm
+\noindent\rule{\textwidth}{0.5pt}
+\vskip 0.5cm
+
+\section{Mô-đun Quản lý Kho Thực phẩm (Pantry Module)}
+
+Mô-đun này quản lý lượng thực phẩm hiện có trong tủ lạnh hoặc kho của gia đình, theo dõi số lượng, vị trí bảo quản và cảnh báo hạn sử dụng.
+
+\subsection{Views}
+
+\subsubsection{Lớp \texttt{PantryDashboard}}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Stereotype:} \texttt{\textless{}\textless{}Boundary\textgreater{}\textgreater{}}
+    \item \textbf{Mô tả:} Component React quản lý giao diện Dashboard của kho thực phẩm.
+\end{itemize}
+
+\paragraph{Thuộc tính (Attributes):}
+Không có.
+
+\paragraph{Phương thức (Operations):}
+\begin{longtable}{|c|l|l|p{9.5cm}|}
+\hline
+\textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu trả về} & \textbf{Mô tả (mục đích)} \\ \hline
+\endhead
+1 & render & JSX.Element & Render giao diện HTML/CSS \\ \hline
+\end{longtable}
+
+\paragraph{Tham số (Parameters):}
+Không có.
+
+\paragraph{Ngoại lệ (Exceptions):}
+Không có.
+
+\paragraph{Luồng xử lý (Method details):}
+\begin{itemize}[leftmargin=*]
+    \item Hiển thị lượng thực phẩm trong kho.
+\end{itemize}
+
+
+\paragraph{Trạng thái (States):}
+Không có.
+
+\vskip 0.5cm
+\noindent\rule{\textwidth}{0.5pt}
+\vskip 0.5cm
+
+\subsubsection{Lớp \texttt{Scanner}}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Stereotype:} \texttt{\textless{}\textless{}Boundary\textgreater{}\textgreater{}}
+    \item \textbf{Mô tả:} Component React quản lý giao diện quét mã vạch sản phẩm.
+\end{itemize}
+
+\paragraph{Thuộc tính (Attributes):}
+Không có.
+
+\paragraph{Phương thức (Operations):}
+\begin{longtable}{|c|l|l|p{9.5cm}|}
+\hline
+\textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu trả về} & \textbf{Mô tả (mục đích)} \\ \hline
+\endhead
+1 & render & JSX.Element & Render giao diện HTML/CSS \\ \hline
+\end{longtable}
+
+\paragraph{Tham số (Parameters):}
+Không có.
+
+\paragraph{Ngoại lệ (Exceptions):}
+Không có.
+
+\paragraph{Luồng xử lý (Method details):}
+\begin{itemize}[leftmargin=*]
+    \item Mở camera và quét barcode để thêm thực phẩm.
+\end{itemize}
+
+
+\paragraph{Trạng thái (States):}
+Không có.
+
+\vskip 0.5cm
+\noindent\rule{\textwidth}{0.5pt}
+\vskip 0.5cm
+
+\subsection{API Clients}
+
+\subsubsection{Lớp \texttt{PantryApiClient}}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Stereotype:} \texttt{\textless{}\textless{}Boundary\textgreater{}\textgreater{}}
+    \item \textbf{Mô tả:} Lớp gọi API bằng Axios để tương tác với Backend.
+\end{itemize}
+
+\paragraph{Thuộc tính (Attributes):}
+\begin{longtable}{|c|l|l|l|p{7.5cm}|}
+\hline
+\textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu} & \textbf{Giá trị mặc định} & \textbf{Mô tả} \\ \hline
+\endhead
+1 & baseUrl & String & \texttt{""} & URL gốc của backend \\ \hline
+\end{longtable}
+
+\paragraph{Phương thức (Operations):}
+\begin{longtable}{|c|l|l|p{9.5cm}|}
+\hline
+\textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu trả về} & \textbf{Mô tả (mục đích)} \\ \hline
+\endhead
+1 & findAll & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Lấy danh sách thực phẩm trong kho \\ \hline
+2 & create & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Thêm thực phẩm mới vào kho \\ \hline
+3 & findOne & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Xem chi tiết thực phẩm \\ \hline
+4 & update & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Cập nhật số lượng/thông tin \\ \hline
+5 & remove & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Xóa thực phẩm khỏi kho \\ \hline
+6 & consume & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Ghi nhận đã tiêu thụ thực phẩm \\ \hline
+7 & markWasted & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Ghi nhận thực phẩm bị lãng phí/hỏng \\ \hline
+\end{longtable}
+
+\paragraph{Tham số (Parameters):}
+\begin{itemize}[leftmargin=*]
+    \item \texttt{data} – Đối tượng chứa payload request
+\end{itemize}
+
+
+\paragraph{Ngoại lệ (Exceptions):}
+\begin{itemize}[leftmargin=*]
+    \item Ngoại lệ kết nối mạng
+\end{itemize}
+
+
+\paragraph{Luồng xử lý (Method details):}
+\begin{itemize}[leftmargin=*]
+    \item Gửi các HTTP request lên API \texttt{/api/pantry}.
+\end{itemize}
+
+
+\paragraph{Trạng thái (States):}
+Không có.
+
+\vskip 0.5cm
+\noindent\rule{\textwidth}{0.5pt}
+\vskip 0.5cm
+
+\subsection{Controllers}
+
+\subsubsection{Lớp \texttt{PantryController}}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Stereotype:} \texttt{\textless{}\textless{}Control\textgreater{}\textgreater{}}
+    \item \textbf{Mô tả:} NestJS Controller nhận request từ Frontend liên quan đến Pantry.
+\end{itemize}
+
+\paragraph{Thuộc tính (Attributes):}
+Không có.
+
+\paragraph{Phương thức (Operations):}
+\begin{longtable}{|c|l|l|p{9.5cm}|}
+\hline
+\textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu trả về} & \textbf{Mô tả (mục đích)} \\ \hline
+\endhead
+1 & findAll & Response & Nhận request lấy kho \\ \hline
+2 & create & Response & Nhận request thêm đồ \\ \hline
+3 & findOne & Response & Nhận request lấy chi tiết đồ \\ \hline
+4 & update & Response & Nhận request sửa đồ \\ \hline
+5 & remove & Response & Nhận request xóa đồ \\ \hline
+6 & consume & Response & Nhận request tiêu thụ \\ \hline
+7 & markWasted & Response & Nhận request đánh dấu hỏng \\ \hline
+\end{longtable}
+
+\paragraph{Tham số (Parameters):}
+\begin{itemize}[leftmargin=*]
+    \item \texttt{dto} – Tham số từ request
+\end{itemize}
+
+
+\paragraph{Ngoại lệ (Exceptions):}
+\begin{itemize}[leftmargin=*]
+    \item \texttt{NotFoundException} – Nếu item không tồn tại
+\end{itemize}
+
+
+\paragraph{Luồng xử lý (Method details):}
+\begin{itemize}[leftmargin=*]
+    \item Gọi đến \texttt{PantryService} tương ứng.
+\end{itemize}
+
+
+\paragraph{Trạng thái (States):}
+Không có.
+
+\vskip 0.5cm
+\noindent\rule{\textwidth}{0.5pt}
+\vskip 0.5cm
+
+\subsection{Services}
+
+\subsubsection{Lớp \texttt{PantryService}}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Stereotype:} \texttt{\textless{}\textless{}Control\textgreater{}\textgreater{}}
+    \item \textbf{Mô tả:} Lớp chứa Business Logic quản lý thực phẩm.
+\end{itemize}
+
+\paragraph{Thuộc tính (Attributes):}
+Không có.
+
+\paragraph{Phương thức (Operations):}
+\begin{longtable}{|c|l|l|p{9.5cm}|}
+\hline
+\textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu trả về} & \textbf{Mô tả (mục đích)} \\ \hline
+\endhead
+1 & findAll & any & Logic lấy danh sách kho \\ \hline
+2 & create & any & Khởi tạo mặt hàng mới \\ \hline
+3 & findOne & any & Tìm kiếm mặt hàng \\ \hline
+4 & update & any & Sửa thông tin hạn sử dụng, số lượng... \\ \hline
+5 & remove & any & Xóa khỏi database \\ \hline
+6 & consume & any & Trừ đi số lượng khi dùng \\ \hline
+7 & markWasted & any & Chuyển trạng thái sang hỏng/lãng phí \\ \hline
+\end{longtable}
+
+\paragraph{Tham số (Parameters):}
+\begin{itemize}[leftmargin=*]
+    \item \texttt{data} – Dữ liệu truyền từ Controller
+\end{itemize}
+
+
+\paragraph{Ngoại lệ (Exceptions):}
+\begin{itemize}[leftmargin=*]
+    \item Lỗi nghiệp vụ (hết số lượng để tiêu thụ...)
+\end{itemize}
+
+
+\paragraph{Luồng xử lý (Method details):}
+\begin{itemize}[leftmargin=*]
+    \item Tương tác CRUD với \texttt{InventoryEntity}.
+\end{itemize}
+
+
+\paragraph{Trạng thái (States):}
+Không có.
+
+\vskip 0.5cm
+\noindent\rule{\textwidth}{0.5pt}
+\vskip 0.5cm
+
+\subsection{Entities}
+
+\subsubsection{Lớp \texttt{InventoryEntity}}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Stereotype:} \texttt{\textless{}\textless{}Entity\textgreater{}\textgreater{}}
+    \item \textbf{Mô tả:} Đối tượng dữ liệu ánh xạ từ Database bảng \texttt{inventory}.
+\end{itemize}
+
+\paragraph{Thuộc tính (Attributes):}
+\begin{longtable}{|c|l|l|l|p{7.5cm}|}
+\hline
+\textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu} & \textbf{Giá trị mặc định} & \textbf{Mô tả} \\ \hline
+\endhead
+1 & inventory\_id & INT & \texttt{null} & Khóa chính \\ \hline
+2 & group\_id & INT & \texttt{null} & Nhóm sở hữu \\ \hline
+3 & food\_id & INT & \texttt{null} & ID thực phẩm \\ \hline
+4 & quantity & DECIMAL & \texttt{0} & Số lượng \\ \hline
+5 & expiry\_date & DATE & \texttt{null} & Ngày hết hạn \\ \hline
+6 & location & VARCHAR & \texttt{""} & Vị trí lưu trữ (tủ lạnh, kệ bếp...) \\ \hline
+\end{longtable}
+
+\paragraph{Phương thức (Operations):}
+Không có.
+
+\paragraph{Tham số (Parameters):}
+Không có.
+
+\paragraph{Ngoại lệ (Exceptions):}
+Không có.
+
+\paragraph{Luồng xử lý (Method details):}
+Không có.
+
+\paragraph{Trạng thái (States):}
+Không có.
+
+\vskip 0.5cm
+\noindent\rule{\textwidth}{0.5pt}
+\vskip 0.5cm
+
+\section{Mô-đun Kế hoạch Ăn uống (Meals Module)}
+
+Mô-đun này quản lý lịch trình ăn uống hàng ngày, lưu lại các bữa ăn dự kiến, kiểm tra nguyên liệu còn thiếu và tự động gợi ý danh sách mua sắm.
+
+\subsection{Views}
+
+\subsubsection{Lớp \texttt{MealPlanner}}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Stereotype:} \texttt{\textless{}\textless{}Boundary\textgreater{}\textgreater{}}
+    \item \textbf{Mô tả:} Component React quản lý giao diện lập kế hoạch bữa ăn.
+\end{itemize}
+
+\paragraph{Thuộc tính (Attributes):}
+Không có.
+
+\paragraph{Phương thức (Operations):}
+\begin{longtable}{|c|l|l|p{9.5cm}|}
+\hline
+\textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu trả về} & \textbf{Mô tả (mục đích)} \\ \hline
+\endhead
+1 & render & JSX.Element & Render giao diện HTML/CSS \\ \hline
+\end{longtable}
+
+\paragraph{Tham số (Parameters):}
+Không có.
+
+\paragraph{Ngoại lệ (Exceptions):}
+Không có.
+
+\paragraph{Luồng xử lý (Method details):}
+\begin{itemize}[leftmargin=*]
+    \item Hiển thị lịch ăn uống của gia đình.
+\end{itemize}
+
+
+\paragraph{Trạng thái (States):}
+Không có.
+
+\vskip 0.5cm
+\noindent\rule{\textwidth}{0.5pt}
+\vskip 0.5cm
+
+\subsection{API Clients}
+
+\subsubsection{Lớp \texttt{MealsApiClient}}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Stereotype:} \texttt{\textless{}\textless{}Boundary\textgreater{}\textgreater{}}
+    \item \textbf{Mô tả:} Lớp gọi API bằng Axios để tương tác với Backend.
+\end{itemize}
+
+\paragraph{Thuộc tính (Attributes):}
+\begin{longtable}{|c|l|l|l|p{7.5cm}|}
+\hline
+\textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu} & \textbf{Giá trị mặc định} & \textbf{Mô tả} \\ \hline
+\endhead
+1 & baseUrl & String & \texttt{""} & URL gốc của backend \\ \hline
+\end{longtable}
+
+\paragraph{Phương thức (Operations):}
+\begin{longtable}{|c|l|l|p{9.5cm}|}
+\hline
+\textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu trả về} & \textbf{Mô tả (mục đích)} \\ \hline
+\endhead
+1 & findAll & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Lấy danh sách kế hoạch bữa ăn \\ \hline
+2 & create & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Thêm bữa ăn vào kế hoạch \\ \hline
+3 & findOne & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Xem chi tiết kế hoạch \\ \hline
+4 & getMissingIngredients & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Kiểm tra nguyên liệu còn thiếu \\ \hline
+5 & generateShoppingList & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Tự động tạo danh sách mua sắm \\ \hline
+6 & update & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Sửa kế hoạch bữa ăn \\ \hline
+7 & remove & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Xóa kế hoạch \\ \hline
+\end{longtable}
+
+\paragraph{Tham số (Parameters):}
+\begin{itemize}[leftmargin=*]
+    \item \texttt{data} – Đối tượng chứa tham số cho từng request
+\end{itemize}
+
+
+\paragraph{Ngoại lệ (Exceptions):}
+\begin{itemize}[leftmargin=*]
+    \item Lỗi kết nối API.
+\end{itemize}
+
+
+\paragraph{Luồng xử lý (Method details):}
+\begin{itemize}[leftmargin=*]
+    \item Gọi đến đường dẫn \texttt{/api/meals}.
+\end{itemize}
+
+
+\paragraph{Trạng thái (States):}
+Không có.
+
+\vskip 0.5cm
+\noindent\rule{\textwidth}{0.5pt}
+\vskip 0.5cm
+
+\subsection{Controllers}
+
+\subsubsection{Lớp \texttt{MealsController}}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Stereotype:} \texttt{\textless{}\textless{}Control\textgreater{}\textgreater{}}
+    \item \textbf{Mô tả:} NestJS Controller nhận request từ Frontend.
+\end{itemize}
+
+\paragraph{Thuộc tính (Attributes):}
+Không có.
+
+\paragraph{Phương thức (Operations):}
+\begin{longtable}{|c|l|l|p{9.5cm}|}
+\hline
+\textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu trả về} & \textbf{Mô tả (mục đích)} \\ \hline
+\endhead
+1 & findAll & Response & Gọi Service tìm danh sách \\ \hline
+2 & create & Response & Gọi Service tạo mới \\ \hline
+3 & findOne & Response & Gọi Service lấy chi tiết \\ \hline
+4 & getMissingIngredients & Response & Gọi Service phân tích nguyên liệu thiếu \\ \hline
+5 & generateShoppingList & Response & Gọi Service sinh danh sách mua sắm \\ \hline
+6 & update & Response & Gọi Service cập nhật \\ \hline
+7 & remove & Response & Gọi Service xóa \\ \hline
+\end{longtable}
+
+\paragraph{Tham số (Parameters):}
+\begin{itemize}[leftmargin=*]
+    \item \texttt{dto} – Tham số body/query truyền từ client.
+\end{itemize}
+
+
+\paragraph{Ngoại lệ (Exceptions):}
+\begin{itemize}[leftmargin=*]
+    \item \texttt{NotFoundException} – Nếu meal\_id không hợp lệ.
+\end{itemize}
+
+
+\paragraph{Luồng xử lý (Method details):}
+\begin{itemize}[leftmargin=*]
+    \item Trích xuất dữ liệu và truyền cho \texttt{MealsService}.
+\end{itemize}
+
+
+\paragraph{Trạng thái (States):}
+Không có.
+
+\vskip 0.5cm
+\noindent\rule{\textwidth}{0.5pt}
+\vskip 0.5cm
+
+\subsection{Services}
+
+\subsubsection{Lớp \texttt{MealsService}}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Stereotype:} \texttt{\textless{}\textless{}Control\textgreater{}\textgreater{}}
+    \item \textbf{Mô tả:} Lớp chứa Business Logic xử lý nghiệp vụ bữa ăn.
+\end{itemize}
+
+\paragraph{Thuộc tính (Attributes):}
+Không có.
+
+\paragraph{Phương thức (Operations):}
+\begin{longtable}{|c|l|l|p{9.5cm}|}
+\hline
+\textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu trả về} & \textbf{Mô tả (mục đích)} \\ \hline
+\endhead
+1 & findAll & any & Logic lấy kế hoạch bữa ăn \\ \hline
+2 & create & any & Khởi tạo kế hoạch \\ \hline
+3 & findOne & any & Tìm kiếm theo ID \\ \hline
+4 & getMissingIngredients & any & Thuật toán đối chiếu Pantry để tìm đồ thiếu \\ \hline
+5 & generateShoppingList & any & Tự động thêm đồ thiếu vào Shopping List \\ \hline
+6 & update & any & Sửa ngày giờ/loại bữa ăn \\ \hline
+7 & remove & any & Xóa khỏi database \\ \hline
+\end{longtable}
+
+\paragraph{Tham số (Parameters):}
+\begin{itemize}[leftmargin=*]
+    \item \texttt{data} – Dữ liệu từ Controller.
+\end{itemize}
+
+
+\paragraph{Ngoại lệ (Exceptions):}
+\begin{itemize}[leftmargin=*]
+    \item Ngoại lệ logic.
+\end{itemize}
+
+
+\paragraph{Luồng xử lý (Method details):}
+\begin{itemize}[leftmargin=*]
+    \item CRUD thông qua \texttt{MealPlansEntity}. Phối hợp với Module Pantry và Shopping List.
+\end{itemize}
+
+
+\paragraph{Trạng thái (States):}
+Không có.
+
+\vskip 0.5cm
+\noindent\rule{\textwidth}{0.5pt}
+\vskip 0.5cm
+
+\subsection{Entities}
+
+\subsubsection{Lớp \texttt{MealPlansEntity}}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Stereotype:} \texttt{\textless{}\textless{}Entity\textgreater{}\textgreater{}}
+    \item \textbf{Mô tả:} Đối tượng dữ liệu ánh xạ từ Database bảng \texttt{meal\_plans}.
+\end{itemize}
+
+\paragraph{Thuộc tính (Attributes):}
+\begin{longtable}{|c|l|l|l|p{7.5cm}|}
+\hline
+\textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu} & \textbf{Giá trị mặc định} & \textbf{Mô tả} \\ \hline
+\endhead
+1 & plan\_id & INT & \texttt{null} & Khóa chính \\ \hline
+2 & group\_id & INT & \texttt{null} & Nhóm sở hữu \\ \hline
+3 & date & DATE & \texttt{null} & Ngày dự kiến \\ \hline
+4 & meal\_type & VARCHAR & \texttt{""} & Loại bữa (Sáng/Trưa/Tối) \\ \hline
+5 & recipe\_id & INT & \texttt{null} & ID công thức \\ \hline
+6 & is\_completed & BOOLEAN & \texttt{false} & Đã hoàn tất nấu chưa \\ \hline
+\end{longtable}
+
+\paragraph{Phương thức (Operations):}
+Không có.
+
+\paragraph{Tham số (Parameters):}
+Không có.
+
+\paragraph{Ngoại lệ (Exceptions):}
+Không có.
+
+\paragraph{Luồng xử lý (Method details):}
+Không có.
+
+\paragraph{Trạng thái (States):}
+Không có.
+
+\vskip 0.5cm
+\noindent\rule{\textwidth}{0.5pt}
+\vskip 0.5cm
+
+\section{Mô-đun Công thức nấu ăn và AI Chef (Recipes Module)}
+
+Mô-đun này quản lý kho công thức nấu ăn, gợi ý món ăn dựa trên lượng thực phẩm sẵn có trong tủ lạnh và tích hợp trợ lý thông minh AI Chef.
+
+\subsection{Views}
+
+\subsubsection{Lớp \texttt{RecipeEditor}}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Stereotype:} \texttt{\textless{}\textless{}Boundary\textgreater{}\textgreater{}}
+    \item \textbf{Mô tả:} Component React quản lý giao diện tạo/chỉnh sửa công thức.
+\end{itemize}
+
+\paragraph{Thuộc tính (Attributes):}
+Không có.
+
+\paragraph{Phương thức (Operations):}
+\begin{longtable}{|c|l|l|p{9.5cm}|}
+\hline
+\textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu trả về} & \textbf{Mô tả (mục đích)} \\ \hline
+\endhead
+1 & render & JSX.Element & Render giao diện HTML/CSS \\ \hline
+\end{longtable}
+
+\paragraph{Tham số (Parameters):}
+Không có.
+
+\paragraph{Ngoại lệ (Exceptions):}
+Không có.
+
+\paragraph{Luồng xử lý (Method details):}
+\begin{itemize}[leftmargin=*]
+    \item Form nhập liệu các bước nấu và nguyên liệu.
+\end{itemize}
+
+
+\paragraph{Trạng thái (States):}
+Không có.
+
+\vskip 0.5cm
+\noindent\rule{\textwidth}{0.5pt}
+\vskip 0.5cm
+
+\subsubsection{Lớp \texttt{RecipeDetail}}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Stereotype:} \texttt{\textless{}\textless{}Boundary\textgreater{}\textgreater{}}
+    \item \textbf{Mô tả:} Component React quản lý giao diện chi tiết công thức nấu ăn.
+\end{itemize}
+
+\paragraph{Thuộc tính (Attributes):}
+Không có.
+
+\paragraph{Phương thức (Operations):}
+\begin{longtable}{|c|l|l|p{9.5cm}|}
+\hline
+\textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu trả về} & \textbf{Mô tả (mục đích)} \\ \hline
+\endhead
+1 & render & JSX.Element & Render giao diện HTML/CSS \\ \hline
+\end{longtable}
+
+\paragraph{Tham số (Parameters):}
+Không có.
+
+\paragraph{Ngoại lệ (Exceptions):}
+Không có.
+
+\paragraph{Luồng xử lý (Method details):}
+\begin{itemize}[leftmargin=*]
+    \item Đọc nội dung công thức và hiển thị.
+\end{itemize}
+
+
+\paragraph{Trạng thái (States):}
+Không có.
+
+\vskip 0.5cm
+\noindent\rule{\textwidth}{0.5pt}
+\vskip 0.5cm
+
+\subsubsection{Lớp \texttt{RecipeSuggestion}}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Stereotype:} \texttt{\textless{}\textless{}Boundary\textgreater{}\textgreater{}}
+    \item \textbf{Mô tả:} Component React quản lý giao diện gợi ý công thức.
+\end{itemize}
+
+\paragraph{Thuộc tính (Attributes):}
+Không có.
+
+\paragraph{Phương thức (Operations):}
+\begin{longtable}{|c|l|l|p{9.5cm}|}
+\hline
+\textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu trả về} & \textbf{Mô tả (mục đích)} \\ \hline
+\endhead
+1 & render & JSX.Element & Render giao diện HTML/CSS \\ \hline
+\end{longtable}
+
+\paragraph{Tham số (Parameters):}
+Không có.
+
+\paragraph{Ngoại lệ (Exceptions):}
+Không có.
+
+\paragraph{Luồng xử lý (Method details):}
+\begin{itemize}[leftmargin=*]
+    \item Hiển thị danh sách món được gợi ý.
+\end{itemize}
+
+
+\paragraph{Trạng thái (States):}
+Không có.
+
+\vskip 0.5cm
+\noindent\rule{\textwidth}{0.5pt}
+\vskip 0.5cm
+
+\subsection{API Clients}
+
+\subsubsection{Lớp \texttt{RecipesApiClient}}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Stereotype:} \texttt{\textless{}\textless{}Boundary\textgreater{}\textgreater{}}
+    \item \textbf{Mô tả:} Lớp gọi API bằng Axios để tương tác với Backend.
+\end{itemize}
+
+\paragraph{Thuộc tính (Attributes):}
+\begin{longtable}{|c|l|l|l|p{7.5cm}|}
+\hline
+\textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu} & \textbf{Giá trị mặc định} & \textbf{Mô tả} \\ \hline
+\endhead
+1 & baseUrl & String & \texttt{""} & URL gốc của backend \\ \hline
+\end{longtable}
+
+\paragraph{Phương thức (Operations):}
+\begin{longtable}{|c|l|l|p{9.5cm}|}
+\hline
+\textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu trả về} & \textbf{Mô tả (mục đích)} \\ \hline
+\endhead
+1 & findAll & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Lấy danh sách công thức \\ \hline
+2 & getSuggestions & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Nhận gợi ý công thức \\ \hline
+3 & findFavorites & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Lấy danh sách món yêu thích \\ \hline
+4 & findOne & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Lấy chi tiết công thức \\ \hline
+5 & addFavorite & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Thêm món vào yêu thích \\ \hline
+6 & removeFavorite & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Bỏ món khỏi yêu thích \\ \hline
+7 & getMissingIngredients & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Kiểm tra nguyên liệu thiếu \\ \hline
+8 & generateShoppingList & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Tạo danh sách mua sắm từ món ăn \\ \hline
+9 & create & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Tạo công thức \\ \hline
+10 & update & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Cập nhật công thức \\ \hline
+11 & remove & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Xóa công thức \\ \hline
+\end{longtable}
+
+\paragraph{Tham số (Parameters):}
+\begin{itemize}[leftmargin=*]
+    \item \texttt{data} – Đối tượng chứa tham số cho request.
+\end{itemize}
+
+
+\paragraph{Ngoại lệ (Exceptions):}
+\begin{itemize}[leftmargin=*]
+    \item Lỗi mạng.
+\end{itemize}
+
+
+\paragraph{Luồng xử lý (Method details):}
+\begin{itemize}[leftmargin=*]
+    \item Gọi Axios request đến API.
+\end{itemize}
+
+
+\paragraph{Trạng thái (States):}
+Không có.
+
+\vskip 0.5cm
+\noindent\rule{\textwidth}{0.5pt}
+\vskip 0.5cm
+
+\subsection{Controllers}
+
+\subsubsection{Lớp \texttt{RecipesController}}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Stereotype:} \texttt{\textless{}\textless{}Control\textgreater{}\textgreater{}}
+    \item \textbf{Mô tả:} NestJS Controller nhận request từ Frontend.
+\end{itemize}
+
+\paragraph{Thuộc tính (Attributes):}
+Không có.
+
+\paragraph{Phương thức (Operations):}
+\begin{longtable}{|c|l|l|p{9.5cm}|}
+\hline
+\textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu trả về} & \textbf{Mô tả (mục đích)} \\ \hline
+\endhead
+1 & findAll & Response & Gọi Service danh sách công thức \\ \hline
+2 & getSuggestions & Response & Gọi Service lấy gợi ý \\ \hline
+3 & findFavorites & Response & Gọi Service tìm món yêu thích \\ \hline
+4 & findOne & Response & Gọi Service lấy chi tiết \\ \hline
+5 & addFavorite & Response & Gọi Service thêm yêu thích \\ \hline
+6 & removeFavorite & Response & Gọi Service xóa yêu thích \\ \hline
+7 & getMissingIngredients & Response & Gọi Service tính nguyên liệu \\ \hline
+8 & generateShoppingList & Response & Gọi Service tạo danh sách \\ \hline
+9 & create & Response & Gọi Service tạo công thức \\ \hline
+10 & update & Response & Gọi Service cập nhật \\ \hline
+11 & remove & Response & Gọi Service xóa công thức \\ \hline
+\end{longtable}
+
+\paragraph{Tham số (Parameters):}
+\begin{itemize}[leftmargin=*]
+    \item \texttt{dto} – Tham số body hoặc params.
+\end{itemize}
+
+
+\paragraph{Ngoại lệ (Exceptions):}
+\begin{itemize}[leftmargin=*]
+    \item Các exception HTTP chuẩn.
+\end{itemize}
+
+
+\paragraph{Luồng xử lý (Method details):}
+\begin{itemize}[leftmargin=*]
+    \item Điều hướng xử lý sang Service.
+\end{itemize}
+
+
+\paragraph{Trạng thái (States):}
+Không có.
+
+\vskip 0.5cm
+\noindent\rule{\textwidth}{0.5pt}
+\vskip 0.5cm
+
+\subsection{Services}
+
+\subsubsection{Lớp \texttt{RecipesService}}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Stereotype:} \texttt{\textless{}\textless{}Control\textgreater{}\textgreater{}}
+    \item \textbf{Mô tả:} Lớp chứa Business Logic xử lý công thức nấu ăn.
+\end{itemize}
+
+\paragraph{Thuộc tính (Attributes):}
+Không có.
+
+\paragraph{Phương thức (Operations):}
+\begin{longtable}{|c|l|l|p{9.5cm}|}
+\hline
+\textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu trả về} & \textbf{Mô tả (mục đích)} \\ \hline
+\endhead
+1 & findAll & any & Đọc database \texttt{recipes} \\ \hline
+2 & getSuggestions & any & Thuật toán gợi ý dựa trên nguyên liệu \\ \hline
+3 & findFavorites & any & Lọc món ăn theo bảng trung gian \\ \hline
+4 & findOne & any & Tìm chi tiết một món \\ \hline
+5 & addFavorite & any & Ghi database yêu thích \\ \hline
+6 & removeFavorite & any & Xóa database yêu thích \\ \hline
+7 & getMissingIngredients & any & So sánh \texttt{recipe\_ingredients} với \texttt{inventory} \\ \hline
+8 & generateShoppingList & any & Chuyển đổi nguyên liệu thiếu thành shopping item \\ \hline
+9 & create & any & Thêm mới \texttt{recipes} \\ \hline
+10 & update & any & Sửa \texttt{recipes} \\ \hline
+11 & remove & any & Xóa \texttt{recipes} \\ \hline
+\end{longtable}
+
+\paragraph{Tham số (Parameters):}
+\begin{itemize}[leftmargin=*]
+    \item \texttt{data} – Dữ liệu cấu trúc từ Controller.
+\end{itemize}
+
+
+\paragraph{Ngoại lệ (Exceptions):}
+\begin{itemize}[leftmargin=*]
+    \item Lỗi logic nghiệp vụ.
+\end{itemize}
+
+
+\paragraph{Luồng xử lý (Method details):}
+\begin{itemize}[leftmargin=*]
+    \item CRUD Entity và thực hiện các thuật toán phức tạp như Suggestion.
+\end{itemize}
+
+
+\paragraph{Trạng thái (States):}
+Không có.
+
+\vskip 0.5cm
+\noindent\rule{\textwidth}{0.5pt}
+\vskip 0.5cm
+
+\subsection{Entities}
+
+\subsubsection{Lớp \texttt{RecipesEntity}}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Stereotype:} \texttt{\textless{}\textless{}Entity\textgreater{}\textgreater{}}
+    \item \textbf{Mô tả:} Bảng lưu trữ công thức \texttt{recipes}.
+\end{itemize}
+
+\paragraph{Thuộc tính (Attributes):}
+\begin{longtable}{|c|l|l|l|p{7.5cm}|}
+\hline
+\textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu} & \textbf{Giá trị mặc định} & \textbf{Mô tả} \\ \hline
+\endhead
+1 & recipe\_id & INT & \texttt{null} & Khóa chính \\ \hline
+2 & name & VARCHAR & \texttt{""} & Tên món ăn \\ \hline
+3 & instructions & TEXT & \texttt{""} & Hướng dẫn cách làm \\ \hline
+4 & image\_url & VARCHAR & \texttt{""} & Link ảnh \\ \hline
+5 & author\_id & INT & \texttt{null} & Người đóng góp \\ \hline
+6 & status & VARCHAR & \texttt{""} & Trạng thái phê duyệt \\ \hline
+\end{longtable}
+
+\paragraph{Phương thức (Operations):}
+Không có.
+
+\paragraph{Tham số (Parameters):}
+Không có.
+
+\paragraph{Ngoại lệ (Exceptions):}
+Không có.
+
+\paragraph{Luồng xử lý (Method details):}
+Không có.
+
+\paragraph{Trạng thái (States):}
+Không có.
+
+\vskip 0.5cm
+\noindent\rule{\textwidth}{0.5pt}
+\vskip 0.5cm
+
+\subsubsection{Lớp \texttt{RecipeIngredientsEntity}}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Stereotype:} \texttt{\textless{}\textless{}Entity\textgreater{}\textgreater{}}
+    \item \textbf{Mô tả:} Bảng lưu nguyên liệu từng món \texttt{recipe\_ingredients}.
+\end{itemize}
+
+\paragraph{Thuộc tính (Attributes):}
+\begin{longtable}{|c|l|l|l|p{7.5cm}|}
+\hline
+\textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu} & \textbf{Giá trị mặc định} & \textbf{Mô tả} \\ \hline
+\endhead
+1 & recipe\_id & INT & \texttt{null} & Khóa món ăn \\ \hline
+2 & food\_id & INT & \texttt{null} & Khóa thực phẩm \\ \hline
+3 & quantity\_required & DECIMAL & \texttt{0} & Số lượng yêu cầu \\ \hline
+\end{longtable}
+
+\paragraph{Phương thức (Operations):}
+Không có.
+
+\paragraph{Tham số (Parameters):}
+Không có.
+
+\paragraph{Ngoại lệ (Exceptions):}
+Không có.
+
+\paragraph{Luồng xử lý (Method details):}
+Không có.
+
+\paragraph{Trạng thái (States):}
+Không có.
+
+\vskip 0.5cm
+\noindent\rule{\textwidth}{0.5pt}
+\vskip 0.5cm
+
+\section{Mô-đun Thống kê và Báo cáo (Reports/Statistics Module)}
+
+Mô-đun này phân tích dữ liệu chi tiêu, xu hướng tiêu thụ thực phẩm và lượng thực phẩm bị lãng phí để xuất báo cáo dạng biểu đồ trực quan.
+
+\subsection{Views}
+
+\subsubsection{Lớp \texttt{StatsDashboard}}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Stereotype:} \texttt{\textless{}\textless{}Boundary\textgreater{}\textgreater{}}
+    \item \textbf{Mô tả:} Component React hiển thị bảng điều khiển báo cáo thống kê.
+\end{itemize}
+
+\paragraph{Thuộc tính (Attributes):}
+Không có.
+
+\paragraph{Phương thức (Operations):}
+\begin{longtable}{|c|l|l|p{9.5cm}|}
+\hline
+\textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu trả về} & \textbf{Mô tả (mục đích)} \\ \hline
+\endhead
+1 & render & JSX.Element & Render giao diện HTML/CSS \\ \hline
+\end{longtable}
+
+\paragraph{Tham số (Parameters):}
+Không có.
+
+\paragraph{Ngoại lệ (Exceptions):}
+Không có.
+
+\paragraph{Luồng xử lý (Method details):}
+\begin{itemize}[leftmargin=*]
+    \item Hiển thị các biểu đồ (charts) phân tích số liệu.
+\end{itemize}
+
+
+\paragraph{Trạng thái (States):}
+Không có.
+
+\vskip 0.5cm
+\noindent\rule{\textwidth}{0.5pt}
+\vskip 0.5cm
+
+\subsection{API Clients}
+
+\subsubsection{Lớp \texttt{ReportsApiClient}}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Stereotype:} \texttt{\textless{}\textless{}Boundary\textgreater{}\textgreater{}}
+    \item \textbf{Mô tả:} Lớp gọi API bằng Axios để tương tác với Backend.
+\end{itemize}
+
+\paragraph{Thuộc tính (Attributes):}
+\begin{longtable}{|c|l|l|l|p{7.5cm}|}
+\hline
+\textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu} & \textbf{Giá trị mặc định} & \textbf{Mô tả} \\ \hline
+\endhead
+1 & baseUrl & String & \texttt{""} & URL gốc của backend \\ \hline
+\end{longtable}
+
+\paragraph{Phương thức (Operations):}
+\begin{longtable}{|c|l|l|p{9.5cm}|}
+\hline
+\textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu trả về} & \textbf{Mô tả (mục đích)} \\ \hline
+\endhead
+1 & getDashboard & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Lấy dữ liệu tổng hợp chung \\ \hline
+2 & getConsumptionTrends & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Lấy báo cáo xu hướng tiêu thụ \\ \hline
+3 & getWasteReport & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Lấy báo cáo thực phẩm lãng phí \\ \hline
+\end{longtable}
+
+\paragraph{Tham số (Parameters):}
+\begin{itemize}[leftmargin=*]
+    \item \texttt{data} – Các bộ lọc tham số (ngày tháng, loại...).
+\end{itemize}
+
+
+\paragraph{Ngoại lệ (Exceptions):}
+\begin{itemize}[leftmargin=*]
+    \item Lỗi kết nối HTTP.
+\end{itemize}
+
+
+\paragraph{Luồng xử lý (Method details):}
+\begin{itemize}[leftmargin=*]
+    \item Gọi đến \texttt{GET /api/reports/...} để tải số liệu JSON.
+\end{itemize}
+
+
+\paragraph{Trạng thái (States):}
+Không có.
+
+\vskip 0.5cm
+\noindent\rule{\textwidth}{0.5pt}
+\vskip 0.5cm
+
+\subsection{Controllers}
+
+\subsubsection{Lớp \texttt{ReportsController}}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Stereotype:} \texttt{\textless{}\textless{}Control\textgreater{}\textgreater{}}
+    \item \textbf{Mô tả:} NestJS Controller nhận request báo cáo.
+\end{itemize}
+
+\paragraph{Thuộc tính (Attributes):}
+Không có.
+
+\paragraph{Phương thức (Operations):}
+\begin{longtable}{|c|l|l|p{9.5cm}|}
+\hline
+\textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu trả về} & \textbf{Mô tả (mục đích)} \\ \hline
+\endhead
+1 & getDashboard & Response & Gọi Service tổng hợp chung \\ \hline
+2 & getConsumptionTrends & Response & Gọi Service xu hướng tiêu dùng \\ \hline
+3 & getWasteReport & Response & Gọi Service báo cáo hao phí \\ \hline
+\end{longtable}
+
+\paragraph{Tham số (Parameters):}
+\begin{itemize}[leftmargin=*]
+    \item \texttt{dto} – Tham số thời gian, nhóm.
+\end{itemize}
+
+
+\paragraph{Ngoại lệ (Exceptions):}
+\begin{itemize}[leftmargin=*]
+    \item \texttt{BadRequestException} – Dữ liệu tham số sai.
+\end{itemize}
+
+
+\paragraph{Luồng xử lý (Method details):}
+\begin{itemize}[leftmargin=*]
+    \item Validate query params rồi chuyển tiếp cho Service.
+\end{itemize}
+
+
+\paragraph{Trạng thái (States):}
+Không có.
+
+\vskip 0.5cm
+\noindent\rule{\textwidth}{0.5pt}
+\vskip 0.5cm
+
+\subsection{Services}
+
+\subsubsection{Lớp \texttt{ReportsService}}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Stereotype:} \texttt{\textless{}\textless{}Control\textgreater{}\textgreater{}}
+    \item \textbf{Mô tả:} Lớp chứa Business Logic thống kê dữ liệu.
+\end{itemize}
+
+\paragraph{Thuộc tính (Attributes):}
+Không có.
+
+\paragraph{Phương thức (Operations):}
+\begin{longtable}{|c|l|l|p{9.5cm}|}
+\hline
+\textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu trả về} & \textbf{Mô tả (mục đích)} \\ \hline
+\endhead
+1 & getDashboard & any & Tính toán chỉ số tổng quát \\ \hline
+2 & getConsumptionTrends & any & Tính toán xu hướng dùng \\ \hline
+3 & getWasteReport & any & Tính lượng thực phẩm bỏ đi \\ \hline
+\end{longtable}
+
+\paragraph{Tham số (Parameters):}
+\begin{itemize}[leftmargin=*]
+    \item \texttt{data} – Dữ liệu lọc từ Controller.
+\end{itemize}
+
+
+\paragraph{Ngoại lệ (Exceptions):}
+\begin{itemize}[leftmargin=*]
+    \item Logic exception.
+\end{itemize}
+
+
+\paragraph{Luồng xử lý (Method details):}
+\begin{itemize}[leftmargin=*]
+    \item Chạy các câu query phức tạp với SQL Aggregate Functions (\texttt{COUNT}, \texttt{SUM}, \texttt{GROUP BY}) vào các entity liên quan (Inventory, Meals, Shopping Lists).
+\end{itemize}
+
+
+\paragraph{Trạng thái (States):}
+Không có.
+
+\vskip 0.5cm
+\noindent\rule{\textwidth}{0.5pt}
+\vskip 0.5cm
+
+\section{Mô-đun Quản trị Hệ thống (Admin Module)}
+
+Mô-đun này dành riêng cho Admin để phê duyệt công thức, quản lý danh mục thực phẩm hệ thống, đơn vị tính và kiểm duyệt người dùng.
+
+\subsection{Views}
+
+\subsubsection{Lớp \texttt{AdminDashboard}}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Stereotype:} \texttt{\textless{}\textless{}Boundary\textgreater{}\textgreater{}}
+    \item \textbf{Mô tả:} Component React hiển thị bảng điều khiển quản trị.
+\end{itemize}
+
+\paragraph{Thuộc tính (Attributes):}
+Không có.
+
+\paragraph{Phương thức (Operations):}
+\begin{longtable}{|c|l|l|p{9.5cm}|}
+\hline
+\textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu trả về} & \textbf{Mô tả (mục đích)} \\ \hline
+\endhead
+1 & render & JSX.Element & Render giao diện HTML/CSS \\ \hline
+\end{longtable}
+
+\paragraph{Tham số (Parameters):}
+Không có.
+
+\paragraph{Ngoại lệ (Exceptions):}
+Không có.
+
+\paragraph{Luồng xử lý (Method details):}
+\begin{itemize}[leftmargin=*]
+    \item Hiển thị menu quản lý Catalog, Recipe, System, Users.
+\end{itemize}
+
+
+\paragraph{Trạng thái (States):}
+Không có.
+
+\vskip 0.5cm
+\noindent\rule{\textwidth}{0.5pt}
+\vskip 0.5cm
+
+\subsection{API Clients}
+
+\subsubsection{Lớp \texttt{AdminApiClient}}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Stereotype:} \texttt{\textless{}\textless{}Boundary\textgreater{}\textgreater{}}
+    \item \textbf{Mô tả:} Lớp gọi API bằng Axios để tương tác với Backend.
+\end{itemize}
+
+\paragraph{Thuộc tính (Attributes):}
+\begin{longtable}{|c|l|l|l|p{7.5cm}|}
+\hline
+\textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu} & \textbf{Giá trị mặc định} & \textbf{Mô tả} \\ \hline
+\endhead
+1 & baseUrl & String & \texttt{""} & URL gốc của backend \\ \hline
+\end{longtable}
+
+\paragraph{Phương thức (Operations):}
+\begin{longtable}{|c|l|l|p{9.5cm}|}
+\hline
+\textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu trả về} & \textbf{Mô tả (mục đích)} \\ \hline
+\endhead
+1 & findAllCategories & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Lấy DS danh mục thực phẩm \\ \hline
+2 & createCategory & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Thêm mới danh mục \\ \hline
+3 & updateCategory & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Cập nhật danh mục \\ \hline
+4 & removeCategory & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Xóa danh mục \\ \hline
+5 & findAllFoods & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Lấy DS thực phẩm \\ \hline
+6 & createFood & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Thêm mới thực phẩm \\ \hline
+7 & updateFood & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Cập nhật thực phẩm \\ \hline
+8 & removeFood & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Xóa thực phẩm \\ \hline
+9 & findAllUnits & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Lấy DS đơn vị tính \\ \hline
+10 & createUnit & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Thêm mới đơn vị tính \\ \hline
+11 & updateUnit & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Cập nhật đơn vị tính \\ \hline
+12 & removeUnit & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Xóa đơn vị tính \\ \hline
+13 & findAll & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Lấy DS Recipes/Users \\ \hline
+14 & updateStatus & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Sửa trạng thái phê duyệt \\ \hline
+15 & getStats & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Lấy số liệu chung hệ thống \\ \hline
+16 & findOne & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Xem chi tiết user/recipe \\ \hline
+17 & create & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Thêm mới (Generic) \\ \hline
+18 & update & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Cập nhật (Generic) \\ \hline
+19 & remove & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Xóa (Generic) \\ \hline
+\end{longtable}
+
+\paragraph{Tham số (Parameters):}
+\begin{itemize}[leftmargin=*]
+    \item \texttt{data} – Payload cấu hình gọi API.
+\end{itemize}
+
+
+\paragraph{Ngoại lệ (Exceptions):}
+\begin{itemize}[leftmargin=*]
+    \item Lỗi mạng HTTP.
+\end{itemize}
+
+
+\paragraph{Luồng xử lý (Method details):}
+\begin{itemize}[leftmargin=*]
+    \item Gọi đến endpoints dạng \texttt{/api/admin/...}
+\end{itemize}
+
+
+\paragraph{Trạng thái (States):}
+Không có.
+
+\vskip 0.5cm
+\noindent\rule{\textwidth}{0.5pt}
+\vskip 0.5cm
+
+\subsection{Controllers}
+
+\subsubsection{Lớp \texttt{AdminController}}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Stereotype:} \texttt{\textless{}\textless{}Control\textgreater{}\textgreater{}}
+    \item \textbf{Mô tả:} NestJS Controller nhận request từ Frontend.
+\end{itemize}
+
+\paragraph{Thuộc tính (Attributes):}
+Không có.
+
+\paragraph{Phương thức (Operations):}
+\begin{longtable}{|c|l|l|p{9.5cm}|}
+\hline
+\textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu trả về} & \textbf{Mô tả (mục đích)} \\ \hline
+\endhead
+1 & findAllCategories & Response & Gọi Service tìm danh mục \\ \hline
+2 & createCategory & Response & Gọi Service thêm danh mục \\ \hline
+3 & updateCategory & Response & Gọi Service cập nhật danh mục \\ \hline
+4 & removeCategory & Response & Gọi Service xóa danh mục \\ \hline
+5 & findAllFoods & Response & Gọi Service tìm thực phẩm \\ \hline
+6 & createFood & Response & Gọi Service thêm thực phẩm \\ \hline
+7 & updateFood & Response & Gọi Service cập nhật thực phẩm \\ \hline
+8 & removeFood & Response & Gọi Service xóa thực phẩm \\ \hline
+9 & findAllUnits & Response & Gọi Service tìm đơn vị tính \\ \hline
+10 & createUnit & Response & Gọi Service thêm đơn vị tính \\ \hline
+11 & updateUnit & Response & Gọi Service cập nhật đơn vị tính \\ \hline
+12 & removeUnit & Response & Gọi Service xóa đơn vị tính \\ \hline
+13 & findAll & Response & Gọi Service lấy DS \\ \hline
+14 & updateStatus & Response & Gọi Service duyệt trạng thái \\ \hline
+15 & getStats & Response & Gọi Service lấy thống kê \\ \hline
+16 & findOne & Response & Gọi Service tìm 1 bản ghi \\ \hline
+17 & create & Response & Gọi Service tạo mới \\ \hline
+18 & update & Response & Gọi Service cập nhật \\ \hline
+19 & remove & Response & Gọi Service xóa \\ \hline
+\end{longtable}
+
+\paragraph{Tham số (Parameters):}
+\begin{itemize}[leftmargin=*]
+    \item \texttt{dto} – Tham số body/param của HTTP.
+\end{itemize}
+
+
+\paragraph{Ngoại lệ (Exceptions):}
+\begin{itemize}[leftmargin=*]
+    \item \texttt{ForbiddenException} – Yêu cầu quyền admin (Role = Admin).
+\end{itemize}
+
+
+\paragraph{Luồng xử lý (Method details):}
+\begin{itemize}[leftmargin=*]
+    \item Điều hướng xử lý sang \texttt{AdminService}.
+\end{itemize}
+
+
+\paragraph{Trạng thái (States):}
+Không có.
+
+\vskip 0.5cm
+\noindent\rule{\textwidth}{0.5pt}
+\vskip 0.5cm
+
+\subsection{Services}
+
+\subsubsection{Lớp \texttt{AdminService}}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Stereotype:} \texttt{\textless{}\textless{}Control\textgreater{}\textgreater{}}
+    \item \textbf{Mô tả:} Lớp chứa Business Logic xử lý nghiệp vụ quản trị hệ thống.
+\end{itemize}
+
+\paragraph{Thuộc tính (Attributes):}
+Không có.
+
+\paragraph{Phương thức (Operations):}
+\begin{itemize}[leftmargin=*]
+    \item (Tham chiếu chức năng tương tự như ở Controller, nhưng xử lý sâu tầng database và sinh trả dữ liệu \texttt{any} thay vì \texttt{Response})*.
+    \item \texttt{findAllCategories(data)} -\textgreater{} \texttt{any}
+    \item \texttt{createCategory(data)} -\textgreater{} \texttt{any}
+    \item \texttt{updateCategory(data)} -\textgreater{} \texttt{any}
+    \item \texttt{removeCategory(data)} -\textgreater{} \texttt{any}
+    \item \texttt{findAllFoods(data)} -\textgreater{} \texttt{any}
+    \item \texttt{createFood(data)} -\textgreater{} \texttt{any}
+    \item \texttt{updateFood(data)} -\textgreater{} \texttt{any}
+    \item \texttt{removeFood(data)} -\textgreater{} \texttt{any}
+    \item \texttt{findAllUnits(data)} -\textgreater{} \texttt{any}
+    \item \texttt{createUnit(data)} -\textgreater{} \texttt{any}
+    \item \texttt{updateUnit(data)} -\textgreater{} \texttt{any}
+    \item \texttt{removeUnit(data)} -\textgreater{} \texttt{any}
+    \item \texttt{findAll(data)} -\textgreater{} \texttt{any}
+    \item \texttt{updateStatus(data)} -\textgreater{} \texttt{any}
+    \item \texttt{getStats(data)} -\textgreater{} \texttt{any}
+    \item \texttt{findOne(data)} -\textgreater{} \texttt{any}
+    \item \texttt{create(data)} -\textgreater{} \texttt{any}
+    \item \texttt{update(data)} -\textgreater{} \texttt{any}
+    \item \texttt{remove(data)} -\textgreater{} \texttt{any}
+\end{itemize}
+
+
+\paragraph{Tham số (Parameters):}
+\begin{itemize}[leftmargin=*]
+    \item \texttt{data} – Payload cấu trúc đã validate.
+\end{itemize}
+
+
+\paragraph{Ngoại lệ (Exceptions):}
+\begin{itemize}[leftmargin=*]
+    \item Ngoại lệ khóa ngoại DB (ràng buộc không thể xóa).
+\end{itemize}
+
+
+\paragraph{Luồng xử lý (Method details):}
+\begin{itemize}[leftmargin=*]
+    \item Thực hiện logic CRUD phức tạp, kiểm tra ràng buộc.
+\end{itemize}
+
+
+\paragraph{Trạng thái (States):}
+Không có.
+
+\vskip 0.5cm
+\noindent\rule{\textwidth}{0.5pt}
+\vskip 0.5cm
+
+\subsection{Entities}
+
+\subsubsection{Lớp \texttt{CategoriesEntity}}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Stereotype:} \texttt{\textless{}\textless{}Entity\textgreater{}\textgreater{}}
+    \item \textbf{Mô tả:} Bảng lưu trữ danh mục hệ thống \texttt{categories}.
+\end{itemize}
+
+\paragraph{Thuộc tính (Attributes):}
+\begin{longtable}{|c|l|l|l|p{7.5cm}|}
+\hline
+\textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu} & \textbf{Giá trị mặc định} & \textbf{Mô tả} \\ \hline
+\endhead
+1 & category\_id & INT & \texttt{null} & Khóa chính \\ \hline
+2 & name & VARCHAR & \texttt{""} & Tên danh mục \\ \hline
+\end{longtable}
+
+\paragraph{Phương thức (Operations):}
+Không có.
+
+\paragraph{Tham số (Parameters):}
+Không có.
+
+\paragraph{Ngoại lệ (Exceptions):}
+Không có.
+
+\paragraph{Luồng xử lý (Method details):}
+Không có.
+
+\paragraph{Trạng thái (States):}
+Không có.
+
+\vskip 0.5cm
+\noindent\rule{\textwidth}{0.5pt}
+\vskip 0.5cm
+
+\subsubsection{Lớp \texttt{FoodCatalogEntity}}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Stereotype:} \texttt{\textless{}\textless{}Entity\textgreater{}\textgreater{}}
+    \item \textbf{Mô tả:} Bảng lưu danh sách thực phẩm chuẩn của hệ thống \texttt{food\_catalog}.
+\end{itemize}
+
+\paragraph{Thuộc tính (Attributes):}
+\begin{longtable}{|c|l|l|l|p{7.5cm}|}
+\hline
+\textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu} & \textbf{Giá trị mặc định} & \textbf{Mô tả} \\ \hline
+\endhead
+1 & food\_id & INT & \texttt{null} & Khóa chính \\ \hline
+2 & name & VARCHAR & \texttt{""} & Tên thực phẩm \\ \hline
+3 & category\_id & INT & \texttt{null} & Thuộc danh mục nào \\ \hline
+4 & unit & VARCHAR & \texttt{""} & Đơn vị tính \\ \hline
+\end{longtable}
+
+\paragraph{Phương thức (Operations):}
+Không có.
+
+\paragraph{Tham số (Parameters):}
+Không có.
+
+\paragraph{Ngoại lệ (Exceptions):}
+Không có.
+
+\paragraph{Luồng xử lý (Method details):}
+Không có.
+
+\paragraph{Trạng thái (States):}
+Không có.
+
+\vskip 0.5cm
+\noindent\rule{\textwidth}{0.5pt}
+\vskip 0.5cm
+
+\section{Mô-đun Thành phần Dùng chung (Shared Module)}
+
+Mô-đun này chứa các thành phần chung như trang chủ ứng dụng, widget điều hướng, dịch vụ chạy ngầm (cronjobs) và hệ thống thông báo đẩy.
+
+\subsection{Views}
+
+\subsubsection{Lớp \texttt{Home}}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Stereotype:} \texttt{\textless{}\textless{}Boundary\textgreater{}\textgreater{}}
+    \item \textbf{Mô tả:} Component React hiển thị trang chủ chung của ứng dụng.
+\end{itemize}
+
+\paragraph{Thuộc tính (Attributes):}
+Không có.
+
+\paragraph{Phương thức (Operations):}
+\begin{longtable}{|c|l|l|p{9.5cm}|}
+\hline
+\textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu trả về} & \textbf{Mô tả (mục đích)} \\ \hline
+\endhead
+1 & render & JSX.Element & Render giao diện HTML/CSS \\ \hline
+\end{longtable}
+
+\paragraph{Tham số (Parameters):}
+Không có.
+
+\paragraph{Ngoại lệ (Exceptions):}
+Không có.
+
+\paragraph{Luồng xử lý (Method details):}
+\begin{itemize}[leftmargin=*]
+    \item Tích hợp các widget và thông báo tổng quan.
+\end{itemize}
+
+
+\paragraph{Trạng thái (States):}
+Không có.
+
+\vskip 0.5cm
+\noindent\rule{\textwidth}{0.5pt}
+\vskip 0.5cm
+
+\subsubsection{Lớp \texttt{AIChef}}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Stereotype:} \texttt{\textless{}\textless{}Boundary\textgreater{}\textgreater{}}
+    \item \textbf{Mô tả:} Component React hỗ trợ tính năng AI gợi ý món ăn qua Chat.
+\end{itemize}
+
+\paragraph{Thuộc tính (Attributes):}
+Không có.
+
+\paragraph{Phương thức (Operations):}
+\begin{longtable}{|c|l|l|p{9.5cm}|}
+\hline
+\textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu trả về} & \textbf{Mô tả (mục đích)} \\ \hline
+\endhead
+1 & render & JSX.Element & Render giao diện HTML/CSS \\ \hline
+\end{longtable}
+
+\paragraph{Tham số (Parameters):}
+Không có.
+
+\paragraph{Ngoại lệ (Exceptions):}
+Không có.
+
+\paragraph{Luồng xử lý (Method details):}
+\begin{itemize}[leftmargin=*]
+    \item Giao tiếp với DialogFlow/OpenAI để gợi ý đồ ăn.
+\end{itemize}
+
+
+\paragraph{Trạng thái (States):}
+Không có.
+
+\vskip 0.5cm
+\noindent\rule{\textwidth}{0.5pt}
+\vskip 0.5cm
+
+\subsubsection{Lớp \texttt{Notifications}}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Stereotype:} \texttt{\textless{}\textless{}Boundary\textgreater{}\textgreater{}}
+    \item \textbf{Mô tả:} Component React hiển thị danh sách thông báo.
+\end{itemize}
+
+\paragraph{Thuộc tính (Attributes):}
+Không có.
+
+\paragraph{Phương thức (Operations):}
+\begin{longtable}{|c|l|l|p{9.5cm}|}
+\hline
+\textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu trả về} & \textbf{Mô tả (mục đích)} \\ \hline
+\endhead
+1 & render & JSX.Element & Render giao diện HTML/CSS \\ \hline
+\end{longtable}
+
+\paragraph{Tham số (Parameters):}
+Không có.
+
+\paragraph{Ngoại lệ (Exceptions):}
+Không có.
+
+\paragraph{Luồng xử lý (Method details):}
+\begin{itemize}[leftmargin=*]
+    \item Hiển thị push notification hoặc in-app alert.
+\end{itemize}
+
+
+\paragraph{Trạng thái (States):}
+Không có.
+
+\vskip 0.5cm
+\noindent\rule{\textwidth}{0.5pt}
+\vskip 0.5cm
+
+\subsection{API Clients}
+
+\subsubsection{Lớp \texttt{SharedApiClient}}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Stereotype:} \texttt{\textless{}\textless{}Boundary\textgreater{}\textgreater{}}
+    \item \textbf{Mô tả:} Lớp gọi API chung cho hệ thống bằng Axios.
+\end{itemize}
+
+\paragraph{Thuộc tính (Attributes):}
+\begin{longtable}{|c|l|l|l|p{7.5cm}|}
+\hline
+\textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu} & \textbf{Giá trị mặc định} & \textbf{Mô tả} \\ \hline
+\endhead
+1 & baseUrl & String & \texttt{""} & URL gốc của backend \\ \hline
+\end{longtable}
+
+\paragraph{Phương thức (Operations):}
+Không có (Hoặc chứa các hàm upload image, push notification tùy dự án).
+
+\paragraph{Tham số (Parameters):}
+Không có.
+
+\paragraph{Ngoại lệ (Exceptions):}
+Không có.
+
+\paragraph{Luồng xử lý (Method details):}
+Không có.
+
+\paragraph{Trạng thái (States):}
+Không có.
+
+\vskip 0.5cm
+\noindent\rule{\textwidth}{0.5pt}
+\vskip 0.5cm
+
+\subsection{Controllers}
+
+\subsubsection{Lớp \texttt{SharedController}}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Stereotype:} \texttt{\textless{}\textless{}Control\textgreater{}\textgreater{}}
+    \item \textbf{Mô tả:} NestJS Controller xử lý các request cấu hình chung.
+\end{itemize}
+
+\paragraph{Thuộc tính (Attributes):}
+Không có.
+
+\paragraph{Phương thức (Operations):}
+Không có.
+
+\paragraph{Tham số (Parameters):}
+Không có.
+
+\paragraph{Ngoại lệ (Exceptions):}
+Không có.
+
+\paragraph{Luồng xử lý (Method details):}
+Không có.
+
+\paragraph{Trạng thái (States):}
+Không có.
+
+\vskip 0.5cm
+\noindent\rule{\textwidth}{0.5pt}
+\vskip 0.5cm
+
+\subsection{Services}
+
+\subsubsection{Lớp \texttt{SharedService}}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Stereotype:} \texttt{\textless{}\textless{}Control\textgreater{}\textgreater{}}
+    \item \textbf{Mô tả:} Lớp logic nghiệp vụ hỗ trợ đa phân hệ (như tính năng Cronjob, Socket.io...).
+\end{itemize}
+
+\paragraph{Thuộc tính (Attributes):}
+Không có.
+
+\paragraph{Phương thức (Operations):}
+Không có.
+
+\paragraph{Tham số (Parameters):}
+Không có.
+
+\paragraph{Ngoại lệ (Exceptions):}
+Không có.
+
+\paragraph{Luồng xử lý (Method details):}
+Không có.
+
+\paragraph{Trạng thái (States):}
+Không có.
+
+\vskip 0.5cm
+\noindent\rule{\textwidth}{0.5pt}
+\vskip 0.5cm
+
+\end{document}

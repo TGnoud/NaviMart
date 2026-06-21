@@ -80,11 +80,15 @@
 \rowcolor{headerblue}
 \thead{Họ và tên} & \thead{MSSV} \\
 \hline
-\rule{0pt}{2.4ex}\dots\dots\dots\dots\dots\dots & \dots\dots\dots \\
+\rule{0pt}{2.4ex}Đỗ Danh Dũng & 20235685 \\
 \hline
-\rule{0pt}{2.4ex}\dots\dots\dots\dots\dots\dots & \dots\dots\dots \\
+\rule{0pt}{2.4ex}Đinh Xuân Thái Dương & 20235889 \\
 \hline
-\rule{0pt}{2.4ex}\dots\dots\dots\dots\dots\dots & \dots\dots\dots \\
+\rule{0pt}{2.4ex}Nguyễn Mạnh Đức & 20235681 \\
+\hline
+\rule{0pt}{2.4ex}Trịnh Thành An & 20235633 \\
+\hline
+\rule{0pt}{2.4ex}Nguyễn Hồng Dương & 20235693 \\
 \hline
 \end{tabular}
 
@@ -462,7 +466,7 @@ thái trả về đúng, mà còn khẳng định service \emph{không} được
 lớp kiểm tra dữ liệu và phân quyền chặn yêu cầu sai \emph{trước khi} chạm tới logic nghiệp vụ.
 
 % =====================================================================
-\section{Kiểm thử tích hợp trên môi trường triển khai (live black-box)}
+\section{Kiểm thử tích hợp trên môi trường triển khai}
 \label{sec:int-live}
 
 \subsection{Mục tiêu và bối cảnh}
@@ -506,70 +510,244 @@ ra trong luồng đều được xóa ngay trong cùng testcase nhằm hạn ch�
 \subsection{Danh mục testcase tích hợp live}
 
 Bộ tích hợp gồm 27 testcase trải trên giao vận frontend, tình trạng backend và chuỗi nghiệp vụ xuyên module
-(Bảng~\ref{tab:intlive}). Toàn bộ pass khi chạy ngày 2026-06-20 đối với bản triển khai hiện hành.
+(Bảng~\ref{tab:intlive}). Toàn bộ pass khi chạy đối với bản triển khai hiện hành.
 
-\begin{table}[h]
+\begin{table}[p]
 \centering
-\caption{Danh mục kiểm thử tích hợp live (black-box)}
+\caption{Danh mục kiểm thử tích hợp live}
 \label{tab:intlive}
-\begin{tabularx}{\linewidth}{|l|l|Y|}
+
+\fontsize{11.5}{10.7}\selectfont
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{0.92}
+
+\begin{tabularx}{\linewidth}{
+|>{\raggedright\arraybackslash}p{2.0cm}
+|>{\raggedright\arraybackslash}p{2.35cm}
+|Y|
+}
 \hline
 \rowcolor{headerblue}
-\thead{Khu vực} & \thead{Mã} & \thead{Kịch bản \& khẳng định} \\
+\thead{Khu vực}
+&
+\thead{Mã}
+&
+\thead{Kịch bản \& khẳng định}
+\\
 \hline
-Frontend (Vercel) & INT-WEB-001 & \code{GET /} trả 200 và chứa khung SPA (\code{<title>NaviMart</title>}, \code{<div id="root">}). \\
+
+Frontend (Vercel)
+&
+INT-WEB-001
+&
+\code{GET /} trả 200 và chứa khung SPA
+(\code{<title>NaviMart</title>}, \code{<div id="root">}).
+\\
 \hline
-Frontend & INT-WEB-002 & Deep link \code{/home} không 404 --- rewrite SPA trả về \code{index.html} cho định tuyến phía client. \\
+
+Frontend
+&
+INT-WEB-002
+&
+Deep link \code{/home} không 404; rewrite SPA trả về
+\code{index.html} cho định tuyến phía client.
+\\
 \hline
-Frontend & INT-WEB-003 & Bundle tĩnh \code{/assets/index-*.js} tải được, đúng \code{content-type} JavaScript. \\
+
+Frontend
+&
+INT-WEB-003
+&
+Bundle tĩnh \code{/assets/index-*.js} tải được, đúng
+\code{content-type} JavaScript.
+\\
 \hline
-Backend & INT-API-001 & \code{GET /api/health} trả \code{status:"ok"}, \code{service:"navimart-backend"}. \\
+
+Backend
+&
+INT-API-001
+&
+\code{GET /api/health} trả \code{status:"ok"} và
+\code{service:"navimart-backend"}.
+\\
 \hline
-Auth$\to$Users & INT-AUTH-001 & Đăng ký tài khoản mới 201, tự tạo gia đình (\code{activeFamilyId}), trả cặp access/refresh token. \\
+
+Auth$\to$Users
+&
+INT-AUTH-001
+&
+Đăng ký tài khoản mới trả 201, tự tạo gia đình
+(\code{activeFamilyId}) và trả cặp access/refresh token.
+\\
 \hline
-Auth & INT-AUTH-002 & Đăng nhập lại bằng cùng thông tin 200, đúng \code{user.id}. \\
+
+Auth
+&
+INT-AUTH-002
+&
+Đăng nhập lại bằng cùng thông tin trả 200, đúng \code{user.id}.
+\\
 \hline
-Auth & INT-AUTH-003 & \code{GET /api/users/me} với token hợp lệ trả đúng hồ sơ (200). \\
+
+Auth
+&
+INT-AUTH-003
+&
+\code{GET /api/users/me} với token hợp lệ trả đúng hồ sơ (200).
+\\
 \hline
-Auth & INT-AUTH-004 & \code{POST /api/auth/refresh} xoay và phát cặp token mới (200). \\
+
+Auth
+&
+INT-AUTH-004
+&
+\code{POST /api/auth/refresh} xoay và phát cặp token mới (200).
+\\
 \hline
-Catalog & INT-CAT-001 & \code{GET /api/catalog/foods?q=ca} có token trả danh sách món (200). \\
+
+Catalog
+&
+INT-CAT-001
+&
+\code{GET /api/catalog/foods?q=ca} có token trả danh sách món (200).
+\\
 \hline
-Catalog & INT-CAT-002 & \code{categories} và \code{units} truy cập được khi đã xác thực (200). \\
+
+Catalog
+&
+INT-CAT-002
+&
+\code{categories} và \code{units} truy cập được khi đã xác thực (200).
+\\
 \hline
-Pantry & INT-PAN-001 & Tạo item kho 201, trả về định danh. \\
+
+Pantry
+&
+INT-PAN-001
+&
+Tạo item kho trả 201 và định danh của item.
+\\
 \hline
-Pantry & INT-PAN-002 & Item vừa tạo xuất hiện trong danh sách kho (200). \\
+
+Pantry
+&
+INT-PAN-002
+&
+Item vừa tạo xuất hiện trong danh sách kho (200).
+\\
 \hline
-Pantry & INT-PAN-003 & \code{GET /api/pantry/:id} đọc đúng item thuộc sở hữu (200). \\
+
+Pantry
+&
+INT-PAN-003
+&
+\code{GET /api/pantry/:id} đọc đúng item thuộc sở hữu (200).
+\\
 \hline
-Pantry & INT-PAN-004 & Xóa item để dọn dẹp production (200/204). \\
+
+Pantry
+&
+INT-PAN-004
+&
+Xóa item để dọn dẹp dữ liệu production (200/204).
+\\
 \hline
-Recipes & INT-RCP-001 & \code{GET /api/recipes} trả kết quả (200). \\
+
+Recipes
+&
+INT-RCP-001
+&
+\code{GET /api/recipes} trả kết quả (200).
+\\
 \hline
-Recipes & INT-RCP-002 & \code{GET /api/recipes/suggestions} xếp hạng theo kho (200). \\
+
+Recipes
+&
+INT-RCP-002
+&
+\code{GET /api/recipes/suggestions} xếp hạng công thức theo kho
+(200).
+\\
 \hline
-Family & INT-FAM-001 & \code{GET /api/family} trả gia đình tự tạo kèm danh sách thành viên (200). \\
+
+Family
+&
+INT-FAM-001
+&
+\code{GET /api/family} trả gia đình tự tạo kèm danh sách thành viên
+(200).
+\\
 \hline
-Shopping list & INT-SL-001..003 & Tạo danh sách 201 (\code{status:active}); xuất hiện trong danh sách + đọc theo id 200; xóa dọn dẹp 200/204. \\
+
+Shopping list
+&
+INT-SL-001--003
+&
+Tạo danh sách trả 201 với \code{status:active}; danh sách xuất hiện
+trong kết quả, đọc được theo ID (200), sau đó được xóa để dọn dẹp
+(200/204).
+\\
 \hline
-Meals & INT-MEAL-001..002 & Tạo bữa ăn 201; đọc theo id 200 rồi xóa 200/204. \\
+
+Meals
+&
+INT-MEAL-001--002
+&
+Tạo bữa ăn (201), đọc theo ID (200), rồi xóa để dọn dẹp (200/204).
+\\
 \hline
-Notifications & INT-NTF-001 & \code{GET /api/notifications} trả mảng (200). \\
+
+Notifications
+&
+INT-NTF-001
+&
+\code{GET /api/notifications} trả một mảng (200).
+\\
 \hline
-Reports & INT-RPT-001 & \code{GET /api/reports/dashboard} kèm khoảng ngày tổng hợp đúng (200, có \code{range}/\code{shopping}). \\
+
+Reports
+&
+INT-RPT-001
+&
+\code{GET /api/reports/dashboard} tổng hợp đúng theo khoảng ngày
+(200), có \code{range} và \code{shopping}.
+\\
 \hline
-AI Chef & INT-AI-001 & \code{GET /api/ai-chef/status} báo cấu hình (200, \code{configured} boolean). \\
+
+AI Chef
+&
+INT-AI-001
+&
+\code{GET /api/ai-chef/status} báo trạng thái cấu hình (200), với
+\code{configured} là boolean.
+\\
 \hline
-CORS & INT-CORS-001 & Preflight từ origin Vercel được chấp nhận (ACAO khớp origin, ACAC \code{true}). \\
+
+CORS
+&
+INT-CORS-001
+&
+Preflight từ origin Vercel được chấp nhận: ACAO khớp origin và ACAC
+có giá trị \code{true}.
+\\
 \hline
-Logout & INT-LOGOUT-001 & Sau \code{logout}, refresh token cũ bị thu hồi $\to$ 401. \\
+
+Logout
+&
+INT-LOGOUT-001
+&
+Sau \code{logout}, refresh token cũ bị thu hồi; yêu cầu làm mới bằng
+token này trả 401.
+\\
 \hline
+
 \end{tabularx}
 \end{table}
 
+
+
 % =====================================================================
-\section{Kiểm thử bảo mật trên môi trường triển khai (live black-box)}
+\section{Kiểm thử bảo mật trên môi trường triển khai}
 \label{sec:sec-live}
 
 \subsection{Mục tiêu}
@@ -584,8 +762,7 @@ Failures).
 
 \subsection{Danh mục testcase bảo mật live}
 
-Bộ bảo mật gồm 20 testcase (Bảng~\ref{tab:seclive}), tất cả đều là cổng cứng (pass/fail). Toàn bộ pass
-ngày 2026-06-20.
+Bộ bảo mật gồm 20 testcase (Bảng~\ref{tab:seclive}), tất cả đều là cổng cứng (pass/fail).
 
 \begin{table}[h]
 \centering
@@ -651,7 +828,7 @@ dấu tiếng Việt và đổi mặc định visibility công thức): tên đ�
 \code{goi$\to$gói}, và công thức người dùng gửi phải có \code{visibility:'shared'} mới vào hàng chờ kiểm
 duyệt. Ngoài ra, tầng kiểm thử \emph{live black-box} mới (Mục~\ref{sec:int-live} và \ref{sec:sec-live}) chạy
 47 testcase trên 2 bộ test (27 tích hợp + 20 bảo mật), gọi thẳng vào bản triển khai Vercel + Render qua HTTPS,
-cũng pass toàn bộ (chạy ngày 2026-06-20, khoảng 40 giây gồm cả thời gian cold start của Render). Frontend chạy
+cũng pass toàn bộ. Frontend chạy
 61 testcase trên 9 tệp, cũng pass toàn bộ. So với hiện trạng đầu kỳ (176
 testcase đơn vị/API backend và 32 testcase frontend), bộ test đã được mở rộng đáng kể: bổ sung kiểm thử đơn
 vị cho các service trước đây bỏ trống (danh mục, người dùng, thông báo, nhắc hạn, ba service quản trị), bổ
@@ -681,8 +858,7 @@ Frontend (Vitest) & 9 & 61 / 61 \\
 
 \subsection{Độ phủ mã nguồn backend}
 
-Độ phủ tổng thể trên toàn bộ \code{src} đạt 61,91\% câu lệnh và 52,70\% nhánh (đo bằng \code{npm run test:cov}
-ngày 2026-06-20). Khi xét riêng theo module (Bảng~\ref{tab:cov}), các module nghiệp vụ cốt lõi --- xác thực,
+Độ phủ tổng thể trên toàn bộ \code{src} đạt 61,91\% câu lệnh và 52,70\% nhánh (đo bằng \code{npm run test:cov}. Khi xét riêng theo module (Bảng~\ref{tab:cov}), các module nghiệp vụ cốt lõi --- xác thực,
 gia đình, kho, công thức, bữa ăn, danh sách mua, báo cáo, danh mục, thông báo, người dùng và AI Chef --- đều
 đạt độ phủ cao (trên dưới 80\%), phản ánh đúng chiến lược ``ưu tiên logic nghiệp vụ''. Các tệp cấu hình, seed
 dữ liệu và cổng realtime được phủ chủ yếu qua kiểm thử đầu-cuối nên kéo tỷ lệ câu lệnh chung xuống.

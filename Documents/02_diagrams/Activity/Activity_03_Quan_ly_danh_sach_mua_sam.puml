@@ -1,0 +1,62 @@
+@startuml
+title Activity Diagram - Quy trình quản lý danh sách mua sắm
+
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam ArrowColor black
+skinparam activity {
+  BackgroundColor #FFF8CC
+  BorderColor black
+  FontColor black
+  DiamondBackgroundColor #FFF8CC
+  DiamondBorderColor black
+  StartColor black
+  EndColor black
+}
+skinparam partition {
+  BackgroundColor white
+  BorderColor black
+  FontColor black
+}
+
+|Người dùng|
+start
+:Mở chức năng danh sách mua sắm;
+
+if (Đã có danh sách phù hợp?) then ([Không])
+  :Tạo mới danh sách mua sắm;
+  |Hệ thống|
+  :Lưu danh sách mới;
+else ([Có])
+  |Người dùng|
+  :Chọn danh sách cần thao tác;
+endif
+
+|Người dùng|
+:Thêm mặt hàng cần mua;
+:Cập nhật tên danh sách\n hoặc mặt hàng nếu cần;
+|Hệ thống|
+:Lưu thay đổi danh sách;
+
+|Người dùng|
+while (Còn mặt hàng cần mua?) is ([Có])
+  :Mua mặt hàng;
+  :Đánh dấu đã mua;
+  |Hệ thống|
+  :Ghi nhận trạng thái đã mua;
+  :Tự động chuyển mặt hàng vào tủ lạnh;
+  |Người dùng|
+endwhile ([Không])
+
+:Xem danh sách sau khi hoàn tất;
+if (Cần xóa danh sách hoặc mặt hàng?) then ([Có])
+  :Chọn xóa;
+  |Hệ thống|
+  :Cập nhật dữ liệu danh sách;
+else ([Không])
+endif
+
+stop
+@enduml

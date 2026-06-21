@@ -4,7 +4,7 @@
 \usepackage[T5]{fontenc}
 \usepackage{lmodern}
 \usepackage{geometry}
-\geometry{a4paper, margin=1in}
+\geometry{a4paper, top=2.5cm, bottom=2.5cm, left=3cm, right=2cm}
 \usepackage[hidelinks]{hyperref}
 \usepackage{titlesec}
 \usepackage{enumitem}
@@ -88,7 +88,7 @@ Mô-đun này chịu trách nhiệm xác thực người dùng, đăng ký, đă
 Không có.
 
 \paragraph{Phương thức (Operations):}
-\begin{longtable}{|c|l|l|p{9.5cm}|}
+\begin{longtable}{|p{0.6cm}|p{3.8cm}|p{2.6cm}|p{6.5cm}|}
 \hline
 \textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu trả về} & \textbf{Mô tả (mục đích)} \\ \hline
 \endhead
@@ -124,7 +124,7 @@ Không có.
 Không có.
 
 \paragraph{Phương thức (Operations):}
-\begin{longtable}{|c|l|l|p{9.5cm}|}
+\begin{longtable}{|p{0.6cm}|p{3.8cm}|p{2.6cm}|p{6.5cm}|}
 \hline
 \textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu trả về} & \textbf{Mô tả (mục đích)} \\ \hline
 \endhead
@@ -160,7 +160,7 @@ Không có.
 Không có.
 
 \paragraph{Phương thức (Operations):}
-\begin{longtable}{|c|l|l|p{9.5cm}|}
+\begin{longtable}{|p{0.6cm}|p{3.8cm}|p{2.6cm}|p{6.5cm}|}
 \hline
 \textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu trả về} & \textbf{Mô tả (mục đích)} \\ \hline
 \endhead
@@ -196,7 +196,7 @@ Không có.
 Không có.
 
 \paragraph{Phương thức (Operations):}
-\begin{longtable}{|c|l|l|p{9.5cm}|}
+\begin{longtable}{|p{0.6cm}|p{3.8cm}|p{2.6cm}|p{6.5cm}|}
 \hline
 \textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu trả về} & \textbf{Mô tả (mục đích)} \\ \hline
 \endhead
@@ -232,7 +232,7 @@ Không có.
 Không có.
 
 \paragraph{Phương thức (Operations):}
-\begin{longtable}{|c|l|l|p{9.5cm}|}
+\begin{longtable}{|p{0.6cm}|p{3.8cm}|p{2.6cm}|p{6.5cm}|}
 \hline
 \textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu trả về} & \textbf{Mô tả (mục đích)} \\ \hline
 \endhead
@@ -267,7 +267,7 @@ Không có.
 \end{itemize}
 
 \paragraph{Thuộc tính (Attributes):}
-\begin{longtable}{|c|l|l|l|p{7.5cm}|}
+\begin{longtable}{|p{0.6cm}|p{2.8cm}|p{2.2cm}|p{1.8cm}|p{5.8cm}|}
 \hline
 \textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu} & \textbf{Giá trị mặc định} & \textbf{Mô tả} \\ \hline
 \endhead
@@ -275,18 +275,18 @@ Không có.
 \end{longtable}
 
 \paragraph{Phương thức (Operations):}
-\begin{longtable}{|c|l|l|p{9.5cm}|}
+\begin{longtable}{|p{0.6cm}|p{3.8cm}|p{2.6cm}|p{6.5cm}|}
 \hline
 \textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu trả về} & \textbf{Mô tả (mục đích)} \\ \hline
 \endhead
-1 & register & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Gửi HTTP POST request đăng ký \\ \hline
-2 & login & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Gửi HTTP POST request đăng nhập \\ \hline
-3 & refresh & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Gửi HTTP POST request làm mới token \\ \hline
-4 & logout & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Gửi HTTP POST request đăng xuất \\ \hline
-5 & forgotPassword & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Gửi HTTP POST request quên mật khẩu \\ \hline
-6 & resetPassword & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Gửi HTTP POST request đặt lại mật khẩu \\ \hline
-7 & sendVerification & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Gửi HTTP POST request gửi mã xác thực \\ \hline
-8 & verifyEmail & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Gửi HTTP POST request xác thực email \\ \hline
+1 & register & Promise\textless{}any\textgreater{} & Gửi HTTP POST request đăng ký \\ \hline
+2 & login & Promise\textless{}any\textgreater{} & Gửi HTTP POST request đăng nhập \\ \hline
+3 & refresh & Promise\textless{}any\textgreater{} & Gửi HTTP POST request làm mới token \\ \hline
+4 & logout & Promise\textless{}any\textgreater{} & Gửi HTTP POST request đăng xuất \\ \hline
+5 & forgotPassword & Promise\textless{}any\textgreater{} & Gửi HTTP POST request quên mật khẩu \\ \hline
+6 & resetPassword & Promise\textless{}any\textgreater{} & Gửi HTTP POST request đặt lại mật khẩu \\ \hline
+7 & sendVerification & Promise\textless{}any\textgreater{} & Gửi HTTP POST request gửi mã xác thực \\ \hline
+8 & verifyEmail & Promise\textless{}any\textgreater{} & Gửi HTTP POST request xác thực email \\ \hline
 \end{longtable}
 
 \paragraph{Tham số (Parameters):}
@@ -326,7 +326,7 @@ Không có.
 Không có.
 
 \paragraph{Phương thức (Operations):}
-\begin{longtable}{|c|l|l|p{9.5cm}|}
+\begin{longtable}{|p{0.6cm}|p{3.8cm}|p{2.6cm}|p{6.5cm}|}
 \hline
 \textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu trả về} & \textbf{Mô tả (mục đích)} \\ \hline
 \endhead
@@ -378,7 +378,7 @@ Không có.
 Không có.
 
 \paragraph{Phương thức (Operations):}
-\begin{longtable}{|c|l|l|p{9.5cm}|}
+\begin{longtable}{|p{0.6cm}|p{3.8cm}|p{2.6cm}|p{6.5cm}|}
 \hline
 \textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu trả về} & \textbf{Mô tả (mục đích)} \\ \hline
 \endhead
@@ -426,7 +426,7 @@ Không có.
 \end{itemize}
 
 \paragraph{Thuộc tính (Attributes):}
-\begin{longtable}{|c|l|l|l|p{7.5cm}|}
+\begin{longtable}{|p{0.6cm}|p{2.8cm}|p{2.2cm}|p{1.8cm}|p{5.8cm}|}
 \hline
 \textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu} & \textbf{Giá trị mặc định} & \textbf{Mô tả} \\ \hline
 \endhead
@@ -482,7 +482,7 @@ Mô-đun này quản lý các kết nối gia đình, cho phép người dùng t
 Không có.
 
 \paragraph{Phương thức (Operations):}
-\begin{longtable}{|c|l|l|p{9.5cm}|}
+\begin{longtable}{|p{0.6cm}|p{3.8cm}|p{2.6cm}|p{6.5cm}|}
 \hline
 \textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu trả về} & \textbf{Mô tả (mục đích)} \\ \hline
 \endhead
@@ -518,7 +518,7 @@ Không có.
 Không có.
 
 \paragraph{Phương thức (Operations):}
-\begin{longtable}{|c|l|l|p{9.5cm}|}
+\begin{longtable}{|p{0.6cm}|p{3.8cm}|p{2.6cm}|p{6.5cm}|}
 \hline
 \textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu trả về} & \textbf{Mô tả (mục đích)} \\ \hline
 \endhead
@@ -554,7 +554,7 @@ Không có.
 Không có.
 
 \paragraph{Phương thức (Operations):}
-\begin{longtable}{|c|l|l|p{9.5cm}|}
+\begin{longtable}{|p{0.6cm}|p{3.8cm}|p{2.6cm}|p{6.5cm}|}
 \hline
 \textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu trả về} & \textbf{Mô tả (mục đích)} \\ \hline
 \endhead
@@ -590,7 +590,7 @@ Không có.
 Không có.
 
 \paragraph{Phương thức (Operations):}
-\begin{longtable}{|c|l|l|p{9.5cm}|}
+\begin{longtable}{|p{0.6cm}|p{3.8cm}|p{2.6cm}|p{6.5cm}|}
 \hline
 \textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu trả về} & \textbf{Mô tả (mục đích)} \\ \hline
 \endhead
@@ -625,7 +625,7 @@ Không có.
 \end{itemize}
 
 \paragraph{Thuộc tính (Attributes):}
-\begin{longtable}{|c|l|l|l|p{7.5cm}|}
+\begin{longtable}{|p{0.6cm}|p{2.8cm}|p{2.2cm}|p{1.8cm}|p{5.8cm}|}
 \hline
 \textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu} & \textbf{Giá trị mặc định} & \textbf{Mô tả} \\ \hline
 \endhead
@@ -633,16 +633,16 @@ Không có.
 \end{longtable}
 
 \paragraph{Phương thức (Operations):}
-\begin{longtable}{|c|l|l|p{9.5cm}|}
+\begin{longtable}{|p{0.6cm}|p{3.8cm}|p{2.6cm}|p{6.5cm}|}
 \hline
 \textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu trả về} & \textbf{Mô tả (mục đích)} \\ \hline
 \endhead
-1 & getCurrentFamily & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Lấy thông tin gia đình hiện tại \\ \hline
-2 & create & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Tạo gia đình mới \\ \hline
-3 & createInvite & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Tạo mã mời \\ \hline
-4 & join & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Tham gia nhóm gia đình \\ \hline
-5 & updateMemberPermissions & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Cập nhật quyền của thành viên \\ \hline
-6 & removeMember & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Xóa thành viên khỏi nhóm \\ \hline
+1 & getCurrentFamily & Promise\textless{}any\textgreater{} & Lấy thông tin gia đình hiện tại \\ \hline
+2 & create & Promise\textless{}any\textgreater{} & Tạo gia đình mới \\ \hline
+3 & createInvite & Promise\textless{}any\textgreater{} & Tạo mã mời \\ \hline
+4 & join & Promise\textless{}any\textgreater{} & Tham gia nhóm gia đình \\ \hline
+5 & updateMemberPermissions & Promise\textless{}any\textgreater{} & Cập nhật quyền của thành viên \\ \hline
+6 & removeMember & Promise\textless{}any\textgreater{} & Xóa thành viên khỏi nhóm \\ \hline
 \end{longtable}
 
 \paragraph{Tham số (Parameters):}
@@ -682,7 +682,7 @@ Không có.
 Không có.
 
 \paragraph{Phương thức (Operations):}
-\begin{longtable}{|c|l|l|p{9.5cm}|}
+\begin{longtable}{|p{0.6cm}|p{3.8cm}|p{2.6cm}|p{6.5cm}|}
 \hline
 \textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu trả về} & \textbf{Mô tả (mục đích)} \\ \hline
 \endhead
@@ -732,7 +732,7 @@ Không có.
 Không có.
 
 \paragraph{Phương thức (Operations):}
-\begin{longtable}{|c|l|l|p{9.5cm}|}
+\begin{longtable}{|p{0.6cm}|p{3.8cm}|p{2.6cm}|p{6.5cm}|}
 \hline
 \textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu trả về} & \textbf{Mô tả (mục đích)} \\ \hline
 \endhead
@@ -778,7 +778,7 @@ Không có.
 \end{itemize}
 
 \paragraph{Thuộc tính (Attributes):}
-\begin{longtable}{|c|l|l|l|p{7.5cm}|}
+\begin{longtable}{|p{0.6cm}|p{2.8cm}|p{2.2cm}|p{1.8cm}|p{5.8cm}|}
 \hline
 \textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu} & \textbf{Giá trị mặc định} & \textbf{Mô tả} \\ \hline
 \endhead
@@ -814,7 +814,7 @@ Không có.
 \end{itemize}
 
 \paragraph{Thuộc tính (Attributes):}
-\begin{longtable}{|c|l|l|l|p{7.5cm}|}
+\begin{longtable}{|p{0.6cm}|p{2.8cm}|p{2.2cm}|p{1.8cm}|p{5.8cm}|}
 \hline
 \textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu} & \textbf{Giá trị mặc định} & \textbf{Mô tả} \\ \hline
 \endhead
@@ -866,7 +866,7 @@ Mô-đun này hỗ trợ lập kế hoạch đi chợ, tạo danh sách các mó
 Không có.
 
 \paragraph{Phương thức (Operations):}
-\begin{longtable}{|c|l|l|p{9.5cm}|}
+\begin{longtable}{|p{0.6cm}|p{3.8cm}|p{2.6cm}|p{6.5cm}|}
 \hline
 \textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu trả về} & \textbf{Mô tả (mục đích)} \\ \hline
 \endhead
@@ -902,7 +902,7 @@ Không có.
 Không có.
 
 \paragraph{Phương thức (Operations):}
-\begin{longtable}{|c|l|l|p{9.5cm}|}
+\begin{longtable}{|p{0.6cm}|p{3.8cm}|p{2.6cm}|p{6.5cm}|}
 \hline
 \textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu trả về} & \textbf{Mô tả (mục đích)} \\ \hline
 \endhead
@@ -937,7 +937,7 @@ Không có.
 \end{itemize}
 
 \paragraph{Thuộc tính (Attributes):}
-\begin{longtable}{|c|l|l|l|p{7.5cm}|}
+\begin{longtable}{|p{0.6cm}|p{2.8cm}|p{2.2cm}|p{1.8cm}|p{5.8cm}|}
 \hline
 \textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu} & \textbf{Giá trị mặc định} & \textbf{Mô tả} \\ \hline
 \endhead
@@ -945,19 +945,19 @@ Không có.
 \end{longtable}
 
 \paragraph{Phương thức (Operations):}
-\begin{longtable}{|c|l|l|p{9.5cm}|}
+\begin{longtable}{|p{0.6cm}|p{3.8cm}|p{2.6cm}|p{6.5cm}|}
 \hline
 \textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu trả về} & \textbf{Mô tả (mục đích)} \\ \hline
 \endhead
-1 & findAll & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Lấy tất cả danh sách mua sắm \\ \hline
-2 & create & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Tạo danh sách mới \\ \hline
-3 & findOne & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Lấy chi tiết một danh sách \\ \hline
-4 & update & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Cập nhật thông tin danh sách \\ \hline
-5 & remove & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Xoá danh sách \\ \hline
-6 & complete & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Đánh dấu hoàn tất danh sách \\ \hline
-7 & addItem & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Thêm mặt hàng vào danh sách \\ \hline
-8 & updateItem & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Cập nhật mặt hàng trong danh sách \\ \hline
-9 & removeItem & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Xóa mặt hàng khỏi danh sách \\ \hline
+1 & findAll & Promise\textless{}any\textgreater{} & Lấy tất cả danh sách mua sắm \\ \hline
+2 & create & Promise\textless{}any\textgreater{} & Tạo danh sách mới \\ \hline
+3 & findOne & Promise\textless{}any\textgreater{} & Lấy chi tiết một danh sách \\ \hline
+4 & update & Promise\textless{}any\textgreater{} & Cập nhật thông tin danh sách \\ \hline
+5 & remove & Promise\textless{}any\textgreater{} & Xoá danh sách \\ \hline
+6 & complete & Promise\textless{}any\textgreater{} & Đánh dấu hoàn tất danh sách \\ \hline
+7 & addItem & Promise\textless{}any\textgreater{} & Thêm mặt hàng vào danh sách \\ \hline
+8 & updateItem & Promise\textless{}any\textgreater{} & Cập nhật mặt hàng trong danh sách \\ \hline
+9 & removeItem & Promise\textless{}any\textgreater{} & Xóa mặt hàng khỏi danh sách \\ \hline
 \end{longtable}
 
 \paragraph{Tham số (Parameters):}
@@ -997,7 +997,7 @@ Không có.
 Không có.
 
 \paragraph{Phương thức (Operations):}
-\begin{longtable}{|c|l|l|p{9.5cm}|}
+\begin{longtable}{|p{0.6cm}|p{3.8cm}|p{2.6cm}|p{6.5cm}|}
 \hline
 \textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu trả về} & \textbf{Mô tả (mục đích)} \\ \hline
 \endhead
@@ -1049,7 +1049,7 @@ Không có.
 Không có.
 
 \paragraph{Phương thức (Operations):}
-\begin{longtable}{|c|l|l|p{9.5cm}|}
+\begin{longtable}{|p{0.6cm}|p{3.8cm}|p{2.6cm}|p{6.5cm}|}
 \hline
 \textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu trả về} & \textbf{Mô tả (mục đích)} \\ \hline
 \endhead
@@ -1098,7 +1098,7 @@ Không có.
 \end{itemize}
 
 \paragraph{Thuộc tính (Attributes):}
-\begin{longtable}{|c|l|l|l|p{7.5cm}|}
+\begin{longtable}{|p{0.6cm}|p{2.8cm}|p{2.2cm}|p{1.8cm}|p{5.8cm}|}
 \hline
 \textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu} & \textbf{Giá trị mặc định} & \textbf{Mô tả} \\ \hline
 \endhead
@@ -1135,7 +1135,7 @@ Không có.
 \end{itemize}
 
 \paragraph{Thuộc tính (Attributes):}
-\begin{longtable}{|c|l|l|l|p{7.5cm}|}
+\begin{longtable}{|p{0.6cm}|p{2.8cm}|p{2.2cm}|p{1.8cm}|p{5.8cm}|}
 \hline
 \textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu} & \textbf{Giá trị mặc định} & \textbf{Mô tả} \\ \hline
 \endhead
@@ -1181,7 +1181,7 @@ Mô-đun này quản lý lượng thực phẩm hiện có trong tủ lạnh ho�
 Không có.
 
 \paragraph{Phương thức (Operations):}
-\begin{longtable}{|c|l|l|p{9.5cm}|}
+\begin{longtable}{|p{0.6cm}|p{3.8cm}|p{2.6cm}|p{6.5cm}|}
 \hline
 \textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu trả về} & \textbf{Mô tả (mục đích)} \\ \hline
 \endhead
@@ -1217,7 +1217,7 @@ Không có.
 Không có.
 
 \paragraph{Phương thức (Operations):}
-\begin{longtable}{|c|l|l|p{9.5cm}|}
+\begin{longtable}{|p{0.6cm}|p{3.8cm}|p{2.6cm}|p{6.5cm}|}
 \hline
 \textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu trả về} & \textbf{Mô tả (mục đích)} \\ \hline
 \endhead
@@ -1252,7 +1252,7 @@ Không có.
 \end{itemize}
 
 \paragraph{Thuộc tính (Attributes):}
-\begin{longtable}{|c|l|l|l|p{7.5cm}|}
+\begin{longtable}{|p{0.6cm}|p{2.8cm}|p{2.2cm}|p{1.8cm}|p{5.8cm}|}
 \hline
 \textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu} & \textbf{Giá trị mặc định} & \textbf{Mô tả} \\ \hline
 \endhead
@@ -1260,17 +1260,17 @@ Không có.
 \end{longtable}
 
 \paragraph{Phương thức (Operations):}
-\begin{longtable}{|c|l|l|p{9.5cm}|}
+\begin{longtable}{|p{0.6cm}|p{3.8cm}|p{2.6cm}|p{6.5cm}|}
 \hline
 \textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu trả về} & \textbf{Mô tả (mục đích)} \\ \hline
 \endhead
-1 & findAll & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Lấy danh sách thực phẩm trong kho \\ \hline
-2 & create & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Thêm thực phẩm mới vào kho \\ \hline
-3 & findOne & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Xem chi tiết thực phẩm \\ \hline
-4 & update & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Cập nhật số lượng/thông tin \\ \hline
-5 & remove & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Xóa thực phẩm khỏi kho \\ \hline
-6 & consume & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Ghi nhận đã tiêu thụ thực phẩm \\ \hline
-7 & markWasted & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Ghi nhận thực phẩm bị lãng phí/hỏng \\ \hline
+1 & findAll & Promise\textless{}any\textgreater{} & Lấy danh sách thực phẩm trong kho \\ \hline
+2 & create & Promise\textless{}any\textgreater{} & Thêm thực phẩm mới vào kho \\ \hline
+3 & findOne & Promise\textless{}any\textgreater{} & Xem chi tiết thực phẩm \\ \hline
+4 & update & Promise\textless{}any\textgreater{} & Cập nhật số lượng/thông tin \\ \hline
+5 & remove & Promise\textless{}any\textgreater{} & Xóa thực phẩm khỏi kho \\ \hline
+6 & consume & Promise\textless{}any\textgreater{} & Ghi nhận đã tiêu thụ thực phẩm \\ \hline
+7 & markWasted & Promise\textless{}any\textgreater{} & Ghi nhận thực phẩm bị lãng phí/hỏng \\ \hline
 \end{longtable}
 
 \paragraph{Tham số (Parameters):}
@@ -1310,7 +1310,7 @@ Không có.
 Không có.
 
 \paragraph{Phương thức (Operations):}
-\begin{longtable}{|c|l|l|p{9.5cm}|}
+\begin{longtable}{|p{0.6cm}|p{3.8cm}|p{2.6cm}|p{6.5cm}|}
 \hline
 \textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu trả về} & \textbf{Mô tả (mục đích)} \\ \hline
 \endhead
@@ -1360,7 +1360,7 @@ Không có.
 Không có.
 
 \paragraph{Phương thức (Operations):}
-\begin{longtable}{|c|l|l|p{9.5cm}|}
+\begin{longtable}{|p{0.6cm}|p{3.8cm}|p{2.6cm}|p{6.5cm}|}
 \hline
 \textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu trả về} & \textbf{Mô tả (mục đích)} \\ \hline
 \endhead
@@ -1407,7 +1407,7 @@ Không có.
 \end{itemize}
 
 \paragraph{Thuộc tính (Attributes):}
-\begin{longtable}{|c|l|l|l|p{7.5cm}|}
+\begin{longtable}{|p{0.6cm}|p{2.8cm}|p{2.2cm}|p{1.8cm}|p{5.8cm}|}
 \hline
 \textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu} & \textbf{Giá trị mặc định} & \textbf{Mô tả} \\ \hline
 \endhead
@@ -1454,7 +1454,7 @@ Mô-đun này quản lý lịch trình ăn uống hàng ngày, lưu lại các b
 Không có.
 
 \paragraph{Phương thức (Operations):}
-\begin{longtable}{|c|l|l|p{9.5cm}|}
+\begin{longtable}{|p{0.6cm}|p{3.8cm}|p{2.6cm}|p{6.5cm}|}
 \hline
 \textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu trả về} & \textbf{Mô tả (mục đích)} \\ \hline
 \endhead
@@ -1489,7 +1489,7 @@ Không có.
 \end{itemize}
 
 \paragraph{Thuộc tính (Attributes):}
-\begin{longtable}{|c|l|l|l|p{7.5cm}|}
+\begin{longtable}{|p{0.6cm}|p{2.8cm}|p{2.2cm}|p{1.8cm}|p{5.8cm}|}
 \hline
 \textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu} & \textbf{Giá trị mặc định} & \textbf{Mô tả} \\ \hline
 \endhead
@@ -1497,17 +1497,17 @@ Không có.
 \end{longtable}
 
 \paragraph{Phương thức (Operations):}
-\begin{longtable}{|c|l|l|p{9.5cm}|}
+\begin{longtable}{|p{0.6cm}|p{3.8cm}|p{2.6cm}|p{6.5cm}|}
 \hline
 \textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu trả về} & \textbf{Mô tả (mục đích)} \\ \hline
 \endhead
-1 & findAll & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Lấy danh sách kế hoạch bữa ăn \\ \hline
-2 & create & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Thêm bữa ăn vào kế hoạch \\ \hline
-3 & findOne & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Xem chi tiết kế hoạch \\ \hline
-4 & getMissingIngredients & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Kiểm tra nguyên liệu còn thiếu \\ \hline
-5 & generateShoppingList & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Tự động tạo danh sách mua sắm \\ \hline
-6 & update & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Sửa kế hoạch bữa ăn \\ \hline
-7 & remove & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Xóa kế hoạch \\ \hline
+1 & findAll & Promise\textless{}any\textgreater{} & Lấy danh sách kế hoạch bữa ăn \\ \hline
+2 & create & Promise\textless{}any\textgreater{} & Thêm bữa ăn vào kế hoạch \\ \hline
+3 & findOne & Promise\textless{}any\textgreater{} & Xem chi tiết kế hoạch \\ \hline
+4 & getMissingIngredients & Promise\textless{}any\textgreater{} & Kiểm tra nguyên liệu còn thiếu \\ \hline
+5 & generateShoppingList & Promise\textless{}any\textgreater{} & Tự động tạo danh sách mua sắm \\ \hline
+6 & update & Promise\textless{}any\textgreater{} & Sửa kế hoạch bữa ăn \\ \hline
+7 & remove & Promise\textless{}any\textgreater{} & Xóa kế hoạch \\ \hline
 \end{longtable}
 
 \paragraph{Tham số (Parameters):}
@@ -1547,7 +1547,7 @@ Không có.
 Không có.
 
 \paragraph{Phương thức (Operations):}
-\begin{longtable}{|c|l|l|p{9.5cm}|}
+\begin{longtable}{|p{0.6cm}|p{3.8cm}|p{2.6cm}|p{6.5cm}|}
 \hline
 \textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu trả về} & \textbf{Mô tả (mục đích)} \\ \hline
 \endhead
@@ -1597,7 +1597,7 @@ Không có.
 Không có.
 
 \paragraph{Phương thức (Operations):}
-\begin{longtable}{|c|l|l|p{9.5cm}|}
+\begin{longtable}{|p{0.6cm}|p{3.8cm}|p{2.6cm}|p{6.5cm}|}
 \hline
 \textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu trả về} & \textbf{Mô tả (mục đích)} \\ \hline
 \endhead
@@ -1644,7 +1644,7 @@ Không có.
 \end{itemize}
 
 \paragraph{Thuộc tính (Attributes):}
-\begin{longtable}{|c|l|l|l|p{7.5cm}|}
+\begin{longtable}{|p{0.6cm}|p{2.8cm}|p{2.2cm}|p{1.8cm}|p{5.8cm}|}
 \hline
 \textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu} & \textbf{Giá trị mặc định} & \textbf{Mô tả} \\ \hline
 \endhead
@@ -1691,7 +1691,7 @@ Mô-đun này quản lý kho công thức nấu ăn, gợi ý món ăn dựa tr�
 Không có.
 
 \paragraph{Phương thức (Operations):}
-\begin{longtable}{|c|l|l|p{9.5cm}|}
+\begin{longtable}{|p{0.6cm}|p{3.8cm}|p{2.6cm}|p{6.5cm}|}
 \hline
 \textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu trả về} & \textbf{Mô tả (mục đích)} \\ \hline
 \endhead
@@ -1727,7 +1727,7 @@ Không có.
 Không có.
 
 \paragraph{Phương thức (Operations):}
-\begin{longtable}{|c|l|l|p{9.5cm}|}
+\begin{longtable}{|p{0.6cm}|p{3.8cm}|p{2.6cm}|p{6.5cm}|}
 \hline
 \textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu trả về} & \textbf{Mô tả (mục đích)} \\ \hline
 \endhead
@@ -1763,7 +1763,7 @@ Không có.
 Không có.
 
 \paragraph{Phương thức (Operations):}
-\begin{longtable}{|c|l|l|p{9.5cm}|}
+\begin{longtable}{|p{0.6cm}|p{3.8cm}|p{2.6cm}|p{6.5cm}|}
 \hline
 \textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu trả về} & \textbf{Mô tả (mục đích)} \\ \hline
 \endhead
@@ -1798,7 +1798,7 @@ Không có.
 \end{itemize}
 
 \paragraph{Thuộc tính (Attributes):}
-\begin{longtable}{|c|l|l|l|p{7.5cm}|}
+\begin{longtable}{|p{0.6cm}|p{2.8cm}|p{2.2cm}|p{1.8cm}|p{5.8cm}|}
 \hline
 \textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu} & \textbf{Giá trị mặc định} & \textbf{Mô tả} \\ \hline
 \endhead
@@ -1806,21 +1806,21 @@ Không có.
 \end{longtable}
 
 \paragraph{Phương thức (Operations):}
-\begin{longtable}{|c|l|l|p{9.5cm}|}
+\begin{longtable}{|p{0.6cm}|p{3.8cm}|p{2.6cm}|p{6.5cm}|}
 \hline
 \textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu trả về} & \textbf{Mô tả (mục đích)} \\ \hline
 \endhead
-1 & findAll & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Lấy danh sách công thức \\ \hline
-2 & getSuggestions & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Nhận gợi ý công thức \\ \hline
-3 & findFavorites & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Lấy danh sách món yêu thích \\ \hline
-4 & findOne & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Lấy chi tiết công thức \\ \hline
-5 & addFavorite & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Thêm món vào yêu thích \\ \hline
-6 & removeFavorite & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Bỏ món khỏi yêu thích \\ \hline
-7 & getMissingIngredients & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Kiểm tra nguyên liệu thiếu \\ \hline
-8 & generateShoppingList & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Tạo danh sách mua sắm từ món ăn \\ \hline
-9 & create & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Tạo công thức \\ \hline
-10 & update & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Cập nhật công thức \\ \hline
-11 & remove & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Xóa công thức \\ \hline
+1 & findAll & Promise\textless{}any\textgreater{} & Lấy danh sách công thức \\ \hline
+2 & getSuggestions & Promise\textless{}any\textgreater{} & Nhận gợi ý công thức \\ \hline
+3 & findFavorites & Promise\textless{}any\textgreater{} & Lấy danh sách món yêu thích \\ \hline
+4 & findOne & Promise\textless{}any\textgreater{} & Lấy chi tiết công thức \\ \hline
+5 & addFavorite & Promise\textless{}any\textgreater{} & Thêm món vào yêu thích \\ \hline
+6 & removeFavorite & Promise\textless{}any\textgreater{} & Bỏ món khỏi yêu thích \\ \hline
+7 & getMissingIngredients & Promise\textless{}any\textgreater{} & Kiểm tra nguyên liệu thiếu \\ \hline
+8 & generateShoppingList & Promise\textless{}any\textgreater{} & Tạo danh sách mua sắm từ món ăn \\ \hline
+9 & create & Promise\textless{}any\textgreater{} & Tạo công thức \\ \hline
+10 & update & Promise\textless{}any\textgreater{} & Cập nhật công thức \\ \hline
+11 & remove & Promise\textless{}any\textgreater{} & Xóa công thức \\ \hline
 \end{longtable}
 
 \paragraph{Tham số (Parameters):}
@@ -1860,7 +1860,7 @@ Không có.
 Không có.
 
 \paragraph{Phương thức (Operations):}
-\begin{longtable}{|c|l|l|p{9.5cm}|}
+\begin{longtable}{|p{0.6cm}|p{3.8cm}|p{2.6cm}|p{6.5cm}|}
 \hline
 \textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu trả về} & \textbf{Mô tả (mục đích)} \\ \hline
 \endhead
@@ -1914,7 +1914,7 @@ Không có.
 Không có.
 
 \paragraph{Phương thức (Operations):}
-\begin{longtable}{|c|l|l|p{9.5cm}|}
+\begin{longtable}{|p{0.6cm}|p{3.8cm}|p{2.6cm}|p{6.5cm}|}
 \hline
 \textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu trả về} & \textbf{Mô tả (mục đích)} \\ \hline
 \endhead
@@ -1965,7 +1965,7 @@ Không có.
 \end{itemize}
 
 \paragraph{Thuộc tính (Attributes):}
-\begin{longtable}{|c|l|l|l|p{7.5cm}|}
+\begin{longtable}{|p{0.6cm}|p{2.8cm}|p{2.2cm}|p{1.8cm}|p{5.8cm}|}
 \hline
 \textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu} & \textbf{Giá trị mặc định} & \textbf{Mô tả} \\ \hline
 \endhead
@@ -2003,7 +2003,7 @@ Không có.
 \end{itemize}
 
 \paragraph{Thuộc tính (Attributes):}
-\begin{longtable}{|c|l|l|l|p{7.5cm}|}
+\begin{longtable}{|p{0.6cm}|p{2.8cm}|p{2.2cm}|p{1.8cm}|p{5.8cm}|}
 \hline
 \textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu} & \textbf{Giá trị mặc định} & \textbf{Mô tả} \\ \hline
 \endhead
@@ -2047,7 +2047,7 @@ Mô-đun này phân tích dữ liệu chi tiêu, xu hướng tiêu thụ thực 
 Không có.
 
 \paragraph{Phương thức (Operations):}
-\begin{longtable}{|c|l|l|p{9.5cm}|}
+\begin{longtable}{|p{0.6cm}|p{3.8cm}|p{2.6cm}|p{6.5cm}|}
 \hline
 \textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu trả về} & \textbf{Mô tả (mục đích)} \\ \hline
 \endhead
@@ -2082,7 +2082,7 @@ Không có.
 \end{itemize}
 
 \paragraph{Thuộc tính (Attributes):}
-\begin{longtable}{|c|l|l|l|p{7.5cm}|}
+\begin{longtable}{|p{0.6cm}|p{2.8cm}|p{2.2cm}|p{1.8cm}|p{5.8cm}|}
 \hline
 \textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu} & \textbf{Giá trị mặc định} & \textbf{Mô tả} \\ \hline
 \endhead
@@ -2090,13 +2090,13 @@ Không có.
 \end{longtable}
 
 \paragraph{Phương thức (Operations):}
-\begin{longtable}{|c|l|l|p{9.5cm}|}
+\begin{longtable}{|p{0.6cm}|p{3.8cm}|p{2.6cm}|p{6.5cm}|}
 \hline
 \textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu trả về} & \textbf{Mô tả (mục đích)} \\ \hline
 \endhead
-1 & getDashboard & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Lấy dữ liệu tổng hợp chung \\ \hline
-2 & getConsumptionTrends & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Lấy báo cáo xu hướng tiêu thụ \\ \hline
-3 & getWasteReport & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Lấy báo cáo thực phẩm lãng phí \\ \hline
+1 & getDashboard & Promise\textless{}any\textgreater{} & Lấy dữ liệu tổng hợp chung \\ \hline
+2 & getConsumptionTrends & Promise\textless{}any\textgreater{} & Lấy báo cáo xu hướng tiêu thụ \\ \hline
+3 & getWasteReport & Promise\textless{}any\textgreater{} & Lấy báo cáo thực phẩm lãng phí \\ \hline
 \end{longtable}
 
 \paragraph{Tham số (Parameters):}
@@ -2136,7 +2136,7 @@ Không có.
 Không có.
 
 \paragraph{Phương thức (Operations):}
-\begin{longtable}{|c|l|l|p{9.5cm}|}
+\begin{longtable}{|p{0.6cm}|p{3.8cm}|p{2.6cm}|p{6.5cm}|}
 \hline
 \textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu trả về} & \textbf{Mô tả (mục đích)} \\ \hline
 \endhead
@@ -2182,7 +2182,7 @@ Không có.
 Không có.
 
 \paragraph{Phương thức (Operations):}
-\begin{longtable}{|c|l|l|p{9.5cm}|}
+\begin{longtable}{|p{0.6cm}|p{3.8cm}|p{2.6cm}|p{6.5cm}|}
 \hline
 \textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu trả về} & \textbf{Mô tả (mục đích)} \\ \hline
 \endhead
@@ -2232,7 +2232,7 @@ Mô-đun này dành riêng cho Admin để phê duyệt công thức, quản lý
 Không có.
 
 \paragraph{Phương thức (Operations):}
-\begin{longtable}{|c|l|l|p{9.5cm}|}
+\begin{longtable}{|p{0.6cm}|p{3.8cm}|p{2.6cm}|p{6.5cm}|}
 \hline
 \textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu trả về} & \textbf{Mô tả (mục đích)} \\ \hline
 \endhead
@@ -2267,7 +2267,7 @@ Không có.
 \end{itemize}
 
 \paragraph{Thuộc tính (Attributes):}
-\begin{longtable}{|c|l|l|l|p{7.5cm}|}
+\begin{longtable}{|p{0.6cm}|p{2.8cm}|p{2.2cm}|p{1.8cm}|p{5.8cm}|}
 \hline
 \textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu} & \textbf{Giá trị mặc định} & \textbf{Mô tả} \\ \hline
 \endhead
@@ -2275,29 +2275,29 @@ Không có.
 \end{longtable}
 
 \paragraph{Phương thức (Operations):}
-\begin{longtable}{|c|l|l|p{9.5cm}|}
+\begin{longtable}{|p{0.6cm}|p{3.8cm}|p{2.6cm}|p{6.5cm}|}
 \hline
 \textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu trả về} & \textbf{Mô tả (mục đích)} \\ \hline
 \endhead
-1 & findAllCategories & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Lấy DS danh mục thực phẩm \\ \hline
-2 & createCategory & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Thêm mới danh mục \\ \hline
-3 & updateCategory & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Cập nhật danh mục \\ \hline
-4 & removeCategory & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Xóa danh mục \\ \hline
-5 & findAllFoods & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Lấy DS thực phẩm \\ \hline
-6 & createFood & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Thêm mới thực phẩm \\ \hline
-7 & updateFood & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Cập nhật thực phẩm \\ \hline
-8 & removeFood & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Xóa thực phẩm \\ \hline
-9 & findAllUnits & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Lấy DS đơn vị tính \\ \hline
-10 & createUnit & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Thêm mới đơn vị tính \\ \hline
-11 & updateUnit & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Cập nhật đơn vị tính \\ \hline
-12 & removeUnit & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Xóa đơn vị tính \\ \hline
-13 & findAll & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Lấy DS Recipes/Users \\ \hline
-14 & updateStatus & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Sửa trạng thái phê duyệt \\ \hline
-15 & getStats & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Lấy số liệu chung hệ thống \\ \hline
-16 & findOne & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Xem chi tiết user/recipe \\ \hline
-17 & create & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Thêm mới (Generic) \\ \hline
-18 & update & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Cập nhật (Generic) \\ \hline
-19 & remove & Promise\textbackslash\{\}\textless{}any\textbackslash\{\}\textgreater{} & Xóa (Generic) \\ \hline
+1 & findAllCategories & Promise\textless{}any\textgreater{} & Lấy DS danh mục thực phẩm \\ \hline
+2 & createCategory & Promise\textless{}any\textgreater{} & Thêm mới danh mục \\ \hline
+3 & updateCategory & Promise\textless{}any\textgreater{} & Cập nhật danh mục \\ \hline
+4 & removeCategory & Promise\textless{}any\textgreater{} & Xóa danh mục \\ \hline
+5 & findAllFoods & Promise\textless{}any\textgreater{} & Lấy DS thực phẩm \\ \hline
+6 & createFood & Promise\textless{}any\textgreater{} & Thêm mới thực phẩm \\ \hline
+7 & updateFood & Promise\textless{}any\textgreater{} & Cập nhật thực phẩm \\ \hline
+8 & removeFood & Promise\textless{}any\textgreater{} & Xóa thực phẩm \\ \hline
+9 & findAllUnits & Promise\textless{}any\textgreater{} & Lấy DS đơn vị tính \\ \hline
+10 & createUnit & Promise\textless{}any\textgreater{} & Thêm mới đơn vị tính \\ \hline
+11 & updateUnit & Promise\textless{}any\textgreater{} & Cập nhật đơn vị tính \\ \hline
+12 & removeUnit & Promise\textless{}any\textgreater{} & Xóa đơn vị tính \\ \hline
+13 & findAll & Promise\textless{}any\textgreater{} & Lấy DS Recipes/Users \\ \hline
+14 & updateStatus & Promise\textless{}any\textgreater{} & Sửa trạng thái phê duyệt \\ \hline
+15 & getStats & Promise\textless{}any\textgreater{} & Lấy số liệu chung hệ thống \\ \hline
+16 & findOne & Promise\textless{}any\textgreater{} & Xem chi tiết user/recipe \\ \hline
+17 & create & Promise\textless{}any\textgreater{} & Thêm mới (Generic) \\ \hline
+18 & update & Promise\textless{}any\textgreater{} & Cập nhật (Generic) \\ \hline
+19 & remove & Promise\textless{}any\textgreater{} & Xóa (Generic) \\ \hline
 \end{longtable}
 
 \paragraph{Tham số (Parameters):}
@@ -2337,7 +2337,7 @@ Không có.
 Không có.
 
 \paragraph{Phương thức (Operations):}
-\begin{longtable}{|c|l|l|p{9.5cm}|}
+\begin{longtable}{|p{0.6cm}|p{3.8cm}|p{2.6cm}|p{6.5cm}|}
 \hline
 \textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu trả về} & \textbf{Mô tả (mục đích)} \\ \hline
 \endhead
@@ -2457,7 +2457,7 @@ Không có.
 \end{itemize}
 
 \paragraph{Thuộc tính (Attributes):}
-\begin{longtable}{|c|l|l|l|p{7.5cm}|}
+\begin{longtable}{|p{0.6cm}|p{2.8cm}|p{2.2cm}|p{1.8cm}|p{5.8cm}|}
 \hline
 \textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu} & \textbf{Giá trị mặc định} & \textbf{Mô tả} \\ \hline
 \endhead
@@ -2491,7 +2491,7 @@ Không có.
 \end{itemize}
 
 \paragraph{Thuộc tính (Attributes):}
-\begin{longtable}{|c|l|l|l|p{7.5cm}|}
+\begin{longtable}{|p{0.6cm}|p{2.8cm}|p{2.2cm}|p{1.8cm}|p{5.8cm}|}
 \hline
 \textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu} & \textbf{Giá trị mặc định} & \textbf{Mô tả} \\ \hline
 \endhead
@@ -2536,7 +2536,7 @@ Mô-đun này chứa các thành phần chung như trang chủ ứng dụng, wid
 Không có.
 
 \paragraph{Phương thức (Operations):}
-\begin{longtable}{|c|l|l|p{9.5cm}|}
+\begin{longtable}{|p{0.6cm}|p{3.8cm}|p{2.6cm}|p{6.5cm}|}
 \hline
 \textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu trả về} & \textbf{Mô tả (mục đích)} \\ \hline
 \endhead
@@ -2572,7 +2572,7 @@ Không có.
 Không có.
 
 \paragraph{Phương thức (Operations):}
-\begin{longtable}{|c|l|l|p{9.5cm}|}
+\begin{longtable}{|p{0.6cm}|p{3.8cm}|p{2.6cm}|p{6.5cm}|}
 \hline
 \textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu trả về} & \textbf{Mô tả (mục đích)} \\ \hline
 \endhead
@@ -2608,7 +2608,7 @@ Không có.
 Không có.
 
 \paragraph{Phương thức (Operations):}
-\begin{longtable}{|c|l|l|p{9.5cm}|}
+\begin{longtable}{|p{0.6cm}|p{3.8cm}|p{2.6cm}|p{6.5cm}|}
 \hline
 \textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu trả về} & \textbf{Mô tả (mục đích)} \\ \hline
 \endhead
@@ -2643,7 +2643,7 @@ Không có.
 \end{itemize}
 
 \paragraph{Thuộc tính (Attributes):}
-\begin{longtable}{|c|l|l|l|p{7.5cm}|}
+\begin{longtable}{|p{0.6cm}|p{2.8cm}|p{2.2cm}|p{1.8cm}|p{5.8cm}|}
 \hline
 \textbf{\#} & \textbf{Tên} & \textbf{Kiểu dữ liệu} & \textbf{Giá trị mặc định} & \textbf{Mô tả} \\ \hline
 \endhead

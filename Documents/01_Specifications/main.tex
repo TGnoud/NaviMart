@@ -1,4 +1,4 @@
-\documentclass[a4paper,13pt,3p,twoside]{report}
+﻿\documentclass[a4paper,13pt,3p,oneside]{report}
 \usepackage{scrextend}
 \changefontsizes{13pt}
 \usepackage[utf8]{vietnam}
@@ -115,6 +115,14 @@
 \setlength{\parskip}{6pt}
 % Lùi đầu dòng
 \setlength{\parindent}{15pt}
+% Giảm padding trong bảng để các bảng đặc tả không tràn lề trang A4
+\setlength{\tabcolsep}{3pt}
+% Tránh giãn khoảng trắng dọc quá lớn khi trang có hình/bảng
+\raggedbottom
+% Giảm khoảng cách giữa hình/bảng và phần văn bản xung quanh
+\setlength{\textfloatsep}{8pt plus 2pt minus 2pt}
+\setlength{\floatsep}{8pt plus 2pt minus 2pt}
+\setlength{\intextsep}{8pt plus 2pt minus 2pt}
 
 % =========================== BODY ===============
 \begin{document}
@@ -122,7 +130,7 @@
 \subfile{Bia} % Phần bìa chính
 
 % ===================================================
-\cleardoublepage
+\clearpage
 \pagenumbering{roman} 
 \renewcommand*\contentsname{MỤC LỤC}
 
@@ -151,21 +159,21 @@
 \addtocontents{toc}{\protect\thispagestyle{empty}}
 \tableofcontents 
 \thispagestyle{empty}
-\cleardoublepage
+\clearpage
 
 % Tạo danh mục hình vẽ
 \renewcommand{\listfigurename}{DANH MỤC HÌNH VẼ}
 {\let\oldnumberline\numberline
 \renewcommand{\numberline}{Hình~\oldnumberline}
 \listoffigures} 
-\cleardoublepage
+\clearpage
 
 % Tạo danh mục bảng biểu
 \renewcommand{\listtablename}{DANH MỤC BẢNG BIỂU}
 {\let\oldnumberline\numberline
 \renewcommand{\numberline}{Bảng~\oldnumberline}
 \listoftables}
-\cleardoublepage
+\clearpage
 
 % ===================================================
 \pagenumbering{arabic}
@@ -178,22 +186,22 @@
 
 % --- Cấu trúc các Chương nội dung ---
 
-\cleardoublepage
+\clearpage
 \chapter{GIỚI THIỆU}
 \label{chapter:Introduction}
 \subfile{Chuong/1_Gioi_thieu}
 
-\cleardoublepage
+\clearpage
 \chapter{MÔ TẢ TỔNG QUAN}
 \label{chapter:Overview}
 \subfile{Chuong/2_Mo_ta_tong_quan}
 
-\cleardoublepage
+\clearpage
 \chapter{ĐẶC TẢ CÁC CHỨC NĂNG}
 \label{chapter:FunctionalReqs}
 \subfile{Chuong/3_Dac_ta} 
 
-\cleardoublepage
+\clearpage
 \chapter{CÁC YÊU CẦU KHÁC}
 \label{chapter:OtherReqs}
 \subfile{Chuong/4_Cac_yeu_cau_khac}

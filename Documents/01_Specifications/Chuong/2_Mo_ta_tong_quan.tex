@@ -25,7 +25,7 @@ Biểu đồ use case tổng quan mô tả các module chính của NaviMart và
 
 Khách chỉ tương tác với nhóm chức năng xác thực và quản lý tài khoản. Sau khi đăng nhập, Người dùng có thể truy cập các chức năng phục vụ sinh hoạt gia đình như quản lý nhóm gia đình, danh sách mua sắm, tủ lạnh, kế hoạch bữa ăn, gợi ý món ăn và thống kê. Quản trị viên sử dụng nhóm chức năng xác thực và quản trị hệ thống để theo dõi, kiểm soát dữ liệu vận hành.
 
-\begin{figure}[H]
+\begin{figure}[!htbp]
     \centering
     \includegraphics[width=0.95\textwidth]{usecase/overview_system.png}
     \caption{Biểu đồ use case tổng quan hệ thống NaviMart}
@@ -38,7 +38,7 @@ Các use case tổng quan được phân rã thành các nhóm chức năng nh�
 \subsection{Module xác thực và quản lý tài khoản}
 Module xác thực và quản lý tài khoản cho phép Khách đăng ký tài khoản và đăng nhập qua mạng xã hội. Người dùng có thể đăng nhập bằng Email/SĐT, quên mật khẩu, đổi mật khẩu, đăng xuất, xem và cập nhật thông tin cá nhân.
 
-\begin{figure}[H]
+\begin{figure}[!htbp]
     \centering
     \includegraphics[width=0.9\textwidth]{usecase/auth.png}
     \caption{Biểu đồ use case module xác thực và quản lý tài khoản}
@@ -48,7 +48,7 @@ Module xác thực và quản lý tài khoản cho phép Khách đăng ký tài 
 \subsection{Module quản lý nhóm gia đình}
 Module nhóm gia đình cho phép Người dùng tạo và quản lý không gian dùng chung cho gia đình. Theo biểu đồ use case, Người dùng có thể tham gia nhóm, rời khỏi nhóm, xem thông tin và thành viên, tạo nhóm gia đình, tạo mã mời và cập nhật phân quyền.
 
-\begin{figure}[H]
+\begin{figure}[!htbp]
     \centering
     \includegraphics[width=0.9\textwidth]{usecase/family_group.png}
     \caption{Biểu đồ use case module quản lý nhóm gia đình}
@@ -58,7 +58,7 @@ Module nhóm gia đình cho phép Người dùng tạo và quản lý không gia
 \subsection{Module quản lý danh sách mua sắm}
 Module danh sách mua sắm hỗ trợ Người dùng tạo mới danh sách, xem, sửa tên hoặc xóa danh sách, thêm mặt hàng, cập nhật/xóa mặt hàng và đánh dấu mặt hàng đã mua. Khi mặt hàng được đánh dấu đã mua, thông tin thực phẩm được tự động chuyển vào tủ lạnh để tiếp tục quản lý ở module kho thực phẩm.
 
-\begin{figure}[H]
+\begin{figure}[!htbp]
     \centering
     \includegraphics[width=0.9\textwidth]{usecase/shopping_list.png}
     \caption{Biểu đồ use case module quản lý danh sách mua sắm}
@@ -68,7 +68,7 @@ Module danh sách mua sắm hỗ trợ Người dùng tạo mới danh sách, xe
 \subsection{Module quản lý tủ lạnh và kho thực phẩm}
 Module quản lý tủ lạnh và kho thực phẩm cho phép Người dùng xem và tìm kiếm thực phẩm, thêm thực phẩm thủ công, cập nhật thông tin thực phẩm và xóa/thanh lý thực phẩm. Tác nhân Hệ thống thực hiện các use case tự động gồm tự động trừ khi nấu ăn và thông báo thực phẩm sắp hết hạn.
 
-\begin{figure}[H]
+\begin{figure}[!htbp]
     \centering
     \includegraphics[width=0.9\textwidth]{usecase/pantry.png}
     \caption{Biểu đồ use case module quản lý tủ lạnh và kho thực phẩm}
@@ -78,7 +78,7 @@ Module quản lý tủ lạnh và kho thực phẩm cho phép Người dùng xem
 \subsection{Module lên kế hoạch bữa ăn}
 Module lên kế hoạch bữa ăn giúp Người dùng xem lịch trình và tạo phiên ăn, thêm hoặc sửa món ăn trong lịch trình và xóa món ăn khỏi kế hoạch.
 
-\begin{figure}[H]
+\begin{figure}[!htbp]
     \centering
     \includegraphics[width=0.9\textwidth]{usecase/meal_planner.png}
     \caption{Biểu đồ use case module lên kế hoạch bữa ăn}
@@ -88,7 +88,7 @@ Module lên kế hoạch bữa ăn giúp Người dùng xem lịch trình và t�
 \subsection{Module gợi ý và công thức nấu ăn}
 Module gợi ý và công thức nấu ăn giúp Người dùng thêm nguyên liệu thiếu vào danh sách mua sắm, tìm và xem công thức, lưu/bỏ lưu công thức, nhận gợi ý món ăn theo Pantry và chat tương tác với AI Chef. Tác nhân Hệ thống AI hỗ trợ trực tiếp cho chức năng gợi ý món ăn theo Pantry và chat tương tác AI Chef.
 
-\begin{figure}[H]
+\begin{figure}[!htbp]
     \centering
     \includegraphics[width=0.9\textwidth]{usecase/ai_recipes.png}
     \caption{Biểu đồ use case module gợi ý và công thức nấu ăn}
@@ -98,7 +98,7 @@ Module gợi ý và công thức nấu ăn giúp Người dùng thêm nguyên li
 \subsection{Module báo cáo, thống kê và quản trị}
 Module báo cáo và thống kê giúp Người dùng xem thống kê tiêu dùng và lãng phí. Module quản trị dành cho Quản trị viên, bao gồm đăng nhập và xem danh sách user, khóa/mở khóa tài khoản, quản lý master data, kiểm duyệt công thức và xem dashboard tổng quan.
 
-\begin{figure}[H]
+\begin{figure}[!htbp]
     \centering
     \includegraphics[width=0.9\textwidth]{usecase/statistics_admin.png}
     \caption{Biểu đồ use case module báo cáo, thống kê và quản trị}
@@ -108,9 +108,9 @@ Module báo cáo và thống kê giúp Người dùng xem thống kê tiêu dùn
 \section{Quy trình nghiệp vụ}
 Các module của NaviMart được liên kết thành một luồng nghiệp vụ khép kín. Điểm bắt đầu thường là nhu cầu mua sắm hoặc chuẩn bị bữa ăn của gia đình; dữ liệu phát sinh từ mỗi bước sẽ được dùng lại ở các bước tiếp theo để giảm thao tác thủ công. Hình \ref{fig:activity-overview-business} mô tả luồng nghiệp vụ tổng quan của hệ thống.
 
-\begin{figure}[H]
+\begin{figure}[!htbp]
     \centering
-    \includegraphics[width=0.95\textwidth,height=0.72\textheight,keepaspectratio]{activity/Activity_00_Tong_quan_nghiep_vu.png}
+    \includegraphics[width=0.95\textwidth,height=0.66\textheight,keepaspectratio]{activity/Activity_00_Tong_quan_nghiep_vu.png}
     \caption{Activity diagram quy trình nghiệp vụ tổng quan NaviMart}
     \label{fig:activity-overview-business}
 \end{figure}
@@ -118,9 +118,9 @@ Các module của NaviMart được liên kết thành một luồng nghiệp v�
 \subsection{Quy trình xác thực và quản lý tài khoản}
 Quy trình xác thực bắt đầu khi Khách hoặc Người dùng truy cập NaviMart. Nếu chưa có tài khoản, Khách thực hiện đăng ký và hệ thống kiểm tra tính hợp lệ của thông tin. Nếu đã có tài khoản, Người dùng có thể đăng nhập bằng Email/SĐT, còn Khách có thể đăng nhập qua mạng xã hội. Sau khi xác thực thành công, Người dùng truy cập vào hệ thống và có thể xem/cập nhật thông tin cá nhân, đổi mật khẩu hoặc đăng xuất khi cần.
 
-\begin{figure}[H]
+\begin{figure}[!htbp]
     \centering
-    \includegraphics[width=0.95\textwidth,height=0.72\textheight,keepaspectratio]{activity/Activity_01_Xac_thuc_quan_ly_tai_khoan.png}
+    \includegraphics[width=0.95\textwidth,height=0.66\textheight,keepaspectratio]{activity/Activity_01_Xac_thuc_quan_ly_tai_khoan.png}
     \caption{Activity diagram quy trình xác thực và quản lý tài khoản}
     \label{fig:activity-auth}
 \end{figure}
@@ -128,9 +128,9 @@ Quy trình xác thực bắt đầu khi Khách hoặc Người dùng truy cập 
 \subsection{Quy trình quản lý nhóm gia đình}
 Quy trình quản lý nhóm gia đình cho phép Người dùng tạo nhóm mới hoặc tham gia nhóm bằng mã mời. Khi đã thuộc một nhóm, Người dùng có thể xem thông tin nhóm, xem danh sách thành viên, tạo mã mời cho thành viên khác, cập nhật phân quyền hoặc rời khỏi nhóm. Hệ thống chịu trách nhiệm kiểm tra mã mời, khởi tạo nhóm, lưu thay đổi phân quyền và cập nhật trạng thái thành viên.
 
-\begin{figure}[H]
+\begin{figure}[!htbp]
     \centering
-    \includegraphics[width=0.95\textwidth,height=0.72\textheight,keepaspectratio]{activity/Activity_02_Quan_ly_nhom_gia_dinh.png}
+    \includegraphics[width=0.95\textwidth,height=0.66\textheight,keepaspectratio]{activity/Activity_02_Quan_ly_nhom_gia_dinh.png}
     \caption{Activity diagram quy trình quản lý nhóm gia đình}
     \label{fig:activity-family-group}
 \end{figure}
@@ -138,9 +138,9 @@ Quy trình quản lý nhóm gia đình cho phép Người dùng tạo nhóm mớ
 \subsection{Quy trình quản lý danh sách mua sắm}
 Người dùng tạo danh sách mua sắm mới theo ngày, theo tuần hoặc theo một nhu cầu cụ thể. Sau đó, Người dùng thêm các mặt hàng cần mua kèm số lượng, đơn vị tính và ghi chú nếu có. Trong quá trình mua hàng, Người dùng cập nhật trạng thái từng mặt hàng để xác định mặt hàng đã mua. Khi mặt hàng được đánh dấu là đã mua, hệ thống ghi nhận trạng thái và tự động chuyển thông tin thực phẩm sang tủ lạnh/kho thực phẩm.
 
-\begin{figure}[H]
+\begin{figure}[!htbp]
     \centering
-    \includegraphics[width=0.95\textwidth,height=0.72\textheight,keepaspectratio]{activity/Activity_03_Quan_ly_danh_sach_mua_sam.png}
+    \includegraphics[width=0.95\textwidth,height=0.66\textheight,keepaspectratio]{activity/Activity_03_Quan_ly_danh_sach_mua_sam.png}
     \caption{Activity diagram quy trình quản lý danh sách mua sắm}
     \label{fig:activity-shopping-list}
 \end{figure}
@@ -150,9 +150,9 @@ Thực phẩm có thể được đưa vào kho từ danh sách mua sắm đã m
 
 Hệ thống đồng thời thực hiện các tác vụ tự động như theo dõi hạn sử dụng, gửi thông báo khi thực phẩm sắp hết hạn và tự động trừ số lượng nguyên liệu khi Người dùng xác nhận đã nấu ăn. Nếu một nguyên liệu đã cạn hoặc gần cạn, hệ thống cảnh báo để Người dùng có thể bổ sung vào danh sách mua sắm.
 
-\begin{figure}[H]
+\begin{figure}[!htbp]
     \centering
-    \includegraphics[width=0.95\textwidth,height=0.72\textheight,keepaspectratio]{activity/Activity_04_Quan_ly_tu_lanh_kho_thuc_pham.png}
+    \includegraphics[width=0.95\textwidth,height=0.66\textheight,keepaspectratio]{activity/Activity_04_Quan_ly_tu_lanh_kho_thuc_pham.png}
     \caption{Activity diagram quy trình quản lý tủ lạnh và kho thực phẩm}
     \label{fig:activity-pantry}
 \end{figure}
@@ -162,9 +162,9 @@ Người dùng tạo lịch trình bữa ăn theo ngày hoặc theo tuần, sau 
 
 Nếu còn thiếu nguyên liệu, Người dùng có thể thêm các nguyên liệu thiếu vào danh sách mua sắm và hệ thống cập nhật danh sách tương ứng. Nếu nguyên liệu đã đủ, lịch trình được đánh dấu là sẵn sàng để thực hiện.
 
-\begin{figure}[H]
+\begin{figure}[!htbp]
     \centering
-    \includegraphics[width=0.95\textwidth,height=0.72\textheight,keepaspectratio]{activity/Activity_05_Len_ke_hoach_bua_an.png}
+    \includegraphics[width=0.95\textwidth,height=0.66\textheight,keepaspectratio]{activity/Activity_05_Len_ke_hoach_bua_an.png}
     \caption{Activity diagram quy trình lên kế hoạch bữa ăn}
     \label{fig:activity-meal-planner}
 \end{figure}
@@ -174,9 +174,9 @@ Người dùng truy cập chức năng gợi ý món ăn khi cần lựa chọn 
 
 Sau khi Người dùng chọn món ăn hoặc công thức, hệ thống kiểm tra nguyên liệu cần thiết. Nếu công thức được chọn còn thiếu nguyên liệu, hệ thống cho phép thêm nhanh các nguyên liệu này vào danh sách mua sắm. Người dùng cũng có thể lưu/bỏ lưu công thức hoặc trao đổi thêm với AI Chef để nhận phản hồi linh hoạt hơn.
 
-\begin{figure}[H]
+\begin{figure}[!htbp]
     \centering
-    \includegraphics[width=0.95\textwidth,height=0.72\textheight,keepaspectratio]{activity/Activity_06_Goi_y_mon_an_cong_thuc.png}
+    \includegraphics[width=0.95\textwidth,height=0.66\textheight,keepaspectratio]{activity/Activity_06_Goi_y_mon_an_cong_thuc.png}
     \caption{Activity diagram quy trình gợi ý món ăn và công thức nấu ăn}
     \label{fig:activity-recipe-suggestion}
 \end{figure}
@@ -186,9 +186,9 @@ Quy trình thống kê dành cho Người dùng và quy trình quản trị dàn
 
 Ở phía quản trị, Quản trị viên đăng nhập vào khu vực quản trị, được hệ thống xác thực quyền, sau đó có thể xem danh sách user, khóa/mở khóa tài khoản, quản lý master data, kiểm duyệt công thức và xem dashboard tổng quan. Các thao tác này giúp đảm bảo dữ liệu trong hệ thống nhất quán, nội dung phù hợp và hoạt động vận hành ổn định.
 
-\begin{figure}[H]
+\begin{figure}[!htbp]
     \centering
-    \includegraphics[width=0.95\textwidth,height=0.72\textheight,keepaspectratio]{activity/Activity_07_Thong_ke_va_quan_tri.png}
+    \includegraphics[width=0.95\textwidth,height=0.66\textheight,keepaspectratio]{activity/Activity_07_Thong_ke_va_quan_tri.png}
     \caption{Activity diagram quy trình thống kê và quản trị hệ thống}
     \label{fig:activity-statistics-admin}
 \end{figure}

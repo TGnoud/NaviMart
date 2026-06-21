@@ -1,8 +1,102 @@
 \documentclass[../main.tex]{subfiles}
 \begin{document}
 
-Hướng dẫn chi tiết cài đặt và sử dụng :
+\section{Truy cập hệ thống}
+Hệ thống NaviMart được triển khai trực tuyến dưới dạng ứng dụng nền tảng web. Người dùng không cần cài đặt phần mềm trên thiết bị cá nhân, chỉ cần sử dụng trình duyệt web thông dụng như Google Chrome, Safari hay Firefox có kết nối Internet để truy cập và sử dụng dịch vụ trên mọi nền tảng từ điện thoại, máy tính bảng đến máy tính cá nhân.
 
-[https://github.com/AnhHoangQuach/itss-english](https://github.com/AnhHoangQuach/itss-english)
+\textbf{Đường dẫn mã nguồn mở chính thức của hệ thống NaviMart trên Github:}
+\begin{center}
+    \url{https://github.com/TGnoud/NaviMart}
+\end{center}
+
+\textbf{Đường dẫn truy cập trực tuyến của hệ thống NaviMart:}
+\begin{center}
+    \url{https://navi-mart-iota.vercel.app/}
+\end{center}
+
+\section{Hướng dẫn sử dụng các chức năng chính}
+
+\subsection{Đăng ký và Đăng nhập}
+\begin{itemize}
+    \item \textbf{Đăng ký tài khoản:} Tại trang khởi đầu, chọn mục Đăng ký. Người dùng cần cung cấp thông tin cơ bản bao gồm họ tên, thư điện tử và mật khẩu. Sau khi hoàn tất, hệ thống sẽ tự động khởi tạo không gian lưu trữ cho người dùng mới.
+    \item \textbf{Đăng nhập:} Người dùng đã có tài khoản tiến hành nhập thư điện tử và mật khẩu vào màn hình Đăng nhập. Hệ thống có hỗ trợ tính năng Quên mật khẩu qua thư điện tử nếu người dùng không nhớ thông tin đăng nhập.
+\end{itemize}
+
+\subsection{Quản lý Kho thực phẩm}
+\begin{itemize}
+    \item \textbf{Thêm thực phẩm:} Tại màn hình Tủ lạnh hay Kho lưu trữ, nhấn nút Thêm mới. Người dùng có thể nhập thông tin thủ công hoặc sử dụng Máy quét mã vạch thông qua camera điện thoại để tự động trích xuất thông tin thực phẩm. Cần nhập đầy đủ số lượng và hạn sử dụng.
+    \item \textbf{Theo dõi hạn sử dụng:} Thực phẩm trong kho được hệ thống tự động theo dõi và phân loại bằng mã màu trực quan, trong đó màu Xanh biểu thị còn hạn an toàn, màu Cam cảnh báo sắp hết hạn cần lưu ý và màu Đỏ báo hiệu đã quá hạn sử dụng.
+    \item \textbf{Cập nhật và Tiêu thụ:} Khi sử dụng xong hoặc muốn loại bỏ thực phẩm, người dùng nhấn vào thực phẩm đó để chỉnh sửa số lượng hoặc xóa hoàn toàn khỏi kho.
+\end{itemize}
+
+\subsection{Lên kế hoạch bữa ăn và Gợi ý công thức}
+\begin{itemize}
+    \item \textbf{Gợi ý món ăn thông minh:} Trợ lý nấu ăn của hệ thống sẽ tự động phân tích các thực phẩm sắp hết hạn hiện có trong kho của bạn để đưa ra các đề xuất món ăn phù hợp, giúp ưu tiên tiêu thụ và giảm thiểu tối đa lãng phí thực phẩm.
+    \item \textbf{Lên thực đơn:} Người dùng truy cập màn hình Kế hoạch bữa ăn để lên lịch và phân bổ các món ăn hay công thức nấu ăn cho các ngày trong tuần, giúp tiết kiệm thời gian suy nghĩ hôm nay ăn gì.
+\end{itemize}
+
+\subsection{Danh sách đi chợ}
+\begin{itemize}
+    \item \textbf{Tạo danh sách:} Có thể tạo nhiều danh sách mua sắm riêng biệt cho từng mục đích, ví dụ như đi siêu thị cuối tuần hay chuẩn bị tiệc sinh nhật.
+    \item \textbf{Theo dõi mua sắm:} Nhập tên các món đồ cần mua. Khi đi siêu thị và đã bỏ món đồ nào vào giỏ, người dùng có thể tích chọn trên điện thoại để đánh dấu hoàn thành bằng cách gạch ngang món đồ đó.
+    \item \textbf{Đồng bộ thời gian thực:} Dữ liệu đi chợ được cập nhật tức thời. Nếu người này đánh dấu mua xong một món, trên máy của những người đang chia sẻ cùng danh sách cũng sẽ cập nhật trạng thái đã mua ngay lập tức nhằm tránh việc mua trùng lặp.
+\end{itemize}
+
+\subsection{Tính năng Gia đình}
+\begin{itemize}
+    \item \textbf{Tạo nhóm Gia đình:} Một tài khoản có thể khởi tạo một không gian Gia đình chung và được cấp quyền làm Quản trị viên của nhóm đó.
+    \item \textbf{Mời thành viên tham gia:} Quản trị viên có thể mời người thân như vợ chồng hay con cái vào nhóm thông qua mã tham gia.
+    \item \textbf{Dùng chung không gian số:} Khi đã vào chung một gia đình, tất cả các thành viên đều có thể nhìn thấy, thêm mới và chỉnh sửa chung trên cùng một Kho thực phẩm, chung một Danh sách đi chợ và chung một Bảng thực đơn tuần.
+\end{itemize}
+
+\section{Hướng dẫn cài đặt và chạy thử nghiệm cục bộ}
+Đối với các nhà phát triển hoặc người dùng muốn cài đặt và chạy hệ thống NaviMart từ mã nguồn ngoại tuyến, vui lòng thực hiện theo các bước sau:
+
+\subsection{Yêu cầu môi trường}
+\begin{itemize}
+    \item Node.js từ phiên bản 18 trở lên.
+    \item Nền tảng Windows vì mã nguồn sử dụng tập lệnh cấu hình sẵn cơ sở dữ liệu MongoDB cục bộ cho môi trường này, hoặc cài đặt sẵn Docker hay MongoDB nếu dùng MacOS và Linux.
+\end{itemize}
+
+\subsection{Các bước khởi động nhanh}
+Mở Terminal hay PowerShell tại thư mục gốc của dự án và thực hiện tuần tự:
+
+\textbf{Bước 1: Cài đặt thư viện phụ thuộc}
+\begin{verbatim}
+cd backend
+npm install
+cd ../frontend
+npm install
+\end{verbatim}
+
+\textbf{Bước 2: Khởi động Cơ sở dữ liệu MongoDB}
+Mở một Terminal riêng biệt tại thư mục \texttt{backend} và chạy lệnh:
+\begin{verbatim}
+cd backend
+& "node_modules\.cache\mongodb-memory-server\mongod-x64-win32-8.2.6.exe" `
+    --dbpath "..\.mongodb-data" --port 27017 --bind_ip 127.0.0.1
+\end{verbatim}
+\textit{Lưu ý: Nếu bạn đã có MongoDB chạy qua Docker hoặc cài trực tiếp, có thể bỏ qua bước này.}
+
+\textbf{Bước 3: Cấu hình môi trường và tạo dữ liệu mẫu ban đầu}
+Mở một Terminal khác tại thư mục \texttt{backend}:
+\begin{verbatim}
+Copy-Item .env.example .env
+npm run seed
+\end{verbatim}
+Lệnh \texttt{seed} sẽ thiết lập hệ thống và tạo các dữ liệu mẫu mặc định bao gồm danh mục, nguyên liệu và tài khoản quản trị viên.
+
+\textbf{Bước 4: Khởi động hệ thống}
+Chạy song song 2 Terminal cho Backend và Frontend:
+\begin{itemize}
+    \item \textbf{Backend:} Từ thư mục \texttt{backend}, chạy lệnh \texttt{npm run start:dev}. Hệ thống API kèm theo tài liệu Swagger sẽ khởi động tại địa chỉ \url{http://localhost:3000/api}.
+    \item \textbf{Frontend:} Từ thư mục \texttt{frontend}, chạy lệnh \texttt{npm run dev}. Giao diện người dùng sẽ mở tại địa chỉ \url{http://localhost:5173}.
+\end{itemize}
+
+\textbf{Tài khoản quản trị viên mặc định sau khi khởi tạo:}
+\begin{itemize}
+    \item \textbf{Thư điện tử:} \texttt{admin@navimart.local}
+    \item \textbf{Mật khẩu:} \texttt{Admin@12345}
+\end{itemize}
 
 \end{document}

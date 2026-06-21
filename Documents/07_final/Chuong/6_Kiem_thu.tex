@@ -1,0 +1,110 @@
+﻿\documentclass[../main.tex]{subfiles}
+\begin{document}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{placeholder}
+\end{figure}
+
+\textbf{Test Driven Development}
+
+\textbf{\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{placeholder}
+\end{figure}}
+
+\section{Chức năng đăng ký}
+\begin{longtable}{|p{0.95\textwidth}|}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|}
+\hline
+STT Testcase & Mô tả testcase & Các bước thực hiện & Kết quả từ chương trình & Đánh giá kết quả \\
+\hline
+1 & Kiểm tra kết quả của chương trình khi đăng ký email đúng định dạng, chưa tồn tại, nhập đầy đủ các trường. & Nhập email: li@gmail.comHọ tên: LiPassword: 123456Yêu cầu đăng ký & Chương trình thông báo đăng ký thành công, chuyển đến trang đăng nhập & Pass \\
+\hline
+2 & Kiểm tra kết quả của chương trình khi nhập thiếu 1 trường bất kỳ & Lần lượt thực hiện nhập thiếu 1 trong 3 trường email, họ tên, mật khẩuYêu cầu đăng ký & Chương trình yêu cầu người dùng nhập đủ các trường & Pass \\
+\hline
+3 & Kiểm tra kết quả của chương trình khi nhập 1 email đã được đăng ký trước đó & Đăng ký 1 email đã được sử dụng trước: li@gmail.comĐiền đầy đủ các trườngYêu cầu đăng ký & Chương trình thông báo email này đã được đăng ký trước đó & Pass \\
+\hline
+4 & Kiểm tra kết quả của chương trình khi nhập đầy đủ các trường, email có định dạng sai & Nhập email có định dạng sai: 123gmail.comĐiền đầy đủ các trườngYêu cầu đăng ký & Chương trình thông báo email sai định dạng & Pass \\
+\hline
+\end{longtable}
+
+
+\section{Chức năng đăng nhập}
+\begin{longtable}{|p{0.95\textwidth}|}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|}
+\hline
+STT Testcase & Mô tả testcase & Các bước thực hiện & Kết quả từ chương trình & Đánh giá kết quả \\
+\hline
+1 & Kiểm tra kết quả của chương trình khi đăng nhập email đã được đăng ký, nhập đúng mật khẩu & Nhập email: li@gmail.comPassword: 123456Yêu cầu đăng nhập & Chương trình thông báo đăng nhập thành công, chuyển đến trang chủ & Pass \\
+\hline
+2 & Kiểm tra kết quả của chương trình khi nhập thiếu 1 trường bất kỳ & Lần lượt thực hiện nhập thiếu 1 trong 2 trường email, mật khẩuYêu cầu đăng nhập & Chương trình yêu cầu người dùng nhập đủ các trường & Pass \\
+\hline
+3 & Kiểm tra kết quả của chương trình khi nhập 1 email chưa được đăng ký & Đăng ký 1 email chưa được đăng ký: 123456@gmail.comĐiền đầy đủ các trườngYêu cầu đăng nhập & Chương trình thông báo tài khoản không tồn tại & Pass \\
+\hline
+4 & Kiểm tra kết quả của chương trình khi nhập đầy đủ các trường, email đã được đăng ký, mật khẩu sai & Nhập email: li@gmail.comĐiền đầy đủ các trườngNhập sai mật khẩuYêu cầu đăng ký & Chương trình thông báo mật khẩu sai & Pass \\
+\hline
+\end{longtable}
+
+
+\section{Chức năng Cập nhật thông tin tài khoản}
+\begin{longtable}{|p{0.95\textwidth}|}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|}
+\hline
+STT Testcase & Mô tả testcase & Các bước thực hiện & Kết quả từ chương trình & Đánh giá kết quả \\
+\hline
+1 & Kiểm tra kết quả của chương trình khi nhập tên và username đúng yêu cầu (username không có khoảng trống) & Họ tên: NgânUsername: ĐinhNganYêu cầu chỉnh sửa & Chương trình thông báo chỉnh sửa thông tin thành công, hiển thị kết quả cho người dùng & Pass \\
+\hline
+2 & Kiểm tra kết quả của chương trình khi nhập thiếu 1 trường bất kỳ & Lần lượt thực hiện nhập thiếu 1 trong 2 trường tên, usernameYêu cầu chỉnh sửa & Chương trình yêu cầu người dùng nhập đủ các trường & Pass \\
+\hline
+3 & Kiểm tra kết quả của chương trình khi nhập username sai định dạng( có khoảng trống) & Họ tên: NgânUsername: Đinh NgânYêu cầu chỉnh sửa & Chương trình thông báo username không được có khoảng trống & Pass \\
+\hline
+\end{longtable}
+
+
+\section{Chức năng Đăng xuất}
+\begin{longtable}{|p{0.95\textwidth}|}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|}
+\hline
+STT Testcase & Mô tả testcase & Các bước thực hiện & Kết quả từ chương trình & Đánh giá kết quả \\
+\hline
+1 & Kiểm tra kết quả của chương trình khi người dùng yêu cầu đăng xuất & Yêu cầu đăng xuất & Chương trình thông báo đăng xuất thành công, chuyển đến trang chủ & Pass \\
+\hline
+\end{longtable}
+
+
+\section{Tính năng Không yêu cầu đăng nhập}
+\begin{longtable}{|p{0.95\textwidth}|}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|}
+\hline
+STT Testcase & Mô tả testcase & Các bước thực hiện & Kết quả từ chương trình & Đánh giá kết quả \\
+\hline
+1 & Kiểm tra kết quả của chương trình khi truy cập các chức năng và sử dụng & Chọn các chức năngTest & Chương trình cho ra kết quả như mong muốn & Pass \\
+\hline
+\end{longtable}
+
+
+\section{Tính năng Yêu cầu phải đăng nhập}
+\begin{longtable}{|p{0.95\textwidth}|}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|}
+\hline
+STT Testcase & Mô tả testcase & Các bước thực hiện & Kết quả từ chương trình & Đánh giá kết quả \\
+\hline
+1 & Kiểm tra kết quả của chương trình khi đăng nhập và sử dụng chức năng & Chọn các chức năngTest & Chương trình chạy đúng như mong muốn & Pass \\
+\hline
+2 & Kiểm tra kết quả của chương trình khi chưa đăng nhập & Chọn các chức năng & Chương trình yêu cầu người dùng phải đăng nhập & Pass \\
+\hline
+\end{longtable}
+
+
+\section{Chức năng Đóng góp}
+\begin{longtable}{|p{0.95\textwidth}|}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|}
+\hline
+STT Testcase & Mô tả testcase & Các bước thực hiện & Kết quả từ chương trình & Đánh giá kết quả \\
+\hline
+1 & Kiểm tra kết quả của chương trình khi chọn chức năng Đóng góp. Người dùng, khách không nhập đủ trường hệ thống yêu cầu & Người dùng, khách chỉ nhập 1 số trong tất cả trường hệ thống yêu cầuNgười dùng, khách xác nhận đóng góp & Chương trình yêu cầu người dùng, khách phải đăng nhập đầy đủ trường yêu cầu & Pass \\
+\hline
+2 & Kiểm tra kết quả của chương trình khi chọn chức năng Đóng góp.Người dùng, khách đóng góp một từ vựng chưa tồn tại trong hệ thống và nhập đủ trường hệ thống yêu cầu & Người dùng, khách nhập từ vựng, nghĩa, nhập các trường đề xuấtNgười dùng, khách xác nhận đóng góp & Chương trình thông báo đã nhận được đóng góp của người dùng, khách & Pass \\
+\hline
+3 & Kiểm tra kết quả của chương trình khi chọn chức năng Đóng góp.Người dùng, khách đóng góp một từ vựng đã tồn tại trong hệ thống và nhập đủ trường hệ thống yêu cầu & Người dùng, khách nhập từ vựng, nghĩa, nhập các trường đề xuấtNgười dùng, khách xác nhận đóng góp & Chương trình thông báo từ người dùng, khách đóng góp đã tồn tại trong hệ thống & Pass \\
+\hline
+\end{longtable}
+
+
+\textbf{Đánh giá:} Chương trình chạy đúng như mong muốn
+
+\end{document}

@@ -1,0 +1,103 @@
+\documentclass[../main.tex]{subfiles}
+\begin{document}
+
+\section{Khảo sát bài toán}
+Trong cuộc sống hiện đại bận rộn, việc quản lý chi tiêu, mua sắm thực phẩm và lên thực đơn bữa ăn hàng ngày cho gia đình thường tốn rất nhiều thời gian và công sức. Các gia đình thường gặp phải những khó khăn như:
+\begin{itemize}
+    \item Quên mua những mặt hàng cần thiết khi đi siêu thị.
+    \item Mua thừa thực phẩm dẫn đến lãng phí, thức ăn hết hạn sử dụng.
+    \item Khó khăn trong việc nghĩ xem "hôm nay ăn gì?" và kết hợp các món ăn sao cho đủ dinh dưỡng.
+    \item Các thành viên trong gia đình thiếu sự đồng bộ trong việc đi chợ (ví dụ: cả hai người cùng mua một loại thực phẩm).
+\end{itemize}
+
+Xuất phát từ những thực tế đó, cùng với sự phát triển của công nghệ ứng dụng trên thiết bị di động và nền tảng web, nhóm chúng em quyết định xây dựng hệ thống \textbf{NaviMart}. Đây là một ứng dụng quản lý đi chợ và thực đơn thông minh, hướng tới việc giúp các cá nhân và gia đình tối ưu hóa thời gian, tiết kiệm chi phí và tổ chức cuộc sống dễ dàng hơn.
+
+\section{Mô tả yêu cầu bài toán}
+
+\subsection{Yêu cầu nghiệp vụ}
+Hệ thống NaviMart được thiết kế để giải quyết các vấn đề trên thông qua các nghiệp vụ lõi:
+\begin{itemize}
+    \item \textbf{Quản lý danh sách mua sắm:} Hỗ trợ người dùng lập danh sách đi chợ, đánh dấu các món đã mua và tự động chuyển các mặt hàng đã mua vào kho.
+    \item \textbf{Quản lý tủ lạnh và kho thực phẩm:} Giúp người dùng theo dõi số lượng thực phẩm hiện có, cảnh báo thực phẩm sắp hết hạn và tự động trừ số lượng khi nấu ăn.
+    \item \textbf{Lên kế hoạch bữa ăn:} Cho phép tạo lịch trình bữa ăn theo ngày hoặc tuần, hỗ trợ thay đổi món ăn linh hoạt.
+    \item \textbf{Gợi ý thông minh \& Công thức nấu ăn:} Gợi ý món ăn dựa trên thực phẩm đang có trong tủ lạnh, tích hợp trợ lý AI để tư vấn nấu ăn và tự động thêm nguyên liệu còn thiếu vào danh sách đi chợ.
+    \item \textbf{Quản lý nhóm gia đình:} Cho phép tạo nhóm, mời thành viên, phân quyền và đồng bộ hóa dữ liệu theo thời gian thực giữa các thành viên trong gia đình.
+    \item \textbf{Báo cáo \& Thống kê:} Thống kê tình hình tiêu dùng, chi tiêu và lãng phí thực phẩm.
+\end{itemize}
+
+\subsection{Phân rã chức năng}
+Dựa trên các yêu cầu nghiệp vụ, hệ thống NaviMart được phân rã thành các chức năng chính như sau:
+
+\begin{itemize}
+    \item \textbf{Xác thực và quản lý tài khoản}
+    \begin{itemize}
+        \item Đăng nhập, đăng ký bằng email, số điện thoại hoặc mạng xã hội.
+        \item Quản lý thông tin cá nhân, đổi mật khẩu, đặt lại mật khẩu, đăng xuất.
+    \end{itemize}
+    \item \textbf{Quản lý nhóm gia đình}
+    \begin{itemize}
+        \item Tạo và quản lý thông tin nhóm gia đình.
+        \item Tạo mã mời, tham gia nhóm gia đình.
+        \item Phân quyền, xóa thành viên, tự động rời khỏi nhóm.
+    \end{itemize}
+    \item \textbf{Quản lý danh sách mua sắm}
+    \begin{itemize}
+        \item Tạo mới, xem, sửa, xóa danh sách mua sắm.
+        \item Thêm, cập nhật, xóa mặt hàng trong danh sách.
+        \item Đánh dấu đã mua và tự động chuyển mặt hàng vào tủ lạnh.
+    \end{itemize}
+    \item \textbf{Quản lý tủ lạnh \& kho thực phẩm}
+    \begin{itemize}
+        \item Thêm, sửa, xóa, tìm kiếm thực phẩm trong kho.
+        \item Tự động trừ số lượng khi hoàn tất nấu ăn.
+        \item Nhắc nhở thực phẩm sắp hết hạn.
+    \end{itemize}
+    \item \textbf{Lên kế hoạch bữa ăn}
+    \begin{itemize}
+        \item Xem lịch trình và tạo các bữa ăn.
+        \item Thêm, sửa, đổi món, xóa món ăn khỏi lịch trình.
+    \end{itemize}
+    \item \textbf{Gợi ý thông minh \& Công thức nấu ăn}
+    \begin{itemize}
+        \item Gợi ý món ăn dựa trên thực phẩm hiện có.
+        \item Tìm kiếm, xem chi tiết và lưu công thức nấu ăn.
+        \item Tự động thêm nguyên liệu còn thiếu vào danh sách mua sắm.
+        \item Tương tác trực tiếp với trợ lý nấu ăn AI.
+    \end{itemize}
+    \item \textbf{Báo cáo \& Thống kê}
+    \begin{itemize}
+        \item Xem thống kê tiêu dùng, chi phí và mức độ lãng phí thực phẩm.
+    \end{itemize}
+    \item \textbf{Quản trị viên}
+    \begin{itemize}
+        \item Quản lý danh sách người dùng.
+        \item Quản lý dữ liệu chuẩn của hệ thống (đơn vị tính, phân loại thực phẩm).
+        \item Kiểm duyệt công thức nấu ăn do người dùng đóng góp.
+        \item Xem thống kê tổng quan của toàn hệ thống.
+    \end{itemize}
+\end{itemize}
+
+\section{Xác định thông tin cơ bản cho nghiệp vụ của bài toán}
+
+Để làm rõ luồng hoạt động, dưới đây là bảng xác định các quy trình nghiệp vụ cơ bản:
+
+\begin{longtable}{|p{0.25\textwidth}|p{0.3\textwidth}|p{0.25\textwidth}|p{0.15\textwidth}|}
+\hline
+\textbf{Nghiệp vụ} & \textbf{Quy trình} & \textbf{Đầu ra} & \textbf{Điều kiện} \\
+\hline
+\endhead
+Quản lý gia đình & Tạo nhóm và mời các thành viên tham gia qua mã mời hoặc đường dẫn. & Không gian chia sẻ chung cho các thành viên. & Đã đăng nhập \\
+\hline
+Quản lý danh sách mua sắm & Lập danh sách, thêm/sửa mặt hàng cần mua, đánh dấu "Đã mua". & Danh sách đi chợ cập nhật, mặt hàng tự chuyển vào tủ lạnh. & Đã tham gia nhóm \\
+\hline
+Quản lý tủ lạnh & Thêm, cập nhật thực phẩm thủ công hoặc tự động qua danh sách đi chợ. & Số lượng thực phẩm trong nhà được kiểm soát. & Đã tham gia nhóm \\
+\hline
+Lên kế hoạch bữa ăn & Xếp lịch các món ăn theo từng bữa/ngày. Khi nấu xong tự trừ nguyên liệu. & Lịch trình bữa ăn tuần và cập nhật tự động kho. & Đã tham gia nhóm \\
+\hline
+Gợi ý và Công thức & Đọc kho thực phẩm để gợi ý món ăn, lưu công thức và hỏi đáp với trợ lý AI. & Danh sách món ăn phù hợp với nguyên liệu sẵn có. & Có thực phẩm \\
+\hline
+Quản trị hệ thống & Duyệt công thức, quản lý người dùng, cấu hình dữ liệu hệ thống. & Hệ thống được kiểm soát và vận hành trơn tru. & Tài khoản Quản trị \\
+\hline
+\end{longtable}
+
+\end{document}

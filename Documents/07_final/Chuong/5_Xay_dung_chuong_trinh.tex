@@ -1,0 +1,114 @@
+\documentclass[../main.tex]{subfiles}
+\begin{document}
+
+\section{Công nghệ sử dụng}
+Hệ thống NaviMart được xây dựng dựa trên các công nghệ và thư viện hiện đại nhằm tối ưu hóa hiệu suất và trải nghiệm người dùng:
+\begin{itemize}
+    \item \textbf{Backend \& Real-time:}
+    \begin{itemize}
+        \item Nền tảng: Node.js
+        \item Framework: NestJS (Xây dựng RESTful APIs)
+        \item Giao tiếp thời gian thực: Socket.io
+    \end{itemize}
+    \item \textbf{Cơ sở dữ liệu (Database):}
+    \begin{itemize}
+        \item Hệ quản trị CSDL: MongoDB
+        \item Thư viện tương tác: Mongoose
+    \end{itemize}
+    \item \textbf{Bảo mật \& Xác thực (Security \& Auth):}
+    \begin{itemize}
+        \item JSON Web Token (JWT)
+        \item Passport (Local \& JWT Strategy)
+        \item Mã hóa mật khẩu: Bcrypt
+    \end{itemize}
+    \item \textbf{Frontend (Client):}
+    \begin{itemize}
+        \item Thư viện cốt lõi: React (Sử dụng TypeScript)
+        \item Quản lý giao diện \& Styling: TailwindCSS
+        \item Quản lý định tuyến: React Router DOM
+        \item Tính năng quét mã vạch/QR: Thư viện ZXing
+        \item Build tool: Vite
+    \end{itemize}
+    \item \textbf{Lưu trữ đám mây (Cloud Storage):}
+    \begin{itemize}
+        \item Lưu trữ hình ảnh: Cloudinary
+    \end{itemize}
+\end{itemize}
+
+\section{Cấu trúc thư mục}
+Cấu trúc dự án được chia làm 2 thư mục chính là \texttt{frontend} và \texttt{backend}:
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{placeholder}
+\caption{Cấu trúc thư mục mã nguồn Backend (NestJS)}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{placeholder}
+\caption{Cấu trúc thư mục mã nguồn Frontend (React)}
+\end{figure}
+
+\section{Sơ đồ dịch chuyển màn hình}
+Sơ đồ dưới đây mô tả luồng thao tác và sự điều hướng qua lại giữa các giao diện chính của hệ thống NaviMart (từ lúc Đăng nhập đến khi quản lý Gia đình, Kho thực phẩm, và Lên thực đơn).
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{placeholder}
+\caption{Sơ đồ dịch chuyển màn hình (Screen Flow)}
+\end{figure}
+
+\section{Giao diện minh họa}
+
+Dưới đây là các giao diện chính của ứng dụng NaviMart:
+
+\textbf{1. Giao diện Đăng nhập / Đăng ký}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{placeholder}
+\end{figure}
+
+\textbf{2. Giao diện Trang chủ (Dashboard tổng quan)}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{placeholder}
+\end{figure}
+
+\textbf{3. Giao diện Quản lý kho thực phẩm (Tủ lạnh / Pantry)}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{placeholder}
+\end{figure}
+
+\textbf{4. Giao diện Danh sách mua sắm (Shopping List)}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{placeholder}
+\end{figure}
+
+\textbf{5. Giao diện Quản lý gia đình \& Phân quyền}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{placeholder}
+\end{figure}
+
+\textbf{6. Giao diện Lên kế hoạch bữa ăn (Meal Planner)}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{placeholder}
+\end{figure}
+
+\textbf{7. Giao diện Gợi ý công thức nấu ăn \& Trợ lý AI (AI Chef)}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{placeholder}
+\end{figure}
+
+\textbf{8. Giao diện Quét mã vạch/QR Code thực phẩm}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{placeholder}
+\end{figure}
+
+\end{document}

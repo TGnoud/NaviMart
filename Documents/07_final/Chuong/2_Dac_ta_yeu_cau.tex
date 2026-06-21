@@ -1,0 +1,557 @@
+﻿\documentclass[../main.tex]{subfiles}
+\begin{document}
+
+\section{Giới thiệu chung}
+Các tác nhân của hệ thống:
+
+\begin{longtable}{|p{0.95\textwidth}|}|p{0.3\textwidth}|p{0.3\textwidth}|}
+\hline
+STT & Tên tác nhân & Mô tả ngắn \\
+\hline
+1 & Khách & Khách ghé thăm trang web, có thể là người dùng khi chưa đăng nhập hệ thống, có thể xem và sử dụng các tính năng không cần đăng nhập \\
+\hline
+2 & Người dùng & Người dùng đã đăng nhập hệ thống, có thể sử dụng tất cả tính năng của trang web \\
+\hline
+\end{longtable}
+
+
+Xác định các ca sử dụng:
+
+\begin{longtable}{|p{0.95\textwidth}|}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|}
+\hline
+STT & Ca sử dụng & Mô tả ngắn & Tác nhân \\
+\hline
+1 & Đăng nhập & Đăng nhập bằng username và password đã đăng ký để cóthể sử dụng được các chức năng của ứng dụng & Khách \\
+\hline
+2 & Đăng ký & Đăng ký một tài khoản mới, lưu trữ vào database & Khách \\
+\hline
+3 & Đăng xuất & Thoát trạng thái đăng nhập của một tài khoản & Người dùng \\
+\hline
+4 & Cập nhật thông tin tài khoản & Cập nhật thông tin tài khoản cho phép người dùng xem cũng như chỉnh sửa lại những thông tin của mình như tên, username & Người dùng \\
+\hline
+5 & Tìm kiếm & Tìm kiếm theo từ vựng, ngữ pháp, … & Khách, người dùng \\
+\hline
+6 & Xem từ vựng yêu thích & Xem được từ vựng mình đã đánh dấu yêu thích ở mục từ vựng & Người dùng \\
+\hline
+7 & Xem bảng xếp hạng & Xem bảng xếp hạng của mình và những người chơi cùng & Người dùng \\
+\hline
+8 & Đóng góp từ vựng & Đóng góp thêm từ vựng mới cho ứng dụng & Khách, người dùng \\
+\hline
+9 & Học từ vựng, ngữ pháp & Học từ vựng, ngữ pháp. Với người dùng có thể bấm yêu thích từ vựng để có thể xem lại trong mục từ vựng yêu thích & Khách, Người dùng \\
+\hline
+10 & Chơi game & Chơi các game để rèn luyện trí nhớ & Khách, người dùng \\
+\hline
+11 & Đánh dấu từ vựng yêu thích.Xóa từ vựng yêu thích & Đánh dấu từ vựng để đưa nó vào danh sách từ vựng yêu thích.Xóa từ vựng yêu thích để xóa nó ra khỏi danh sách từ vựng yêu thích & Người dùng \\
+\hline
+ \\
+\hline
+\end{longtable}
+
+
+\section{\#\# **2.2. Biểu đồ Usecase}
+Biểu đồ Use Case tổng quan
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{placeholder}
+\end{figure}
+
+\section{Đặc tả usecase}
+\textbf{Đặc tả use case UC001 “Đăng nhập”}
+
+\begin{longtable}{|p{0.95\textwidth}|}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|}
+\hline
+Mã Use case & UC001 & Tên Use case & Đăng nhập \\
+\hline
+Tác n­­­hân & Khách \\
+\hline
+Tiền điều kiện & Không \\
+\hline
+Luồng sự kiện chính(Thành công) & STTThực hiện bởiHành động1.Kháchchọn chức năng Đăng nhập2.Hệ thốnghiển thị giao diện đăng nhập3.Kháchnhập email và mật khẩu (mô tả phía dưới *)4.Kháchyêu cầu đăng nhập5.Hệ thốngkiểm tra xem khách đã nhập các trường bắt buộc nhập hay chưa6.Hệ thốngkiểm tra email và mật khẩu có hợp lệ không7.Hệ thốnghiển thị giao diện trang chủ cho người dùng & STT & Thực hiện bởi & Hành động & 1. & Khách & chọn chức năng Đăng nhập & 2. & Hệ thống & hiển thị giao diện đăng nhập & 3. & Khách & nhập email và mật khẩu (mô tả phía dưới *) & 4. & Khách & yêu cầu đăng nhập & 5. & Hệ thống & kiểm tra xem khách đã nhập các trường bắt buộc nhập hay chưa & 6. & Hệ thống & kiểm tra email và mật khẩu có hợp lệ không & 7. & Hệ thống & hiển thị giao diện trang chủ cho người dùng \\
+\hline
+STT & Thực hiện bởi & Hành động \\
+\hline
+1. & Khách & chọn chức năng Đăng nhập \\
+\hline
+2. & Hệ thống & hiển thị giao diện đăng nhập \\
+\hline
+3. & Khách & nhập email và mật khẩu (mô tả phía dưới *) \\
+\hline
+4. & Khách & yêu cầu đăng nhập \\
+\hline
+5. & Hệ thống & kiểm tra xem khách đã nhập các trường bắt buộc nhập hay chưa \\
+\hline
+6. & Hệ thống & kiểm tra email và mật khẩu có hợp lệ không \\
+\hline
+7. & Hệ thống & hiển thị giao diện trang chủ cho người dùng \\
+\hline
+\end{longtable}
+</td></tr><tr><td><p><strong>Luồng sự kiện thay thế</strong></p></td><td colspan="3">\begin{longtable}{|p{0.95\textwidth}|}|p{0.3\textwidth}|p{0.3\textwidth}|}
+\hline
+STT & Thực hiện bởi & Hành động \\
+\hline
+6a. & Hệ thống & thông báo lỗi: Cần nhập các trường bắt buộc nhập nếu khách nhập thiếu \\
+\hline
+7a. & Hệ thống & thông báo lỗi: Email và/hoặc mật khẩu chưa đúng nếu không tìm thấy email và mật khẩu trong hệ thống \\
+\hline
+\end{longtable}
+</td></tr><tr><td><p><strong>Hậu điều kiện</strong></p></td><td colspan="3"><p>Không</p></td></tr></tbody></table>
+
+\* Dữ liệu đầu vào của thông tin cá nhân gồm các trường dữ liệu sau:
+
+\begin{longtable}{|p{0.95\textwidth}|}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|}
+\hline
+STT & Trường dữ liệu & Mô tả & Bắt buộc? & Điều kiện hợp lệ & Ví dụ \\
+\hline
+1. & Email &  & Có &  & li@gmail.com \\
+\hline
+2. & Mật khẩu &  & Có &  & 123456 \\
+\hline
+\end{longtable}
+
+
+\textbf{Đặc tả use case UC002 “Đăng ký”}
+
+\begin{longtable}{|p{0.95\textwidth}|}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|}
+\hline
+Mã Use case & UC002 & Tên Use case & Đăng ký \\
+\hline
+Tác nhân & Khách \\
+\hline
+Tiền điều kiện & Không \\
+\hline
+Luồng sự kiện chính(Thành công) & STTThực hiện bởiHành động1.Kháchchọn chức năng Đăng ký2.Hệ thốnghiển thị giao diện đăng nhập3.Kháchnhập email, họ tên và mật khẩu (mô tả phía dưới *)4.Kháchyêu cầu đăng ký5.Hệ thốngkiểm tra xem khách đã nhập các trường bắt buộc nhập hay chưa6.Hệ thốngkiểm tra email có hợp lệ không7.Hệ thốngkiểm tra xem email đã được sử dụng hay chưa8.Hệ thốnglưu thông tin đăng ký của khách vào database và hiển thị thông báo đăng ký thành công9.Hệ thốnghiển thị giao diện trang chủ & STT & Thực hiện bởi & Hành động & 1. & Khách & chọn chức năng Đăng ký & 2. & Hệ thống & hiển thị giao diện đăng nhập & 3. & Khách & nhập email, họ tên và mật khẩu (mô tả phía dưới *) & 4. & Khách & yêu cầu đăng ký & 5. & Hệ thống & kiểm tra xem khách đã nhập các trường bắt buộc nhập hay chưa & 6. & Hệ thống & kiểm tra email có hợp lệ không & 7. & Hệ thống & kiểm tra xem email đã được sử dụng hay chưa & 8. & Hệ thống & lưu thông tin đăng ký của khách vào database và hiển thị thông báo đăng ký thành công & 9. & Hệ thống & hiển thị giao diện trang chủ \\
+\hline
+STT & Thực hiện bởi & Hành động \\
+\hline
+1. & Khách & chọn chức năng Đăng ký \\
+\hline
+2. & Hệ thống & hiển thị giao diện đăng nhập \\
+\hline
+3. & Khách & nhập email, họ tên và mật khẩu (mô tả phía dưới *) \\
+\hline
+4. & Khách & yêu cầu đăng ký \\
+\hline
+5. & Hệ thống & kiểm tra xem khách đã nhập các trường bắt buộc nhập hay chưa \\
+\hline
+6. & Hệ thống & kiểm tra email có hợp lệ không \\
+\hline
+7. & Hệ thống & kiểm tra xem email đã được sử dụng hay chưa \\
+\hline
+8. & Hệ thống & lưu thông tin đăng ký của khách vào database và hiển thị thông báo đăng ký thành công \\
+\hline
+9. & Hệ thống & hiển thị giao diện trang chủ \\
+\hline
+\end{longtable}
+</td></tr><tr><td><p><strong>Luồng sự kiện thay thế</strong></p></td><td colspan="3">\begin{longtable}{|p{0.95\textwidth}|}|p{0.3\textwidth}|p{0.3\textwidth}|}
+\hline
+STT & Thực hiện bởi & Hành động \\
+\hline
+5a. & Hệ thống & thông báo lỗi: Cần nhập các trường bắt buộc nhập nếu khách nhập thiếu \\
+\hline
+6a. & Hệ thống & thông báo lỗi: Email chưa hợp lệ \\
+\hline
+7a. & Hệ thống & thông báo lỗi: Email đã được sử dụng \\
+\hline
+\end{longtable}
+</td></tr><tr><td><p><strong>Hậu điều kiện</strong></p></td><td colspan="3"><p>Không</p></td></tr></tbody></table>
+
+\* Dữ liệu đầu vào của thông tin cá nhân gồm các trường dữ liệu sau:
+
+\begin{longtable}{|p{0.95\textwidth}|}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|}
+\hline
+STT & Trường dữ liệu & Mô tả & Bắt buộc? & Điều kiện hợp lệ & Ví dụ \\
+\hline
+1. & Email &  & Có &  & li@gmail.com \\
+\hline
+2. & Tên &  & Có &  & Li \\
+\hline
+3. & Mật khẩu &  & Có &  & 123456 \\
+\hline
+\end{longtable}
+
+
+\textbf{Đặc tả use case UC003 “Đăng xuất”}
+
+\begin{longtable}{|p{0.95\textwidth}|}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|}
+\hline
+Mã Use case & UC003 & Tên Use case & Đăng xuất \\
+\hline
+Tác nhân & Người dùng \\
+\hline
+Tiền điều kiện & Không \\
+\hline
+Luồng sự kiện chính(Thành công) & STTThực hiện bởiHành động1.Người dùngchọn chức năng Đăng xuất2.Hệ thốngđăng xuất tài khoản hiện có, trở về giao diện trang chủ & STT & Thực hiện bởi & Hành động & 1. & Người dùng & chọn chức năng Đăng xuất & 2. & Hệ thống & đăng xuất tài khoản hiện có, trở về giao diện trang chủ \\
+\hline
+STT & Thực hiện bởi & Hành động \\
+\hline
+1. & Người dùng & chọn chức năng Đăng xuất \\
+\hline
+2. & Hệ thống & đăng xuất tài khoản hiện có, trở về giao diện trang chủ \\
+\hline
+\end{longtable}
+</td></tr><tr><td><p><strong>Hậu điều kiện</strong></p></td><td colspan="3"><p>Không</p></td></tr></tbody></table>
+
+\textbf{Đặc tả use case UC004 “Cập nhật thông tin tài khoản”}
+
+\begin{longtable}{|p{0.95\textwidth}|}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|}
+\hline
+Mã Use case & UC004 & Tên Use case & Cập nhật thông tin tài khoản \\
+\hline
+Tác nhân & Người dùng \\
+\hline
+Tiền điều kiện & Không \\
+\hline
+Luồng sự kiện chính(Thành công) & STTThực hiện bởiHành động1.Người dùngchọn chức năng Cập nhật thông tin tài khoản2.Hệ thốnghiển thị giao diện cập nhật thông tin tài khoản3.Kháchnhập tên và username( dữ liệu ở *)4.Kháchyêu cầu cập nhật5.Hệ thốngkiểm tra username đã hợp lệ chưa6.Hệ thốngcập nhật thông tin và lưu lại vào database & STT & Thực hiện bởi & Hành động & 1. & Người dùng & chọn chức năng Cập nhật thông tin tài khoản & 2. & Hệ thống & hiển thị giao diện cập nhật thông tin tài khoản & 3. & Khách & nhập tên và username( dữ liệu ở *) & 4. & Khách & yêu cầu cập nhật & 5. & Hệ thống & kiểm tra username đã hợp lệ chưa & 6. & Hệ thống & cập nhật thông tin và lưu lại vào database \\
+\hline
+STT & Thực hiện bởi & Hành động \\
+\hline
+1. & Người dùng & chọn chức năng Cập nhật thông tin tài khoản \\
+\hline
+2. & Hệ thống & hiển thị giao diện cập nhật thông tin tài khoản \\
+\hline
+3. & Khách & nhập tên và username( dữ liệu ở *) \\
+\hline
+4. & Khách & yêu cầu cập nhật \\
+\hline
+5. & Hệ thống & kiểm tra username đã hợp lệ chưa \\
+\hline
+6. & Hệ thống & cập nhật thông tin và lưu lại vào database \\
+\hline
+\end{longtable}
+</td></tr><tr><td><p><strong>Luồng sự kiện thay thế</strong></p></td><td colspan="3">\begin{longtable}{|p{0.95\textwidth}|}|p{0.3\textwidth}|p{0.3\textwidth}|}
+\hline
+STT & Thực hiện bởi & Hành động \\
+\hline
+5a. & Hệ thống & thông báo lỗi: Nhập lại username nếu không hợp lệ (username không chứa khoảng trống) \\
+\hline
+\end{longtable}
+</td></tr><tr><td><p><strong>Hậu điều kiện</strong></p></td><td colspan="3"><p>Không</p></td></tr></tbody></table>
+
+\* Dữ liệu đầu vào của thông tin cá nhân gồm các trường dữ liệu sau:
+
+\begin{longtable}{|p{0.95\textwidth}|}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|}
+\hline
+STT & Trường dữ liệu & Mô tả & Bắt buộc? & Điều kiện hợp lệ & Ví dụ \\
+\hline
+1. & Tên &  & Không &  & Li \\
+\hline
+2. & Username &  & Không & Không chứa khoảng trống và dấu câu & camli123 \\
+\hline
+\end{longtable}
+
+
+\textbf{Đặc tả use case UC005 “Tìm kiếm”}
+
+\begin{longtable}{|p{0.95\textwidth}|}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|}
+\hline
+Mã Use case & UC005 & Tên Use case & Tìm kiếm \\
+\hline
+Tác nhân & Khách, Người dùng \\
+\hline
+Tiền điều kiện & Không \\
+\hline
+Luồng sự kiện chính(Thành công) & STTThực hiện bởiHành động1.Kháchchọn chức năng Tìm kiếm trên giao diện trang chủ2.Hệ thốnghiển thị kết quả tìm kiếm theo danh sách các từ vựng & STT & Thực hiện bởi & Hành động & 1. & Khách & chọn chức năng Tìm kiếm trên giao diện trang chủ & 2. & Hệ thống & hiển thị kết quả tìm kiếm theo danh sách các từ vựng \\
+\hline
+STT & Thực hiện bởi & Hành động \\
+\hline
+1. & Khách & chọn chức năng Tìm kiếm trên giao diện trang chủ \\
+\hline
+2. & Hệ thống & hiển thị kết quả tìm kiếm theo danh sách các từ vựng \\
+\hline
+\end{longtable}
+</td></tr><tr><td><p><strong>Luồng sự kiện thay thế</strong></p></td><td colspan="3">\begin{longtable}{|p{0.95\textwidth}|}|p{0.3\textwidth}|p{0.3\textwidth}|}
+\hline
+STT & Thực hiện bởi & Hành động \\
+\hline
+2a. & Hệ thống & thông báo: không tìm thấy kết quả nào cả \\
+\hline
+\end{longtable}
+</td></tr><tr><td><p><strong>Hậu điều kiện</strong></p></td><td colspan="3"><p>Không</p></td></tr></tbody></table>
+
+\textbf{Đặc tả use case UC006 “Xem từ vựng yêu thích”}
+
+\begin{longtable}{|p{0.95\textwidth}|}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|}
+\hline
+Mã Use case & UC006 & Tên Use case & Xem từ vựng yêu thích \\
+\hline
+Tác nhân & Người dùng \\
+\hline
+Tiền điều kiện & Đã đăng nhập thành công \\
+\hline
+Luồng sự kiện chính(Thành công) & STTThực hiện bởiHành động1.Kháchchọn chức năng Xem từ vựng yêu thích2.Hệ thốnghiển thị giao diện của chức năng & STT & Thực hiện bởi & Hành động & 1. & Khách & chọn chức năng Xem từ vựng yêu thích & 2. & Hệ thống & hiển thị giao diện của chức năng \\
+\hline
+STT & Thực hiện bởi & Hành động \\
+\hline
+1. & Khách & chọn chức năng Xem từ vựng yêu thích \\
+\hline
+2. & Hệ thống & hiển thị giao diện của chức năng \\
+\hline
+\end{longtable}
+</td></tr><tr><td><p><strong>Hậu điều kiện</strong></p></td><td colspan="3"><p>Không</p></td></tr></tbody></table>
+
+\textbf{Đặc tả use case UC007 “Xem bảng xếp hạng”}
+
+\begin{longtable}{|p{0.95\textwidth}|}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|}
+\hline
+Mã Use case & UC007 & Tên Use case & Xem bảng xếp hạng \\
+\hline
+Tác nhân & Người dùng \\
+\hline
+Tiền điều kiện & Đã đăng nhập thành công \\
+\hline
+Luồng sự kiện chính(Thành công) & STTThực hiện bởiHành động1.Kháchchọn chức năng Xem bảng xếp hạng2.Hệ thốnghiển thị giao diện bảng xếp hạng & STT & Thực hiện bởi & Hành động & 1. & Khách & chọn chức năng Xem bảng xếp hạng & 2. & Hệ thống & hiển thị giao diện bảng xếp hạng \\
+\hline
+STT & Thực hiện bởi & Hành động \\
+\hline
+1. & Khách & chọn chức năng Xem bảng xếp hạng \\
+\hline
+2. & Hệ thống & hiển thị giao diện bảng xếp hạng \\
+\hline
+\end{longtable}
+</td></tr><tr><td><p><strong>Hậu điều kiện</strong></p></td><td colspan="3"><p>Không</p></td></tr></tbody></table>
+
+\textbf{Đặc tả use case UC008 “Đóng góp từ vựng”}
+
+\begin{longtable}{|p{0.95\textwidth}|}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|}
+\hline
+Mã Use case & UC008 & Tên Use case & Đóng góp từ vựng \\
+\hline
+Tác nhân & Người dùng, Khách \\
+\hline
+Tiền điều kiện & Không \\
+\hline
+Luồng sự kiện chính(Thành công) & STTThực hiện bởiHành động1.Kháchchọn chức năng Đóng góp từ vựng2.Hệ thốnghiển thị giao diện Đóng góp từ vựng3.KháchNhập các trường được yêu cầu4.Kháchyêu cầu thêm từ5.Hệ thốngkiểm tra xem khách đã nhập các trường bắt buộc nhập hay chưa6.Hệ thốngkiểm tra từ được nhập đã tồn tại trong database hay chưa7.Hệ thốngthêm từ được nhập vào database và thông báo nhập từ thành công & STT & Thực hiện bởi & Hành động & 1. & Khách & chọn chức năng Đóng góp từ vựng & 2. & Hệ thống & hiển thị giao diện Đóng góp từ vựng & 3. & Khách & Nhập các trường được yêu cầu & 4. & Khách & yêu cầu thêm từ & 5. & Hệ thống & kiểm tra xem khách đã nhập các trường bắt buộc nhập hay chưa & 6. & Hệ thống & kiểm tra từ được nhập đã tồn tại trong database hay chưa & 7. & Hệ thống & thêm từ được nhập vào database và thông báo nhập từ thành công \\
+\hline
+STT & Thực hiện bởi & Hành động \\
+\hline
+1. & Khách & chọn chức năng Đóng góp từ vựng \\
+\hline
+2. & Hệ thống & hiển thị giao diện Đóng góp từ vựng \\
+\hline
+3. & Khách & Nhập các trường được yêu cầu \\
+\hline
+4. & Khách & yêu cầu thêm từ \\
+\hline
+5. & Hệ thống & kiểm tra xem khách đã nhập các trường bắt buộc nhập hay chưa \\
+\hline
+6. & Hệ thống & kiểm tra từ được nhập đã tồn tại trong database hay chưa \\
+\hline
+7. & Hệ thống & thêm từ được nhập vào database và thông báo nhập từ thành công \\
+\hline
+\end{longtable}
+</td></tr><tr><td><p><strong>Luồng sự kiện thay thế</strong></p></td><td colspan="3">\begin{longtable}{|p{0.95\textwidth}|}|p{0.3\textwidth}|p{0.3\textwidth}|}
+\hline
+STT & Thực hiện bởi & Hành động \\
+\hline
+5a. & Hệ thống & thông báo lỗi: Cần nhập các trường bắt buộc nhập nếu khách nhập thiếu \\
+\hline
+7a. & Hệ thống & thông báo lỗi: từ này đã tồn tại trong hệ thống \\
+\hline
+\end{longtable}
+</td></tr><tr><td><p><strong>Hậu điều kiện</strong></p></td><td colspan="3"><p>Không</p></td></tr></tbody></table>
+
+\textbf{Đặc tả use case UC009 “Học từ vựng, ngữ pháp”}
+
+\begin{longtable}{|p{0.95\textwidth}|}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|}
+\hline
+Mã Use case & UC009 & Tên Use case & Học từ vựng ngữ pháp \\
+\hline
+Tác nhân & Khách, Người dùng \\
+\hline
+Tiền điều kiện & Không \\
+\hline
+Luồng sự kiện chính(Thành công) & STTThực hiện bởiHành động1.Kháchchọn chức năng Học từ vựng, ngữ pháp2.Hệ thốnghiển thị giao diện chức năng & STT & Thực hiện bởi & Hành động & 1. & Khách & chọn chức năng Học từ vựng, ngữ pháp & 2. & Hệ thống & hiển thị giao diện chức năng \\
+\hline
+STT & Thực hiện bởi & Hành động \\
+\hline
+1. & Khách & chọn chức năng Học từ vựng, ngữ pháp \\
+\hline
+2. & Hệ thống & hiển thị giao diện chức năng \\
+\hline
+\end{longtable}
+</td></tr><tr><td><p><strong>Hậu điều kiện</strong></p></td><td colspan="3"><p>Không</p></td></tr></tbody></table>
+
+\textbf{Đặc tả use case UC010 “Đánh dấu từ vựng yêu thích”}
+
+\begin{longtable}{|p{0.95\textwidth}|}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|}
+\hline
+Mã Use case & UC010 & Tên Use case & Đánh dấu từ vựng yêu thích \\
+\hline
+Tác nhân & Người dùng \\
+\hline
+Tiền điều kiện & Đã đăng nhập thành công \\
+\hline
+Luồng sự kiện chính(Thành công) & STTThực hiện bởiHành động1.Kháchchọn từ vựng yêu thích2.Hệ thốngxác nhận yêu cầu của người dùng3.Hệ thốnglưu từ vựng yêu thích vào danh sách từ vựng yêu thích của người dùng & STT & Thực hiện bởi & Hành động & 1. & Khách & chọn từ vựng yêu thích & 2. & Hệ thống & xác nhận yêu cầu của người dùng & 3. & Hệ thống & lưu từ vựng yêu thích vào danh sách từ vựng yêu thích của người dùng \\
+\hline
+STT & Thực hiện bởi & Hành động \\
+\hline
+1. & Khách & chọn từ vựng yêu thích \\
+\hline
+2. & Hệ thống & xác nhận yêu cầu của người dùng \\
+\hline
+3. & Hệ thống & lưu từ vựng yêu thích vào danh sách từ vựng yêu thích của người dùng \\
+\hline
+\end{longtable}
+</td></tr><tr><td><p><strong>Hậu điều kiện</strong></p></td><td colspan="3"><p>Không</p></td></tr></tbody></table>
+
+\textbf{Đặc tả use case UC011 “Xóa từ vựng yêu thích”}
+
+\begin{longtable}{|p{0.95\textwidth}|}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|}
+\hline
+Mã Use case & UC001 & Tên Use case & Xóa từ vựng yêu thích \\
+\hline
+Tác nhân & Người dùng \\
+\hline
+Tiền điều kiện & Đã đăng nhập thành công \\
+\hline
+Luồng sự kiện chính(Thành công) & STTThực hiện bởiHành động1.Kháchchọn xóa từ vựng yêu thích2.Hệ thốngxác nhận yêu cầu của người dùng3.Hệ thốngxóa từ vựng yêu thích khỏi danh sách từ vựng yêu thích của người dùng & STT & Thực hiện bởi & Hành động & 1. & Khách & chọn xóa từ vựng yêu thích & 2. & Hệ thống & xác nhận yêu cầu của người dùng & 3. & Hệ thống & xóa từ vựng yêu thích khỏi danh sách từ vựng yêu thích của người dùng \\
+\hline
+STT & Thực hiện bởi & Hành động \\
+\hline
+1. & Khách & chọn xóa từ vựng yêu thích \\
+\hline
+2. & Hệ thống & xác nhận yêu cầu của người dùng \\
+\hline
+3. & Hệ thống & xóa từ vựng yêu thích khỏi danh sách từ vựng yêu thích của người dùng \\
+\hline
+\end{longtable}
+</td></tr><tr><td><p><strong>Hậu điều kiện</strong></p></td><td colspan="3"><p>Không</p></td></tr></tbody></table>
+
+\textbf{Đặc tả use case UC012 “Chơi game”}
+
+\section{\#}
+\begin{longtable}{|p{0.95\textwidth}|}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|}
+\hline
+Mã Use case & UC012 & Tên Use case & Chơi game \\
+\hline
+Tác nhân & Khách/Người dùng \\
+\hline
+Tiền điều kiện & Không \\
+\hline
+Luồng sự kiện chính(Thành công) & STTThực hiện bởiHành động1.Khách/Người dùngchọn chơi game theo 3 danh mục : hãy chọn từ đúng, ghép từ, tay nhanh hơn não2.Hệ thốngxác nhận yêu cầuđiều hướng đến trang game3.Hệ thốnghiển thị dữ liệu trò chơi dựa trên lựa chọn của người dùng & STT & Thực hiện bởi & Hành động & 1. & Khách/Người dùng & chọn chơi game theo 3 danh mục : hãy chọn từ đúng, ghép từ, tay nhanh hơn não & 2. & Hệ thống & xác nhận yêu cầuđiều hướng đến trang game & 3. & Hệ thống & hiển thị dữ liệu trò chơi dựa trên lựa chọn của người dùng \\
+\hline
+STT & Thực hiện bởi & Hành động \\
+\hline
+1. & Khách/Người dùng & chọn chơi game theo 3 danh mục : hãy chọn từ đúng, ghép từ, tay nhanh hơn não \\
+\hline
+2. & Hệ thống & xác nhận yêu cầuđiều hướng đến trang game \\
+\hline
+3. & Hệ thống & hiển thị dữ liệu trò chơi dựa trên lựa chọn của người dùng \\
+\hline
+\end{longtable}
+</td></tr><tr><td><p><strong>Hậu điều kiện</strong></p></td><td colspan="3"><p>Không</p></td></tr></tbody></table>
+
+\section{Biểu đồ hoạt động}
+Usecase “Đăng nhập”
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{placeholder}
+\end{figure}
+
+Usecase “Đăng ký”
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{placeholder}
+\end{figure}
+
+Usecase “Đăng xuất”
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{placeholder}
+\end{figure}
+
+Usecase “Cập nhật thông tài khoản”
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{placeholder}
+\end{figure}
+
+Usecase “Tìm kiếm”
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{placeholder}
+\end{figure}
+
+Usecase “Xem từ vựng yêu thích”\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{placeholder}
+\end{figure}
+
+Usecase “Xem bảng xếp hạng”\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{placeholder}
+\end{figure}
+
+Usecase “Thêm từ vựng yêu thích”
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{placeholder}
+\end{figure}
+
+Usecase “Xóa từ vựng yêu thích”
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{placeholder}
+\end{figure}
+
+Usecase “Đóng góp từ vựng”
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{placeholder}
+\end{figure}
+
+Usecase “Chơi game”
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{placeholder}
+\end{figure}
+
+Usecase “Học từ vựng, ngữ pháp”
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{placeholder}
+\end{figure}
+
+\section{\#\# **2.5. Các yêu cầu phi chức năng}
+Chức năng
+
+\- Hỗ trợ nhiều người dùng sử dụng đồng thời.
+
+\- Nếu xảy ra lỗi thì trở lại bình thường trong vòng 1h
+
+Tính dễ dùng
+
+\- Giao diện người dùng tương thích với nhiều thiết bị.
+
+Thân thiện.
+
+Tính ổn định
+
+\- Hệ thống phải hoạt động liên tục 24 giờ/ngày, 7 ngày/tuần, với thời gian ngừng hoạt động không quá 10%.
+
+Hiệu suất
+
+\- Hệ thống phải hỗ trợ đến 1000 người dùng truy xuất CSDL trung tâm đồng thời bất kỳ lúc nào, và đến 500 người dùng truy xuất các server cục bộ.
+
+\- Hệ thống phải truy xuất đến CSDL danh mục học phần cũ với độ trễ không quá 10 giây.
+
+Sự hỗ trợ
+
+\- Không có.
+
+Các ràng buộc thiết kế
+
+\- Hệ thống phải cung cấp giao diện dựa Web.
+
+\end{document}

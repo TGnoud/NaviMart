@@ -1,0 +1,32 @@
+\documentclass[../main.tex]{subfiles}
+\begin{document}
+
+\section{Thiết kế kiến trúc hệ thống}
+Để phát triển và xây dựng ứng dụng NaviMart, nhóm sử dụng các công nghệ hiện đại như Node.js (NestJS) cho Backend, React cho Frontend và MongoDB cho cơ sở dữ liệu. Kiến trúc tổng thể của hệ thống được thiết kế tuân theo mô hình \textbf{MVC (Model - View - Controller)}.
+
+Mỗi thành phần trong mô hình MVC đảm nhận một nhiệm vụ riêng biệt và độc lập với nhau, giúp cho mã nguồn dễ quản lý, bảo trì và nâng cấp. Dưới đây là cách mô hình MVC được áp dụng cụ thể vào dự án NaviMart:
+
+\begin{itemize}
+    \item \textbf{View (Tầng giao diện):} Được xây dựng bằng \textbf{React}. Đây là nơi người dùng trực tiếp tương tác (như điền form đăng nhập, thêm thực phẩm vào kho, đánh dấu danh sách đi chợ). View chịu trách nhiệm hiển thị dữ liệu một cách trực quan và ghi nhận các sự kiện từ người dùng để gửi yêu cầu (HTTP Request) xuống Controller.
+    \item \textbf{Controller (Tầng điều khiển):} Được xây dựng bằng \textbf{NestJS} (kết hợp với Socket.io) ở phía Backend. Controller đóng vai trò là "người nhạc trưởng", tiếp nhận các yêu cầu từ View, kiểm tra tính hợp lệ của dữ liệu đầu vào, gọi các logic nghiệp vụ (Business Logic) để xử lý tính toán và điều phối luồng dữ liệu. Sau khi xử lý xong, Controller sẽ trả kết quả về cho View.
+    \item \textbf{Model (Tầng dữ liệu):} Sử dụng cơ sở dữ liệu NoSQL \textbf{MongoDB} kết hợp với \textbf{Mongoose}. Model là các Schema định nghĩa cấu trúc dữ liệu của hệ thống (như cấu trúc của User, Item, ShoppingList). Tầng này chịu trách nhiệm tương tác trực tiếp với cơ sở dữ liệu để thực hiện các thao tác thêm, đọc, sửa, xóa (CRUD) và trả dữ liệu lại cho Controller.
+\end{itemize}
+
+Việc tách riêng vai trò của Model, View và Controller giúp cho chúng ta phân định rõ ràng các công việc: xử lý giao diện (View), điều hướng và nghiệp vụ (Controller), và quản lý dữ liệu (Model). Do vậy, việc cập nhật chỉnh sửa giao diện (React) sẽ không làm ảnh hưởng đến cấu trúc cơ sở dữ liệu (MongoDB) và ngược lại.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{placeholder}
+\caption{Mô hình kiến trúc MVC của hệ thống NaviMart}
+\end{figure}
+
+\section{Thiết kế cơ sở dữ liệu}
+Hệ thống sử dụng cơ sở dữ liệu NoSQL (MongoDB), lưu trữ dữ liệu dưới dạng các Document được tổ chức thành các Collection. Các Collection chính bao gồm: Users (Người dùng), Families (Gia đình), Items (Thực phẩm trong kho), ShoppingLists (Danh sách mua sắm), Recipes (Công thức) và Meals (Thực đơn). Các Document có thể tham chiếu (Reference) tới nhau thông qua thuộc tính \texttt{ObjectId}, giúp việc truy vấn dữ liệu quan hệ trở nên thuận tiện.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{placeholder}
+\caption{Sơ đồ thiết kế cơ sở dữ liệu (Database Schema)}
+\end{figure}
+
+\end{document}

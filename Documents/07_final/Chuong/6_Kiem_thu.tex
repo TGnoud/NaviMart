@@ -1,0 +1,145 @@
+\documentclass[../main.tex]{subfiles}
+\begin{document}
+
+\section{Chiến lược kiểm thử phân tầng}
+Hệ thống NaviMart áp dụng chiến lược kiểm thử phân tầng theo mô hình tháp kiểm thử nhằm bảo đảm độ tin cậy từ mức độ logic cục bộ đến toàn bộ luồng nghiệp vụ xuyên suốt. Nguyên tắc cốt lõi là mỗi loại kiểm thử chỉ xác minh những thành phần phù hợp nhất với chức năng của nó.
+
+\begin{longtable}{|p{0.15\textwidth}|p{0.35\textwidth}|p{0.4\textwidth}|}
+\hline
+\textbf{Tầng kiểm thử} & \textbf{Mục tiêu xác minh} & \textbf{Công cụ và Đặc điểm} \\
+\hline
+Kiểm thử Đơn vị & Logic nghiệp vụ, hàm tiện ích, cấu trúc dữ liệu. & Sử dụng nền tảng Jest kết hợp giả lập dữ liệu, không khởi tạo toàn bộ ngữ cảnh hệ thống. \\
+\hline
+Kiểm thử Giao tiếp & Mã trạng thái HTTP, định dạng dữ liệu đầu vào và đầu ra, xử lý ngoại lệ. & Sử dụng thư viện Supertest để gọi trực tiếp các đường dẫn, các dịch vụ bên dưới được giả lập. \\
+\hline
+Kiểm thử Bảo mật & Mã lỗi phân quyền, lớp bảo vệ dữ liệu và xác thực danh tính. & Giả lập các quyền truy cập ở mức hợp đồng dữ liệu. \\
+\hline
+Kiểm thử Đầu cuối & Quá trình lưu trữ thực tế, luồng dữ liệu xuyên suốt các dịch vụ và kết nối thời gian thực. & Chạy hệ thống máy chủ thật kết hợp cơ sở dữ liệu ảo MongoDB trong bộ nhớ. \\
+\hline
+Kiểm thử Trực tuyến & Hệ thống triển khai thực tế trên mạng Internet, cấu hình bảo mật tên miền, máy chủ và cơ sở dữ liệu thật. & Gọi trực tiếp các yêu cầu HTTP vào hệ thống đã phát hành như Vercel và Render. \\
+\hline
+Kiểm thử Giao diện & Hàm thuần, ngữ cảnh dữ liệu, thành phần hiển thị và kết nối gọi máy chủ. & Sử dụng Vitest và thư viện Testing Library trên môi trường ảo hóa trình duyệt. \\
+\hline
+\end{longtable}
+
+\section{Ma trận truy vết theo phân hệ nghiệp vụ}
+Ma trận truy vết cho thấy mức độ bao phủ của từng loại kiểm thử đối với từng phân hệ của dự án. Các ô có nội dung cho biết nghiệp vụ đã được chứng minh an toàn ở nhiều tầng khác nhau.
+
+\begin{longtable}{|p{0.15\textwidth}|p{0.25\textwidth}|p{0.25\textwidth}|p{0.25\textwidth}|}
+\hline
+\textbf{Phân hệ} & \textbf{Kiểm thử Đơn vị} & \textbf{Kiểm thử Giao tiếp} & \textbf{Kiểm thử Đầu cuối và Bảo mật} \\
+\hline
+Xác thực & Vòng đời mã thông báo, mật khẩu & Đăng nhập, đăng ký, lỗi dữ liệu & Kiểm tra mã xác thực âm tính, đặt lại mật khẩu \\
+\hline
+Gia đình & Logic tạo và phân quyền nhóm & Tham gia nhóm, mã mời & Luồng gia nhập và từ chối truy cập \\
+\hline
+Kho thực phẩm & Trừ kho nguyên tử, cảnh báo hạn & Tạo mới, tiêu thụ, bắt lỗi âm kho & Lọc hạn dùng, ngăn chặn tiêu thụ đồng thời \\
+\hline
+Công thức & Xếp hạng gợi ý, duyệt nội dung & Tìm kiếm, lưu yêu thích & Quyền chỉnh sửa công thức, gợi ý theo kho \\
+\hline
+Danh sách mua & Tạo, hoàn tất, đồng bộ kho & Kiểm tra thiếu thông tin & Quyền xem danh sách mua của người khác \\
+\hline
+Bữa ăn & Tính nguyên liệu thiếu & Tạo kế hoạch theo ngày & Luồng lập bữa ăn đến danh sách đi chợ \\
+\hline
+Báo cáo & Tổng hợp lãng phí, chi tiêu & Yêu cầu theo mốc thời gian & Chặn xem báo cáo nếu thiếu quyền quản trị \\
+\hline
+Danh mục & Tạo và tìm danh mục chuẩn & Phân trang và tìm kiếm & Chặn thêm mới nếu không phải quản trị viên \\
+\hline
+Người dùng & Cập nhật hồ sơ & Sửa tên, ảnh đại diện & Thông tin người dùng qua luồng đăng nhập \\
+\hline
+\end{longtable}
+
+\section{Danh mục kịch bản kiểm thử giao tiếp tiêu biểu}
+Các kịch bản kiểm thử giao tiếp tập trung vào hợp đồng gửi nhận dữ liệu giữa giao diện và máy chủ.
+
+\begin{longtable}{|p{0.2\textwidth}|p{0.15\textwidth}|p{0.55\textwidth}|}
+\hline
+\textbf{Phân hệ} & \textbf{Mã Kịch bản} & \textbf{Chi tiết kịch bản và kết quả mong đợi} \\
+\hline
+Xác thực & AUTH-001 & Đăng ký tài khoản thành công trả về mã 201, lỗi thiếu mật khẩu trả về mã 400, trùng thư điện tử trả về mã 409. \\
+\hline
+Gia đình & FAM-001 & Lấy thông tin gia đình mã 200, tạo mã mời thiếu quyền trả mã 403, tự sửa quyền của chính mình báo lỗi mã 400. \\
+\hline
+Kho thực phẩm & PAN-001 & Liệt kê kho mã 200, tiêu thụ thực phẩm vượt mức tồn kho báo lỗi mã 400, truy xuất món đồ không tồn tại mã 404. \\
+\hline
+Công thức & RCP-001 & Gợi ý món ăn thành công mã 200, tạo công thức không đúng quyền mã 403, thêm vào danh sách yêu thích mã 201. \\
+\hline
+Danh sách đi chợ & SL-001 & Tạo mới thành công mã 201, hoàn tất một danh sách đã hoàn tất từ trước báo lỗi mã 400. \\
+\hline
+Kế hoạch bữa ăn & MEAL-001 & Lấy danh sách theo mốc ngày mã 200, báo lỗi thiếu ngày truy vấn mã 400, tạo kế hoạch mới thành công mã 201. \\
+\hline
+\end{longtable}
+
+\section{Danh mục kiểm thử tích hợp trực tuyến}
+Tầng kiểm thử này gọi trực tiếp vào hệ thống đã phát hành để xác nhận độ tương thích của nền tảng vận hành.
+
+\begin{longtable}{|p{0.2\textwidth}|p{0.15\textwidth}|p{0.55\textwidth}|}
+\hline
+\textbf{Khu vực} & \textbf{Mã Kịch bản} & \textbf{Chi tiết kịch bản và kết quả mong đợi} \\
+\hline
+Giao diện & INT-WEB-001 & Giao diện trang chủ phản hồi mã 200 và chứa đủ thẻ định dạng hiển thị. \\
+\hline
+Giao diện & INT-WEB-002 & Tải lại trang tại các đường dẫn nội bộ không bị lỗi 404 do máy chủ đã cấu hình điều hướng đúng. \\
+\hline
+Máy chủ & INT-API-001 & Đường dẫn kiểm tra sức khỏe hệ thống trả về thông báo hoạt động bình thường. \\
+\hline
+Xác thực & INT-AUTH-001 & Đăng ký tài khoản trực tuyến tự động tạo gia đình và trả về cặp mã xác thực hợp lệ. \\
+\hline
+Xác thực & INT-AUTH-004 & Làm mới phiên làm việc thành công, hệ thống phát mã xác thực mới. \\
+\hline
+Kho thực phẩm & INT-PAN-001 & Tạo món đồ trong kho thành công và trả về mã định danh trực tuyến. \\
+\hline
+Danh sách đi chợ & INT-SL-002 & Tạo danh sách mua sắm, hiển thị chính xác nội dung, sau đó xóa dọn dẹp hệ thống không để lại rác dữ liệu. \\
+\hline
+\end{longtable}
+
+\section{Danh mục kiểm thử bảo mật trực tuyến}
+Tầng kiểm thử này đánh giá hệ thống dưới góc nhìn của một tin tặc tấn công từ bên ngoài mạng lưới.
+
+\begin{longtable}{|p{0.2\textwidth}|p{0.15\textwidth}|p{0.55\textwidth}|}
+\hline
+\textbf{Khu vực rủi ro} & \textbf{Mã Kịch bản} & \textbf{Chi tiết kịch bản và kết quả mong đợi} \\
+\hline
+Xác thực & SEC-001 & Truy cập tài nguyên bảo mật không kèm mã xác thực bị từ chối mã 401. \\
+\hline
+Xác thực & SEC-003 & Mã xác thực giả mạo có chữ ký sai bị hệ thống phát hiện và chặn lại mã 401. \\
+\hline
+Kiểm tra đầu vào & SEC-006 & Đẩy thêm các trường dữ liệu lạ nhằm leo thang quyền quản trị sẽ bị hệ thống phát hiện và báo lỗi dữ liệu mã 400. \\
+\hline
+Chống tiêm nhiễm & SEC-008 & Gửi cấu trúc truy vấn NoSQL nguy hiểm vào ô thư điện tử không thể vượt qua lớp bảo vệ, trả về lỗi mã 400. \\
+\hline
+Bảo mật dữ liệu & SEC-010 & Thành viên gia đình khác cố tình đọc món đồ trong kho của gia đình mục tiêu sẽ nhận lại lỗi không tìm thấy mã 404 nhằm tránh rò rỉ dữ liệu. \\
+\hline
+Quyền theo vai trò & SEC-011 & Người dùng thông thường cố tình gọi giao tiếp thống kê quản trị viên sẽ bị chặn mã 403. \\
+\hline
+Bảo vệ mật khẩu & SEC-018 & Giao tiếp đọc hồ sơ cá nhân tuyệt đối không trả về chuỗi băm mật khẩu ra bên ngoài giao diện. \\
+\hline
+\end{longtable}
+
+\section{Kết quả thực thi và độ phủ mã nguồn}
+
+Toàn bộ hệ thống kiểm thử tự động của dự án NaviMart đã được thực thi toàn diện.
+
+\begin{longtable}{|p{0.55\textwidth}|p{0.2\textwidth}|p{0.15\textwidth}|}
+\hline
+\textbf{Phạm vi kiểm thử} & \textbf{Số lượng bộ thử} & \textbf{Thành công trên Tổng số} \\
+\hline
+Máy chủ Đơn vị và Giao tiếp & 37 & 293 / 293 \\
+\hline
+Máy chủ Đầu cuối trong bộ nhớ & 4 & 32 / 32 \\
+\hline
+Máy chủ Tích hợp và Bảo mật trực tuyến & 2 & 47 / 47 \\
+\hline
+Giao diện người dùng & 9 & 61 / 61 \\
+\hline
+\end{longtable}
+
+Về độ phủ mã nguồn, hệ thống máy chủ đạt độ phủ tổng thể trên 61 phần trăm số dòng lệnh. Khi xét riêng các phân hệ cốt lõi, phần lớn đều đạt mức độ phủ an toàn rất cao:
+\begin{itemize}
+    \item Trợ lý thông minh và thông báo đạt từ 85 đến 90 phần trăm.
+    \item Quản lý người dùng, Danh mục, Báo cáo và Kho thực phẩm đạt từ 81 đến 83 phần trăm.
+    \item Nhóm Gia đình, Công thức, Kế hoạch bữa ăn và Xác thực đạt từ 70 đến 79 phần trăm.
+\end{itemize}
+Sự chênh lệch giữa độ phủ tổng thể và độ phủ từng phân hệ đến từ việc nhóm bỏ qua kiểm thử đơn vị cho các tệp cấu hình môi trường hoặc bộ thiết lập dữ liệu giả, mà thay vào đó kiểm chứng chúng thông qua môi trường kiểm thử trực tuyến và đầu cuối để tiết kiệm thời gian vận hành. Toàn bộ các tiêu chí nghiệm thu khắt khe đã được thỏa mãn đầy đủ.
+
+\end{document}

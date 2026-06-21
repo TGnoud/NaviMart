@@ -1,0 +1,242 @@
+% !TEX TS-program = xelatex
+% =====================================================================
+%  TÀI LIỆU THIẾT KẾ GIAO DIỆN — DANH SÁCH MÀN HÌNH NAVIMART
+%  Biên dịch: XeLaTeX (khuyến nghị) hoặc LuaLaTeX để hỗ trợ tiếng Việt UTF-8.
+%      xelatex ScreenList-NaviMart.tex   (chạy 2 lần để cập nhật mục lục)
+% =====================================================================
+\documentclass[12pt,a4paper]{article}
+
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[utf8]{inputenc}
+  \usepackage[T5]{fontenc}
+\else
+  \usepackage{fontspec}
+  % \setmainfont{Times New Roman}
+  % \setmonofont{Consolas}
+\fi
+
+\usepackage[a4paper,margin=2.5cm]{geometry}
+\usepackage{tabularx}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage[table]{xcolor}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{titling}
+\usepackage[hidelinks]{hyperref}
+
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+\renewcommand{\arraystretch}{1.35}
+\setlength{\parskip}{0.6em}
+\setlength{\parindent}{0pt}
+\setlength{\tabcolsep}{8pt}
+
+% Mã nguồn nội tuyến
+\newcommand{\code}[1]{\texttt{#1}}
+% Đường dẫn tệp: cho phép ngắt dòng tại "/" và "." để không tràn lề
+\newcommand{\fpath}[1]{\nolinkurl{#1}}
+
+% ---- Phong cách bảng -------------------------------------------------
+\definecolor{navy}{RGB}{31,78,121}
+\definecolor{headerblue}{RGB}{31,78,121}
+\definecolor{rowalt}{RGB}{234,241,248}
+\arrayrulecolor{navy!55}
+% Ô tiêu đề: nền xanh (qua \rowcolor) + chữ trắng đậm
+\newcommand{\thead}[1]{\textbf{\textcolor{white}{#1}}}
+% ---------------------------------------------------------------------
+
+\titleformat{\section}{\Large\bfseries\color{navy}}{\thesection.}{0.6em}{}
+\titleformat{\subsection}{\large\bfseries\color{navy}}{\thesubsection}{0.6em}{}
+\titlespacing*{\section}{0pt}{1.4em}{0.6em}
+
+\hypersetup{pdftitle={Danh sách màn hình hệ thống NaviMart},pdfauthor={Nhóm NaviMart}}
+
+\begin{document}
+
+% =====================================================================
+% TRANG BÌA
+% =====================================================================
+\begin{titlepage}
+\centering
+\vspace*{1.2cm}
+{\large ĐẠI HỌC BÁCH KHOA HÀ NỘI\par}
+{\large Trường Công nghệ Thông tin và Truyền thông\par}
+\vspace{2.4cm}
+{\large\bfseries TÀI LIỆU THIẾT KẾ CHI TIẾT\par}
+{\normalsize Phân hệ: Thiết kế giao diện người dùng (UI Design)\par}
+\vspace{1.4cm}
+\rule{0.8\linewidth}{0.4pt}\par
+\vspace{0.6cm}
+{\Huge\bfseries\color{navy} HỆ THỐNG NAVIMART\par}
+\vspace{0.5cm}
+{\large Danh sách và chức năng các màn hình giao diện\par}
+\vspace{0.4cm}
+\rule{0.8\linewidth}{0.4pt}\par
+\vspace{1.2cm}
+{\large Môn: Phát triển phần mềm theo chuẩn kỹ năng ITSS\par}
+\vspace{2cm}
+
+\begin{tabular}{|l|l|}
+\hline
+\rowcolor{headerblue}
+\thead{Họ và tên} & \thead{MSSV} \\
+\hline
+\rule{0pt}{2.4ex}\dots\dots\dots\dots\dots\dots & \dots\dots\dots \\
+\hline
+\rule{0pt}{2.4ex}\dots\dots\dots\dots\dots\dots & \dots\dots\dots \\
+\hline
+\rule{0pt}{2.4ex}\dots\dots\dots\dots\dots\dots & \dots\dots\dots \\
+\hline
+\end{tabular}
+
+\vfill
+{\itshape Hà Nội, ngày \today\par}
+\end{titlepage}
+
+\tableofcontents
+\newpage
+
+% =====================================================================
+\section{Giới thiệu chung}
+
+Tài liệu này cung cấp danh sách chi tiết và giải thích chức năng của từng màn hình trong hệ thống \textbf{NaviMart}. Các màn hình được liệt kê dựa trên cấu trúc định tuyến (routing) của ứng dụng Frontend (phát triển bằng React/Vite), bao gồm các phân hệ từ xác thực người dùng, quản lý kho thực phẩm, kế hoạch bữa ăn, chia sẻ gia đình cho đến quản trị hệ thống.
+
+Mục đích của tài liệu là giúp các thành viên trong nhóm (đặc biệt là lập trình viên Frontend, BA và kiểm thử viên) nắm rõ kiến trúc giao diện, luồng đi của người dùng (User Flow) và chức năng cốt lõi được thiết kế cho từng màn hình.
+
+% =====================================================================
+\section{Phân tích cấu trúc màn hình NaviMart}
+
+Hệ thống NaviMart được chia thành các nhóm màn hình chính dựa trên quyền truy cập và mục đích sử dụng. Bảng dưới đây liệt kê chi tiết tên màn hình, đường dẫn (Route) tương ứng trên ứng dụng và tác dụng của chúng.
+
+\subsection{Nhóm màn hình Không yêu cầu đăng nhập (Public/Auth)}
+
+Đây là các màn hình dành cho người dùng chưa đăng nhập hoặc những người dùng mới bắt đầu làm quen với hệ thống.
+
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3.5cm}|>{\raggedright\arraybackslash}p{4cm}|>{\raggedright\arraybackslash}p{7.5cm}|}
+\hline
+\rowcolor{headerblue}
+\thead{Tên màn hình} & \thead{Đường dẫn (Route)} & \thead{Tác dụng / Chức năng chính} \\
+\hline
+\endfirsthead
+\hline
+\rowcolor{headerblue}
+\thead{Tên màn hình} & \thead{Đường dẫn (Route)} & \thead{Tác dụng / Chức năng chính} (tiếp) \\
+\hline
+\endhead
+Splash & \code{/} & Màn hình chờ (khởi động), hiển thị logo của NaviMart trong lúc ứng dụng đang tải các tài nguyên ban đầu. \\
+\hline
+Onboarding & \code{/onboarding} & Các slide giới thiệu tính năng nổi bật của NaviMart dành cho người dùng mới cài đặt. \\
+\hline
+Login & \code{/login} & Cho phép người dùng đăng nhập vào hệ thống bằng email và mật khẩu đã đăng ký. \\
+\hline
+Register & \code{/register} & Giao diện tạo tài khoản mới cho người dùng. \\
+\hline
+Forgot Password & \code{/forgot-password} & Hỗ trợ người dùng yêu cầu khôi phục hoặc đặt lại mật khẩu khi bị quên. \\
+\hline
+\end{longtable}
+
+\subsection{Nhóm màn hình Quản lý chính (Yêu cầu đăng nhập)}
+
+Đây là khu vực cốt lõi của ứng dụng, nơi người dùng tương tác với các tính năng quản lý thực phẩm, lên kế hoạch và mua sắm. Các màn hình này được bảo vệ bởi \code{ProtectedRoute}.
+
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3.5cm}|>{\raggedright\arraybackslash}p{4cm}|>{\raggedright\arraybackslash}p{7.5cm}|}
+\hline
+\rowcolor{headerblue}
+\thead{Tên màn hình} & \thead{Đường dẫn (Route)} & \thead{Tác dụng / Chức năng chính} \\
+\hline
+\endfirsthead
+\hline
+\rowcolor{headerblue}
+\thead{Tên màn hình} & \thead{Đường dẫn (Route)} & \thead{Tác dụng / Chức năng chính} (tiếp) \\
+\hline
+\endhead
+Home & \code{/home} & Trang tổng quan (Dashboard). Hiển thị tóm tắt tình trạng kho, cảnh báo thực phẩm sắp hết hạn, danh sách mua sắm hiện tại và bữa ăn trong ngày. \\
+\hline
+Pantry Dashboard & \code{/pantry} & Quản lý kho thực phẩm gia đình. Hiển thị danh sách các mặt hàng đang có, phân loại theo trạng thái hạn sử dụng (An toàn, Sắp hết hạn, Đã hết hạn). \\
+\hline
+Add Item & \code{/add-item} & Cung cấp biểu mẫu để người dùng thêm mới một mặt hàng hoặc nguyên liệu vào kho thực phẩm. \\
+\hline
+Edit Item & \code{/edit-item/:id} & Cập nhật thông tin chi tiết (số lượng, ngày sản xuất, hạn sử dụng, phân loại) của một mặt hàng cụ thể đã có trong kho. \\
+\hline
+My Lists & \code{/lists} & Liệt kê các danh sách mua sắm hiện có (đang hoạt động hoặc đã hoàn tất). Cho phép tạo mới danh sách. \\
+\hline
+List Detail & \code{/list-detail/:listId} & Xem chi tiết các món cần mua trong một danh sách. Người dùng có thể đánh dấu đã mua và hoàn tất để hệ thống tự động đẩy hàng vào kho. \\
+\hline
+Meal Planner & \code{/meals} & Lịch lập kế hoạch bữa ăn theo ngày hoặc tuần. Cho phép người dùng gắn công thức vào từng bữa và tự động tính toán nguyên liệu còn thiếu. \\
+\hline
+Scanner & \code{/scanner} & Sử dụng camera để quét mã vạch sản phẩm. Tích hợp để thao tác nhanh như thêm sản phẩm vào kho hoặc tìm kiếm thông tin. \\
+\hline
+\end{longtable}
+
+\subsection{Nhóm màn hình Công thức nấu ăn (Recipes)}
+
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3.5cm}|>{\raggedright\arraybackslash}p{4cm}|>{\raggedright\arraybackslash}p{7.5cm}|}
+\hline
+\rowcolor{headerblue}
+\thead{Tên màn hình} & \thead{Đường dẫn (Route)} & \thead{Tác dụng / Chức năng chính} \\
+\hline
+\endfirsthead
+\hline
+\rowcolor{headerblue}
+\thead{Tên màn hình} & \thead{Đường dẫn (Route)} & \thead{Tác dụng / Chức năng chính} (tiếp) \\
+\hline
+\endhead
+Recipe Suggestion & \code{/recipe-suggestion} & Giao diện đề xuất và tìm kiếm công thức nấu ăn. Đặc biệt, hệ thống sẽ ưu tiên gợi ý các món ăn có thể nấu được từ nguyên liệu hiện có trong kho. \\
+\hline
+Recipe Detail & \code{/recipe-detail/:recipeId} & Hiển thị thông tin chi tiết của công thức bao gồm nguyên liệu cần thiết, khẩu phần và các bước hướng dẫn thực hiện. \\
+\hline
+Recipe Editor & \code{/recipe-editor} \newline \code{/recipe-editor/:id} & Màn hình soạn thảo. Cho phép người dùng tạo mới hoặc chỉnh sửa công thức nấu ăn cá nhân trước khi lưu hoặc chia sẻ. \\
+\hline
+\end{longtable}
+
+\subsection{Nhóm màn hình Cá nhân, Cài đặt và Báo cáo}
+
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3.5cm}|>{\raggedright\arraybackslash}p{4cm}|>{\raggedright\arraybackslash}p{7.5cm}|}
+\hline
+\rowcolor{headerblue}
+\thead{Tên màn hình} & \thead{Đường dẫn (Route)} & \thead{Tác dụng / Chức năng chính} \\
+\hline
+\endfirsthead
+\hline
+\rowcolor{headerblue}
+\thead{Tên màn hình} & \thead{Đường dẫn (Route)} & \thead{Tác dụng / Chức năng chính} (tiếp) \\
+\hline
+\endhead
+Family Sharing & \code{/family} & Giao diện quản lý gia đình. Cho phép người chủ gia đình tạo mã mời, quản lý thành viên và thiết lập quyền truy cập cho từng người. \\
+\hline
+Stats Dashboard & \code{/reports} & Bảng điều khiển thống kê và báo cáo. Trực quan hóa dữ liệu về mức tiêu thụ thực phẩm, tình trạng lãng phí và tổng quan chi tiêu theo thời gian. \\
+\hline
+Profile & \code{/profile} & Xem thông tin hồ sơ của người dùng (tên, avatar, email). \\
+\hline
+Edit Profile & \code{/edit-profile} & Chỉnh sửa thông tin cá nhân. \\
+\hline
+Settings & \code{/settings} & Quản lý các cấu hình chung của ứng dụng, tùy chọn ngôn ngữ, giao diện hoặc đổi mật khẩu. \\
+\hline
+Notifications & \code{/notifications} & Trung tâm thông báo. Hiển thị các cảnh báo thực phẩm sắp hết hạn, lời mời gia đình hoặc các cập nhật quan trọng khác từ hệ thống theo thời gian thực. \\
+\hline
+\end{longtable}
+
+\subsection{Nhóm màn hình Quản trị viên (Admin)}
+
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3.5cm}|>{\raggedright\arraybackslash}p{4cm}|>{\raggedright\arraybackslash}p{7.5cm}|}
+\hline
+\rowcolor{headerblue}
+\thead{Tên màn hình} & \thead{Đường dẫn (Route)} & \thead{Tác dụng / Chức năng chính} \\
+\hline
+\endfirsthead
+\hline
+\rowcolor{headerblue}
+\thead{Tên màn hình} & \thead{Đường dẫn (Route)} & \thead{Tác dụng / Chức năng chính} (tiếp) \\
+\hline
+\endhead
+Admin Dashboard & \code{/admin} & Khu vực dành riêng cho Quản trị viên. Được bảo vệ bởi \code{requireAdmin}. Dùng để quản lý người dùng trên toàn hệ thống, quản lý danh mục dữ liệu gốc (thực phẩm, đơn vị) và kiểm duyệt công thức nấu ăn. \\
+\hline
+\end{longtable}
+
+% =====================================================================
+\section{Kết luận}
+
+Hệ thống điều hướng của NaviMart được thiết kế rõ ràng và phân tách tốt giữa các khu vực chức năng, sử dụng \code{React Router} với cơ chế tải lười (\code{lazy loading}) để tối ưu hiệu suất (code splitting). Việc chia nhỏ màn hình theo từng luồng chức năng đảm bảo tính dễ sử dụng, đáp ứng được nhu cầu quản lý chi tiết từ kho thực phẩm, kế hoạch mua sắm cho tới theo dõi chi tiêu của một gia đình hiện đại.
+
+\end{document}

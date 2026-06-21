@@ -2,394 +2,97 @@
 
 ## 1. Visual Theme & Atmosphere
 
-Hệ thống NaviMart hướng tới đối tượng người nội trợ, mang đến một giao diện thân thiện, lịch sự và đáng tin cậy. Thiết kế cân bằng giữa sự trang nhã của font chữ có chân (Serif) và tính hiện đại, rõ ràng của font chữ không chân (Sans-serif). Màu xanh lá cây (Green) chủ đạo gợi lên sự tươi mát của thực phẩm, kết hợp với các điểm nhấn màu cam (Orange) ấm cúng cho các ưu đãi mua sắm. Cấu trúc UI được thiết kế to, rõ ràng, giúp người nội trợ dễ dàng đọc thông tin quan trọng như giá cả, hạn sử dụng và thao tác một cách thuận tiện trên thiết bị di động.
+Hệ thống NaviMart hướng tới đối tượng người nội trợ, mang đến một giao diện thân thiện, lịch sự và đáng tin cậy. Thiết kế mang tính hiện đại, rõ ràng thông qua việc sử dụng đồng nhất font chữ không chân (Sans-serif) **Be Vietnam Pro** cho toàn bộ hệ thống. Bảng màu tuân theo triết lý **Material Design 3 (MD3)** với tông màu xanh lá cây chủ đạo (`primary`, `tertiary`), gợi lên sự tươi mát của thực phẩm, kết hợp với các điểm nhấn phụ màu cam (`secondary-container`) để thu hút sự chú ý vào các tính năng quan trọng (như cảnh báo hạn dùng hoặc ưu đãi mua sắm). 
 
 **Key Characteristics**
 
-- Phong cách thiết kế lịch sự, thân thiện và đáng tin cậy dành cho người nội trợ và gia đình.
-- Sử dụng màu xanh lá cây chủ đạo kết hợp với các điểm nhấn màu cam ấm áp.
-- Bố cục rõ ràng, rộng rãi, các nút bấm to để thao tác dễ dàng trên điện thoại di động.
-- Chữ số (giá tiền, số lượng) và hạn sử dụng (HSD) được in đậm, tương phản cao để dễ nhìn.
-- Sự kết hợp tinh tế giữa font Lora (trang nhã, lịch sự) và Be Vietnam Pro (rõ ràng, dễ đọc).
+- Phong cách thiết kế thống nhất, hiện đại, mang hơi hướng Material Design.
+- Sử dụng duy nhất font `Be Vietnam Pro` để đảm bảo sự rõ ràng, dễ đọc trên mọi thiết bị di động.
+- Bảng màu MD3 hệ thống hóa rõ ràng các vai trò (Primary, Secondary, Tertiary, Surface, Error).
+- Bố cục rõ ràng, rộng rãi, thao tác thân thiện với cảm ứng (touch-friendly).
 
 ## 2. Color Palette & Roles
 
-### Primary
+Bảng màu được trích xuất từ cấu hình Tailwind CSS hiện tại của dự án, tuân thủ chặt chẽ hệ thống token của Material Design 3:
 
-- **Green Primary( `#2E7D32`):** Main brand color used for primary CTAs, key highlights, and brand identity elements
-- **Green Accent( `#43A047`):** Secondary blue for emphasis and supporting interactive states
-### Interactive
+### Primary (Nhóm màu chính)
+- **Primary:** `#0d631b` - Màu xanh lá chủ đạo, dùng cho các nút bấm chính, thành phần cần nhấn mạnh nhất.
+- **On Primary:** `#ffffff` - Text hoặc icon hiển thị trên nền Primary.
+- **Primary Container:** `#2e7d32` - Nền cho các khối nội dung mang tính chất nhấn mạnh chính.
+- **On Primary Container:** `#cbffc2`
 
-- **Green Deep( `#1B5E20`):** Hover and active states for interactive elements
-- **Orange Accent( `#FF9800`):** Warm complementary accent for secondary actions, high-urgency deals (Flash Sale), and highlights
-### Neutral Scale
+### Secondary & Tertiary (Nhóm màu phụ & Tương tác)
+- **Secondary:** `#8b5000` 
+- **Secondary Container:** `#ff9800` (Cam) - Dùng cho các điểm nhấn, cảnh báo mức độ vừa (ví dụ: Thực phẩm sắp hết hạn).
+- **On Secondary Container:** `#653900`
+- **Tertiary:** `#1f6223` - Xanh lá thẫm, dùng cho các trạng thái an toàn (ví dụ: Thực phẩm còn hạn xa).
+- **Tertiary Container:** `#3a7b39`
 
-- **Dark Heading( `#111827`):** Primary heading text and high-contrast elements
-- **Body Text( `#374151`):** Main body text and secondary headings
-- **Secondary Text( `#4B5563`):** Tertiary text, descriptions, and supporting copy
-- **Muted Text( `#333333`):** Labels and secondary UI text
-- **Light Gray( `#E2E8F0`):** Backgrounds, dividers, and subtle UI elements
-- **Border Gray( `#D1D5DB`):** Border strokes and subtle separators
-- **Light Neutral( `#E5E7EB`):** Soft background fills
-- **Very Light( `#F9FAFB`):** Minimal background tints
-- **White( `#FFFFFF`):** Primary background and card surfaces
-- **Black( `#000000`):** Maximum contrast text and critical elements
-### Surface & Borders
+### Surface & Background (Nền & Khung giao diện)
+- **Background / Surface / Surface Bright:** `#f7fbf0` (Xanh lá cực nhạt) - Màu nền chính của toàn bộ trang web và ứng dụng.
+- **Surface Variant:** `#e0e4da` - Màu nền cho các khối thẻ (card) hoặc container phụ.
+- **On Surface:** `#181d17` - Màu chữ chính (Đen/Xám đậm) dùng trên nền sáng.
+- **On Surface Variant:** `#40493d` - Màu chữ phụ (cho các đoạn mô tả, text hỗ trợ).
+- **Outline:** `#73796d` - Màu đường viền chính (border).
+- **Outline Variant:** `#bfcaba` - Màu đường viền nhạt hơn (subtle border).
 
-- **Light Green( `#E8F5E9`):** Soft background tint for green-accented sections
-- **Subtle Border( `#E2E8F0`):** Default border color for inputs and containers
-- **Transparent Black(#0000):** Overlay and transparency base
-### Semantic / Status
+### Semantic / Status (Trạng thái)
+- **Error:** `#cf2e2e` (Đỏ) - Lỗi, cảnh báo nghiêm trọng (ví dụ: Thực phẩm đã hết hạn).
+- **Error Container:** `#ffdad6` - Nền khối cảnh báo lỗi.
+- **On Error:** `#ffffff` - Chữ trên nền báo lỗi.
 
-- **Warning( `#E3BB42`, `#FCB900`):** Alert states and cautionary information (e.g., product expiring soon)
-- **Error/Danger( `#CF2E2E`, `#E60A32`):** Error states, validation failures, and destructive actions
 ## 3. Typography Rules
 
-### Font Family
+Hệ thống sử dụng duy nhất một font chữ cho cả tiêu đề lẫn nội dung để tạo sự đồng nhất và tối ưu hóa tốc độ tải trang.
 
-**Primary (Heading):** Lora
-**Secondary (Body):** Be Vietnam Pro
-**Fallback Stack:** -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif
+**Font Family:** `Be Vietnam Pro`, sans-serif
 
-**Hierarchy**
+**Hierarchy (Phân cấp Text)**
 
-| **Role** | **Font** | **Size** | **Weight** | **Line Height** | **Letter Spacing** | **Notes** |
-| --- | --- | --- | --- | --- | --- | --- |
-| Display / H1 | Lora | 32px | 700 | 40px | 0px | Tiêu đề chính trang web |
-| Heading / H2 | Lora | 24px | 700 | 32px | 0px | Tiêu đề phân mục lớn |
-| Heading / H3 | Lora | 20px | 600 | 28px | 0px | Tiêu đề phụ và thẻ (card) |
-| Heading / H4 | Lora | 18px | 600 | 26px | 0px | Tiêu đề nhóm nhỏ |
-| Body Large | Be Vietnam Pro | 16px | 400 | 24px | 0px | Nội dung văn bản chính |
-| Body Regular | Be Vietnam Pro | 16px | 500 | 24px | 0px | Nội dung phụ và text nhấn mạnh |
-| Body Medium | Be Vietnam Pro | 14px | 500 | 20px | 0px | Text cho nút bấm (Button) |
-| Body Small | Be Vietnam Pro | 14px | 400 | 20px | 0px | Nhãn (Labels) và form text |
-| Caption | Be Vietnam Pro | 12px | 400 | 16px | 0px | Chú thích, thời gian, HSD |
-| Code | Be Vietnam Pro | 12px | 500 | 16px | 0px | Monospace-style elements |
+| **Role (Tailwind Class)** | **Size** | **Weight** | **Line Height** | **Sử dụng cho** |
+| --- | --- | --- | --- | --- |
+| `text-display-lg` | 36px | 700 (Bold) | 44px | Tiêu đề chính trang web rất lớn |
+| `text-display-sm` | 32px | 700 (Bold) | 40px | Tiêu đề lớn (Ví dụ: Banner, Hero section) |
+| `text-headline-md`| 28px | 700 (Bold) | 36px | Tiêu đề trang (Page headers) |
+| `text-headline-sm`| 22px | 600 (Semibold)| 30px | Tiêu đề phân mục lớn (Section headers) |
+| `text-body-lg` | 18px | 400 (Regular)| 26px | Đoạn văn bản lớn, câu chữ nổi bật |
+| `text-body-md` | 16px | 500 (Medium) | 24px | Nội dung văn bản chính, nhãn của nút bấm chuẩn |
+| `text-label-sm` | 14px | 400 (Regular)| 20px | Nhãn nhỏ, chú thích phụ, HSD, thông tin ngày tháng |
 
-### Principles
+## 4. Component Stylings & Layout
 
-- **Hierarchy through weight:** Use font weight (400–700) to create clear visual priority before sizing
-- **Generous line height:** Always maintain at least 150% of font size for readability and breathing room
-- **Sự kết hợp Lora & Be Vietnam Pro:** Tạo sự cân bằng giữa nét trang nhã, lịch sự cho tiêu đề và sự rõ ràng, dễ đọc cho nội dung chi tiết.
-- **Semantic sizing:** Every role has a purpose; avoid arbitrary sizes
-- **Mobile consideration:** Maintain minimum 14px for body text on all devices
-## 4. Component Stylings
+### Border Radius (Độ bo góc)
+Tuân theo chuẩn cấu hình hệ thống hiện tại:
+- **DEFAULT (4px):** `rounded` - Độ bo góc mặc định cho các thành phần nhỏ (input, nhãn, tag).
+- **lg (8px):** `rounded-lg` - Độ bo góc chuẩn cho nút bấm (Button), thẻ chứa nội dung (Card).
+- **xl (12px):** `rounded-xl` - Cho các khối container lớn hoặc cửa sổ modal.
+- **full (9999px):** `rounded-full` - Avatar người dùng, nút icon tròn, pill badges.
 
-### Buttons
+### Spacing System (Hệ thống khoảng cách)
+Các giá trị cố định (Custom Spacing) được khai báo cho bố cục hệ thống:
+- **`stack-sm` (8px):** Khoảng cách nhỏ giữa các thành phần liên quan chặt chẽ.
+- **`gutter-mobile` (12px):** Khoảng cách lề (gutter) chuẩn giữa các phần tử trên thiết bị di động.
+- **`stack-md` (16px):** Khoảng cách dọc chuẩn giữa các khối nội dung, padding bên trong của các thẻ (card).
+- **`margin-mobile` (16px):** Căn lề ngoài (margin) trái/phải chuẩn cho màn hình điện thoại.
+- **`nav-height` (69px):** Chiều cao cố định của thanh điều hướng (Navigation Bar) trên cùng.
 
-#### Primary Button
+### Trạng thái hạn sử dụng trong Kho (Pantry Safelist)
+Hệ thống sử dụng các class Tailwind động (đã được cấu hình safelist) để thể hiện trực quan trạng thái của thực phẩm:
+- **Tertiary (`text-tertiary`, `bg-tertiary`):** Dùng cho trạng thái an toàn (Còn hạn sử dụng xa).
+- **Secondary (`text-secondary`, `bg-secondary`):** Dùng cho trạng thái cảnh báo (Sắp hết hạn - màu Cam).
+- **Error (`text-error`, `bg-error`):** Dùng cho trạng thái khẩn cấp (Đã hết hạn - màu Đỏ).
 
-- **Background:** `#2E7D32`
-- **Text Color:** `#FFFFFF`
-- **Font Size:** 14px
-- **Font Weight:** 500
-- **Line Height:** 20px
-- **Padding:** 0px 8px
-- **Height:** 36px
-- **Border Radius:** 8px
-- **Border:** 0px solid transparent
-- **Box Shadow:** none
-- **Hover State:** Background `#43A047`, shadow rgba(0, 0, 0, 0.14) 0px 4px 8px 0px
-- **Active State:** Background `#1B5E20`
-- **Disabled State:** Background `#D1D5DB`, Text Color `#4B5563`
-#### Secondary Button
-
-- **Background:** transparent
-- **Text Color:** `#2E7D32`
-- **Font Size:** 14px
-- **Font Weight:** 500
-- **Line Height:** 20px
-- **Padding:** 0px 8px
-- **Height:** 36px
-- **Border Radius:** 8px
-- **Border:** 2px solid `#2E7D32`
-- **Box Shadow:** none
-- **Hover State:** Background `#E8F5E9`, border `#43A047`
-- **Active State:** Background `#D9F0F1`, border `#1B5E20`
-#### Ghost Button
-
-- **Background:** transparent
-- **Text Color:** `#374151`
-- **Font Size:** 14px
-- **Font Weight:** 500
-- **Line Height:** 20px
-- **Padding:** 0px 8px
-- **Height:** 36px
-- **Border Radius:** 0px
-- **Border:** 0px solid transparent
-- **Box Shadow:** none
-- **Hover State:** Text Color `#2E7D32`, underline on
-- **Active State:** Text Color `#43A047`
-#### Icon Button
-
-- **Background:** transparent
-- **Text Color:** `#FFFFFF`
-- **Size:** 20px × 20px
-- **Border Radius:** 0px
-- **Border:** 0px solid transparent
-- **Box Shadow:** none
-- **Hover State:** Opacity 0.8
-- **Active State:** Opacity 0.6
-### Cards & Containers
-
-#### Card Surface
-
-- **Background:** `#FFFFFF`
-- **Border:** 1px solid `#E2E8F0`
-- **Border Radius:** 8px
-- **Padding:** 24px
-- **Box Shadow:** rgba(0, 0, 0, 0.14) 0px 8px 16px 0px, rgba(0, 0, 0, 0.12) 0px 0px 2px 0px
-- **Hover State:** Box Shadow rgba(0, 0, 0, 0.14) 0px 12px 24px 0px
-#### Subtle Container
-
-- **Background:** `#F9FAFB`
-- **Border:** 1px solid `#E5E7EB`
-- **Border Radius:** 8px
-- **Padding:** 16px
-- **Box Shadow:** none
-#### Tinted Container
-
-- **Background:** `#E8F5E9`
-- **Border:** 1px solid `#2E7D32`
-- **Border Radius:** 8px
-- **Padding:** 16px
-- **Box Shadow:** none
-### Inputs & Forms
-
-#### Text Input
-
-- **Background:** `#FFFFFF`
-- **Text Color:** `#333333`
-- **Font Size:** 16px
-- **Font Weight:** 400
-- **Line Height:** 24px
-- **Padding:** 8px 12px
-- **Height:** 40px
-- **Border Radius:** 0px
-- **Border:** 1px solid `#C1C1C1`
-- **Box Shadow:** none
-- **Focus State:** Border 2px solid `#2E7D32`, box shadow rgba(46, 125, 50, 0.2) 0px 0px 0px 3px
-- **Error State:** Border 2px solid `#E60A32`, text color `#E60A32`
-- **Disabled State:** Background `#F9FAFB`, border `#E5E7EB`, text color `#4B5563`
-#### Label
-
-- **Font Size:** 14px
-- **Font Weight:** 600
-- **Line Height:** 20px
-- **Color:** `#374151`
-- **Margin Bottom:** 8px
-- **Display:** block
-#### Helper Text
-
-- **Font Size:** 12px
-- **Font Weight:** 400
-- **Line Height:** 16px
-- **Color:** `#4B5563`
-- **Margin Top:** 4px
-#### Error Text
-
-- **Font Size:** 12px
-- **Font Weight:** 400
-- **Line Height:** 16px
-- **Color:** `#E60A32`
-- **Margin Top:** 4px
-### Navigation
-
-#### Navigation Bar
-
-- **Background:** `#FFFFFF`
-- **Height:** 69px
-- **Border Bottom:** 1px solid `#E5E7EB`
-- **Padding:** 0px 24px
-- **Display:** flex
-- **Align Items:** center
-- **Box Shadow:** rgba(0, 0, 0, 0.05) 0px 1px 2px 0px
-#### Navigation Link
-
-- **Font Size:** 16px
-- **Font Weight:** 600
-- **Line Height:** 24px
-- **Color:** `#374151`
-- **Padding:** 8px 12px
-- **Border Radius:** 4px
-- **Text Decoration:** none
-- **Hover State:** Background `#F9FAFB`, color `#2E7D32`
-- **Active State:** Color `#2E7D32`, border bottom 3px solid `#2E7D32`
-#### Dropdown Menu
-
-- **Background:** `#FFFFFF`
-- **Border:** 1px solid `#E2E8F0`
-- **Border Radius:** 8px
-- **Box Shadow:** rgba(0, 0, 0, 0.14) 0px 8px 16px 0px, rgba(0, 0, 0, 0.12) 0px 0px 2px 0px
-- **Padding:** 8px 0px
-- **Min Width:** 200px
-#### Dropdown Item
-
-- **Font Size:** 14px
-- **Font Weight:** 500
-- **Line Height:** 20px
-- **Color:** `#374151`
-- **Padding:** 12px 16px
-- **Hover State:** Background `#F9FAFB`, color `#2E7D32`
-### Badges
-
-#### Default Badge (Information/HSD Status)
-
-- **Background:** `#E8F5E9`
-- **Text Color:** `#43A047`
-- **Font Size:** 12px
-- **Font Weight:** 600
-- **Line Height:** 16px
-- **Padding:** 4px 8px
-- **Border Radius:** 2px
-- **Border:** 1px solid `#2E7D32`
-#### Warning Badge
-
-- **Background:** `#FFF3E0`
-- **Text Color:** `#E3BB42`
-- **Font Size:** 12px
-- **Font Weight:** 600
-- **Line Height:** 16px
-- **Padding:** 4px 8px
-- **Border Radius:** 2px
-- **Border:** 1px solid `#FCB900`
-#### Error Badge
-
-- **Background:** `#FFEBEE`
-- **Text Color:** `#E60A32`
-- **Font Size:** 12px
-- **Font Weight:** 600
-- **Line Height:** 16px
-- **Padding:** 4px 8px
-- **Border Radius:** 2px
-- **Border:** 1px solid `#CF2E2E`
-## 5. Layout Principles
-
-### Spacing System
-
-**Base Unit:**8px
-
-**Spacing Scale:**
-
-- **2xs:** 4px – Micro gaps between inline elements
-- **xs:** 8px – Tight spacing, button padding
-- **sm:** 12px – Comfortable input padding, small gaps
-- **md:** 16px – Standard padding, section margins
-- **lg:** 20px – Larger gaps between elements
-- **xl:** 24px – Card padding, generous spacing
-- **2xl:** 32px – Section separation
-- **3xl:** 40px – Large section margins
-- **4xl:** 48px – Major content blocks
-- **5xl:** 68px – Full-width page section separation
-- **6xl:** 72px – Very large spacing
-- **7xl:** 80px – Maximum padding for major containers
-**Usage Context:**
-- **Buttons:** 8px horizontal, 0px vertical padding
-- **Cards:** 24px padding
-- **Form Fields:** 8px vertical, 12px horizontal padding
-- **Section Gaps:** 32px to 72px depending on content hierarchy
-- **Container Margins:** 24px to 80px for page-level spacing
-Grid & Container
-
-**Max Width:**1440px **Gutter:**24px **Column Strategy:**12-column responsive grid
-
-- **Desktop (1440px):** Full 12 columns, 24px gutters
-- **Tablet (768px):** 8 effective columns, 16px gutters
-- **Mobile (375px):** 4 effective columns, 12px gutters
-**Container Patterns:**
-- Hero sections span full width with max-width content area
-- Card grids use responsive layouts (3 columns desktop, 2 tablet, 1 mobile)
-- Sidebars occupy 25% width on desktop, collapse to stack on tablet/mobile
-Whitespace Philosophy
-
-NaviMart ưu tiên sự rõ ràng và tốc độ đọc hiểu thông qua việc sử dụng khoảng trắng chiến lược, đảm bảo các thông tin quan trọng (như mặt hàng cần mua, HSD, giá cả) có thể nhìn thấy ngay lập tức. Khoảng cách lớn (40px–80px) ngăn cách các phần nội dung chính, tạo nhịp điệu trực quan và khuyến khích sự tập trung. Padding bên trong các component (16px–24px) đảm bảo văn bản và các yếu tố tương tác (như nút Thêm vào giỏ) không bao giờ có cảm giác chật chội. Không gian trống (negative space) làm giảm tải trọng nhận thức, nâng cao nhận thức về sự minh bạch và độ tin cậy. Giao diện tránh các cụm thông tin dày đặc, ưu tiên các hệ thống phân cấp dễ quét (scannable) hỗ trợ ra quyết định nhanh chóng cho người nội trợ. Border Radius Scale
-
-- **0px:** Form inputs, navigation bars, and full-bleed backgrounds
-- **2px:** Badges and very small interactive elements
-- **4px:** Minor UI details and subtle emphasis
-- **8px:** Buttons, cards, containers, and standard components
-- **10px:** Larger cards and containers
-- **16px:** Hero sections and display components
-- **50%:** Circular avatars and badges (pill-shaped for badges)
-## 6. Depth & Elevation
-
-| **Level** | **Treatment** | **Use** |
-| --- | --- | --- |
-| Flat (None) | No shadow, box-shadow: none | Form inputs, navigation, subtle backgrounds |
-| Raised (1) | box-shadow: rgba(0, 0, 0, 0.12) 0px 0px 2px 0px | Minimal elevation for borders |
-| Elevated (2) | box-shadow: rgba(0, 0, 0, 0.14) 0px 4px 8px 0px, rgba(0, 0, 0, 0.12) 0px 0px 2px 0px | Cards, dropdowns, default hover states |
-| High (3) | box-shadow: rgba(0, 0, 0, 0.14) 0px 8px 16px 0px, rgba(0, 0, 0, 0.12) 0px 0px 2px 0px | Floating panels, modals, card hover states (for deal urgency) |
-| Maximum (4) | box-shadow: rgba(0, 0, 0, 0.14) 0px 12px 24px 0px, rgba(0, 0, 0, 0.12) 0px 0px 2px 0px | Top-level modals, important overlays (e.g., checkout/payment) |
-
-**Shadow Philosophy:** NaviMart sử dụng đổ bóng tinh tế, phân lớp để gợi ý chiều sâu của material mà không gây phân tâm. Shadows luôn sử dụng cách tiếp cận hai lớp—lớp mờ nhẹ tạo chiều sâu không gian và lớp đổ bóng rõ để định hình. Điều này tạo ra hệ thống phân cấp trực quan mà không tạo ra các độ tương phản gay gắt hay làm rối mắt. Bóng đổ được giữ ở mức tối thiểu ở các khu vực nội dung chính, dành elevation mạnh hơn cho các lớp phủ (overlays) và trạng thái tương tác, đảm bảo thông tin sản phẩm và giá cả luôn giữ vị trí ưu tiên trong phân cấp trực quan.
-
-## 7. Do's and Don'ts
+## 5. Do's and Don'ts (Quy tắc thiết kế)
 
 ### Do
+- **Sử dụng duy nhất font `Be Vietnam Pro`** cho toàn bộ hệ thống từ tiêu đề đến nội dung để giữ tính hiện đại và đồng bộ.
+- **Sử dụng đúng palette màu Material Design 3** qua các class của Tailwind (như `text-primary`, `bg-surface-variant`, `text-on-surface`).
+- **Dùng `text-body-md` (16px)** làm font chữ tiêu chuẩn cho các nội dung văn bản dài và thân nút bấm để đảm bảo độ đọc hiểu.
+- **Dùng bo góc `rounded-lg` (8px)** cho các Button và Card để thống nhất trải nghiệm UI.
+- **Tận dụng các biến khoảng cách** như `gap-stack-md` hay `m-margin-mobile` thay vì viết thông số cứng.
 
-- **Use green (****#****0077B6) for all primary CTAs**to ensure consistent brand recognition and tap target clarity
-- **Maintain 16px minimum font size for body text**across all devices for accessibility and readability
-- **Apply 8px border radius consistently**to buttons, cards, and inputs for cohesive modern aesthetic
-- **Provide generous padding (24px) inside cards**to ensure product details never feel cramped
-- **Stack spacing in multiples of 8px**to maintain visual alignment and rhythm
-- **Sử dụng Lora cho tiêu đề và Be Vietnam Pro cho nội dung** để đảm bảo tính lịch sự và dễ đọc
-- **Pair blue with white or****#****F9FAFB backgrounds**for optimal contrast and professional appearance
-- **Include hover states on all interactive elements**with color shifts or shadow elevation
-- **Use****#****E6F6FF background for green-accented sections**to reinforce brand color without overwhelming
-- **Keep focus indicators (2px colored borders) visible**on form inputs for keyboard navigation accessibility
 ### Don't
-
-- **Don't use colors outside the defined palette**without explicit design review
-- **Don't apply shadows heavier than Level 3**on primary content or standard cards
-- **Don't set font sizes below 12pxfor body text (use line-height:** 16px minimum)
-- **Don't create buttons without clear hover states**—interactive elements must respond visibly
-- **Don't mix other font families**—Chỉ sử dụng Lora (Serif) cho Heading và Be Vietnam Pro (Sans-serif) cho Body
-- **Don't use the orange accent (****#****FF6900) for primary actions**—reserve it for secondary emphasis or high-urgency flash deals
-- **Don't compress padding below 8px on interactive elements**as it compromises touch targets
-- **Don't apply border radius above 10px to standard components**unless explicitly designing display elements
-- **Don't mix green color values**—use `#2E7D32` for primary, `#43A047` for secondary, `#1B5E20` for active
-- **Don't omit error states**on form fields; always communicate validation failures clearly using `#E60A32`
-## 8. Responsive Behavior
-
-### Breakpoints
-
-| **Name** | **Width** | **Key Changes** |
-| --- | --- | --- |
-| Mobile | 375px | 1 column, 12px gutters, stacked navigation, 14px body text |
-| Small Tablet | 576px | 2 columns, 16px gutters, collapsible menus, 14px body text |
-| Tablet | 768px | 3–4 columns, 16px gutters, horizontal navigation, 16px body text |
-| Desktop | 1024px | 8–12 columns, 24px gutters, full navigation, 16px body text |
-| Large Desktop | 1440px+ | Full width, max-width container, 24px gutters, 16px body text |
-
-### Touch Targets
-
-- **Minimum interactive element size:** 44px × 44px (buttons, links)
-- **Button padding:** Maintain at least 8px horizontal to exceed 44px target
-- **Input height:** 40px minimum
-- **Spacing between touch targets:** 8px minimum gap to prevent accidental overlap
-- **Icon-only buttons:** 36px × 36px minimum with 8px internal padding
-Collapsing Strategy
-
-- **Desktop (1440px):** Full horizontal navigation, side-by-side cards (3 per row), unrestricted spacing
-- **Tablet (768px):** Navigation collapses to hamburger menu, cards shift to 2 per row, padding reduces to 16px
-- **Mobile (375px):** Stack-first layout, full-width cards (1 per row), navigation hidden behind menu, padding reduces to 12px, font sizes remain at 14px minimum
-- **Font scaling:** Never reduce below 14px on any breakpoint
-- **Image scaling:** Use responsive images with max-width: 100% and maintain aspect ratio
-- **Container margins:** Reduce from 80px (desktop) to 48px (tablet) to 24px (mobile)
-- **Hero section height:** 400px on desktop, 300px on tablet, 250px on mobile
-## 9. Agent Prompt Guide
-
-### Quick Color Reference
-
-**Primary CTA Background:**Green Primary ( `#2E7D32`) **Primary CTA Text:**White ( `#FFFFFF`) **Primary CTA Hover:**Green Accent ( `#43A047`) **Secondary Text:**Body Text ( `#374151`) **Heading Text:**Dark Heading ( `#111827`) **Background (default):**White ( `#FFFFFF`) **Background (subtle):**Very Light ( `#F9FAFB`) **Background (tinted):**Light Green ( `#E8F5E9`) **Border:**Light Gray ( `#E2E8F0`) **Error State:**Danger ( `#E60A32`) **Warning State:**Warning ( `#E3BB42`) **Input Border:**Border Gray ( `#C1C1C1`) **Disabled Text:**Secondary Text ( `#4B5563`)Iteration Guide
-
-- **Every button follows the primary style by default:** Green background ( `#2E7D32`), white text, 14px font, 500 weight, 36px height, 8px radius, 0px 8px padding unless explicitly secondary or ghost.
-- **Typography hierarchy is strict:** Use Lora Display (32px, 700) for major titles, Lora Heading (24px, 700) for sections, Be Vietnam Pro Body Large (16px, 400) for content, Be Vietnam Pro Body Medium (14px, 500) for buttons/emphasis, Be Vietnam Pro Caption (12px, 400) for metadata. Never improvise sizes.
-- **Spacing in 8px multiples only:** All margins, padding, and gaps must be 4px, 8px, 12px, 16px, 20px, 24px, 32px, 40px, 48px, 68px, 72px, or 80px.No arbitrary values.
-- **Cards always have white background and subtle shadow:** Base shadow is rgba(0, 0, 0, 0.14) 0px 8px 16px 0px, rgba(0, 0, 0, 0.12) 0px 0px 2px 0px.Hover state elevates to rgba(0, 0, 0, 0.14) 0px 12px 24px 0px.
-- **Form inputs default to white background with 1px border:** Use `#C1C1C1` for default border, focus state shifts to 2px solid `#2E7D32` with subtle shadow.Error state uses `#E60A32` border and text color.
-- **Navigation bar is always white with bottom border:** 69px height, 24px horizontal padding, 1px solid `#E5E7EB` bottom border.Navigation links are 16px, 600 weight, with active state showing green color ( `#2E7D32`).
-- **Every interactive element must have a visible hover state:** Buttons shift color or shadow, links underline or change color, inputs gain focus ring.No silent hovers.
-- **Font:** Use Lora for Headings and Be Vietnam Pro for Body text. Never introduce other typefaces.
-- **Border radius follows the scale:** 0px for inputs/full-bleed, 2px for badges, 8px for buttons/cards/containers, 10px for larger cards, 16px for hero elements.No other radius values unless approved.
-- **Mobile-first responsive:** Desktop max-width 1440px, tablet breakpoint 768px (shift to 2 columns, 16px gutters), mobile 375px (full-width, 12px gutters).Font sizes never below 14px.Maintain 44px × 44px minimum touch targets everywhere.
+- **Không sử dụng font có chân (Serif) như Lora** (NaviMart hiện tại đã loại bỏ font này khỏi hệ thống thiết kế).
+- **Không tự ý thêm mã màu HEX cứng** vào trong file giao diện React (ngoại trừ cấu hình Tailwind). Hãy tham chiếu đến các tên biến màu đã định nghĩa.
+- **Không dùng kích thước font chữ nhỏ hơn 14px (`text-label-sm`)**. Đối tượng sử dụng chính là người nội trợ, họ cần thông tin to, rõ ràng và dễ quét (scannable) trên màn hình điện thoại.
+- **Không lạm dụng bóng đổ (shadow)** quá dày, hãy sử dụng bóng đổ nhẹ (`shadow-sm`, `shadow-md`) theo tinh thần thiết kế phẳng, hiện đại của MD3.

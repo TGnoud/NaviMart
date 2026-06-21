@@ -1,0 +1,240 @@
+\documentclass[a4paper,13pt,3p]{report}
+\usepackage{scrextend}
+\changefontsizes{13pt}
+\usepackage[utf8]{vietnam}
+\usepackage[top=2cm, bottom=2cm, left=3cm, right=2cm]{geometry}
+
+\usepackage{graphicx} 
+\usepackage{fancybox} 
+\usepackage{indentfirst} 
+\usepackage{amsthm} 
+\usepackage{latexsym} 
+\usepackage{amsmath} 
+\usepackage{amssymb} 
+\usepackage{amsbsy} 
+\usepackage{times} 
+\usepackage{array} 
+\usepackage{enumitem} 
+\usepackage{subfiles} 
+\usepackage{titlesec} 
+\usepackage{titletoc}
+\usepackage{chngcntr} 
+\usepackage{pdflscape} 
+\usepackage{afterpage}
+\usepackage[ruled,vlined]{algorithm2e}  
+\usepackage{capt-of} 
+\usepackage{multirow} 
+\usepackage{fancyhdr} 
+\usepackage{appendix}
+
+\usepackage[font=small,labelfont=bf]{caption}
+
+\usepackage{listings}
+\usepackage{float}
+\usepackage{subcaption}
+\usepackage{xurl}
+\usepackage{longtable}
+
+\usepackage{setspace}
+\usepackage{parskip}
+
+% package content table
+\usepackage{tocbasic}
+\usepackage{blindtext}
+\usepackage[table]{xcolor}
+
+% ===================================================
+\pagestyle{fancy}
+\fancyhf{} % Xóa sạch toàn bộ cấu hình header/footer cũ
+\renewcommand{\headrulewidth}{0pt} % Xóa luôn đường kẻ ngang ở trên đầu trang
+\fancyfoot[C]{\thepage} % Chỉ đặt số trang ở chính giữa dưới cùng (Center)
+% ===================================================
+\titleformat{\chapter}[hang]{\centering\bfseries}{CHƯƠNG \thechapter.\ }{0pt}{}[]
+
+\titleformat 
+    {\chapter} % command
+    [hang] % shape
+    {\centering\bfseries} % format
+    {CHƯƠNG \thechapter.\ } % label
+    {0pt} % sep
+    {} % before
+    [] % after
+\titlespacing*{\chapter}{0pt}{-20pt}{20pt}
+
+\titleformat
+    {\section} % command
+    [hang] % shape
+    {\bfseries} % format
+    {\thechapter.\arabic{section}\ \ \ \ } % label
+    {0pt} % sep
+    {} % before
+    [] % after
+\titlespacing{\section}{0pt}{\parskip}{0.5\parskip}
+
+\titleformat
+    {\subsection} % command
+    [hang] % shape
+    {\bfseries} % format
+    {\thechapter.\arabic{section}.\arabic{subsection}\ \ \ \ } % label
+    {0pt} % sep
+    {} % before
+    [] % after
+\titlespacing{\subsection}{30pt}{\parskip}{0.5\parskip}
+
+\renewcommand\thesubsubsection{\alph{subsubsection}}
+\titleformat
+    {\subsubsection} % command
+    [hang] % shape
+    {\bfseries} % format
+    {\alph{subsubsection}, \ } % label
+    {0pt} % sep
+    {} % before
+    [] % after
+\titlespacing{\subsubsection}{50pt}{\parskip}{0.5\parskip}
+
+% ===================================================
+\usepackage{hyperref}
+\hypersetup{pdfborder = {0 0 0}} 
+\hypersetup{pdftitle={\TITLE}, pdfauthor={\AUTHOR}}
+    
+\usepackage[all]{hypcap} % Tham chiếu chính xác đến hình ảnh và bảng biểu
+
+\graphicspath{{figures/}{../figures/}} % Thư mục chứa hình ảnh
+\counterwithin{figure}{chapter} % Đánh số hình ảnh kèm theo chapter
+
+\title{\bf \TITLE}
+\author{\AUTHOR}
+
+\setcounter{secnumdepth}{3} 
+
+\theoremstyle{definition}
+\newtheorem{example}{Ví dụ}[chapter]
+
+\onehalfspacing
+% Khoảng cách xuống dòng
+\setlength{\parskip}{6pt}
+% Lùi đầu dòng
+\setlength{\parindent}{15pt}
+
+% =========================== BODY ===============
+\begin{document}
+
+\subfile{Bia} % Phần bìa chính
+
+% ===================================================
+\cleardoublepage
+\pagenumbering{roman} 
+
+\subfile{Loi_noi_dau}
+\cleardoublepage
+
+\subfile{Phan_cong}
+\cleardoublepage
+
+\renewcommand*\contentsname{MỤC LỤC}
+
+\titlecontents{chapter}
+    [0.0cm]             % left margin
+    {\bfseries\vspace{0.3cm}}                  % above code
+    {{\bfseries{\scshape} CHƯƠNG \thecontentslabel.\ }} % numbered format
+    {}         % unnumbered format
+    {\titlerule*[0.3pc]{.}\contentspage}         % filler-page-format
+
+\titlecontents{section}
+    [0.0cm]             % left margin
+    {\vspace{0.3cm}}                  % above code
+    {\thecontentslabel \ } % numbered format
+    {}         % unnumbered format
+    {\titlerule*[0.3pc]{.}\contentspage}
+    
+\titlecontents{subsection}
+    [1.0cm]             % left margin
+    {\vspace{0.3cm}}                  % above code
+    {\thecontentslabel \ } % numbered format
+    {}         % unnumbered format
+    {\titlerule*[0.3pc]{.}\contentspage}
+
+% Tạo mục lục tự động
+\addtocontents{toc}{\protect\thispagestyle{empty}}
+\tableofcontents 
+\thispagestyle{empty}
+\cleardoublepage
+
+% Tạo danh mục hình vẽ
+\renewcommand{\listfigurename}{DANH MỤC HÌNH VẼ}
+{\let\oldnumberline\numberline
+\renewcommand{\numberline}{Hình~\oldnumberline}
+\listoffigures} 
+\cleardoublepage
+
+% Tạo danh mục bảng biểu
+\renewcommand{\listtablename}{DANH MỤC BẢNG BIỂU}
+{\let\oldnumberline\numberline
+\renewcommand{\numberline}{Bảng~\oldnumberline}
+\listoftables}
+\cleardoublepage
+
+% ===================================================
+\pagenumbering{arabic}
+
+% Áp dụng lại style không có header, chỉ có số trang ở giữa
+\pagestyle{fancy}
+\fancyhf{} 
+\renewcommand{\headrulewidth}{0pt} 
+\fancyfoot[C]{\thepage} 
+
+% --- Cấu trúc các Chương nội dung ---
+
+\cleardoublepage
+\chapter{KHẢO SÁT BÀI TOÁN}
+\label{chapter:1}
+\subfile{Chuong/1_Khao_sat_bai_toan}
+
+\cleardoublepage
+\chapter{ĐẶC TẢ YÊU CẦU}
+\label{chapter:2}
+\subfile{Chuong/2_Dac_ta_yeu_cau}
+
+\cleardoublepage
+\chapter{PHÂN TÍCH YÊU CẦU}
+\label{chapter:3}
+\subfile{Chuong/3_Phan_tich_yeu_cau}
+
+\cleardoublepage
+\chapter{THIẾT KẾ CHƯƠNG TRÌNH}
+\label{chapter:4}
+\subfile{Chuong/4_Thiet_ke_chuong_trinh}
+
+\cleardoublepage
+\chapter{XÂY DỰNG CHƯƠNG TRÌNH MINH HỌA}
+\label{chapter:5}
+\subfile{Chuong/5_Xay_dung_chuong_trinh}
+
+\cleardoublepage
+\chapter{KIỂM THỬ}
+\label{chapter:6}
+\subfile{Chuong/6_Kiem_thu}
+
+\cleardoublepage
+\chapter{NGUYÊN LÝ THIẾT KẾ}
+\label{chapter:7}
+\subfile{Chuong/7_Nguyen_ly_thiet_ke}
+
+\cleardoublepage
+\chapter{HƯỚNG DẪN SỬ DỤNG}
+\label{chapter:8}
+\subfile{Chuong/8_Huong_dan_su_dung}
+
+\cleardoublepage
+\chapter*{KẾT LUẬN \& HƯỚNG PHÁT TRIỂN}
+\addcontentsline{toc}{chapter}{KẾT LUẬN \& HƯỚNG PHÁT TRIỂN}
+\label{chapter:Ket_luan}
+\subfile{Chuong/Ket_luan}
+
+\cleardoublepage
+\chapter*{TÀI LIỆU THAM KHẢO}
+\addcontentsline{toc}{chapter}{TÀI LIỆU THAM KHẢO}
+\label{chapter:Tai_lieu_tham_khao}
+\subfile{Chuong/Tai_lieu_tham_khao}
+
+\end{document}

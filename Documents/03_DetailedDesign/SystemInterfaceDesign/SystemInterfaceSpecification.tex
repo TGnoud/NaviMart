@@ -1,0 +1,2641 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[vietnamese]{babel}
+\usepackage[T5]{fontenc}
+\usepackage{lmodern}
+\usepackage{geometry}
+\geometry{a4paper, margin=1in}
+\usepackage[hidelinks]{hyperref}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage{indentfirst}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{longtable}
+
+\begin{document}
+
+\begin{titlepage}
+    \begin{center}
+        \textbf{\Large ĐẠI HỌC BÁCH KHOA HÀ NỘI} \\
+        \textbf{\Large TRƯỜNG CÔNG NGHỆ THÔNG TIN VÀ TRUYỀN THÔNG} \\
+        \vskip 3cm
+        \noindent\rule{\textwidth}{2pt} \\
+        \vskip 0.6cm
+        \textbf{\Huge SYSTEM INTERFACE SPECIFICATION} \\[0.5em]
+        \textbf{\huge HỆ THỐNG ĐI CHỢ TIỆN LỢI - NAVIMART} \\
+        \noindent\rule{\textwidth}{2pt} \\
+        \vskip 1.5cm
+        \textbf{\large Môn học: Phát triển phần mềm theo chuẩn kỹ năng ITSS} \\
+        \textbf{\large Giảng viên hướng dẫn: ThS. Nguyễn Mạnh Tuấn} \\
+        \textbf{\large Nhóm thực hiện: Nhóm 5} \\
+        \vskip 1.5cm
+        \textbf{\large DANH SÁCH THÀNH VIÊN} \\
+        \vskip 0.4cm
+        \begin{tabular}{|c|l|c|}
+            \hline
+            \textbf{STT} & \textbf{Họ và tên} & \textbf{MSSV} \\
+            \hline
+            1 & Trịnh Thành An & 20235633 \\
+            \hline
+            2 & Nguyễn Mạnh Đức & 20235681 \\
+            \hline
+            3 & Đỗ Danh Dũng & 20235685 \\
+            \hline
+            4 & Đinh Xuân Thái Dương & 20235689 \\
+            \hline
+            5 & Nguyễn Hồng Dương & 20235693 \\
+            \hline
+        \end{tabular}
+        \vfill
+        \textbf{Hà Nội, 2026}
+    \end{center}
+\end{titlepage}
+
+\tableofcontents
+\newpage
+
+\section{Giới thiệu chung}
+Tài liệu này đặc tả chi tiết giao diện giao tiếp phần mềm (API Specification) của hệ thống đi chợ tiện lợi \textbf{NaviMart}. Các REST APIs trong hệ thống được thiết kế theo đúng mô hình kiến trúc phân lớp, tuân thủ chặt chẽ nguyên lý RESTful để truyền nhận dữ liệu JSON đồng bộ và bảo mật giữa Client (giao diện React) và Backend (dịch vụ NestJS).
+
+Tài liệu được chia thành hai phần chính:
+\begin{enumerate}
+    \item \textbf{Hệ thống REST APIs nội bộ:} Đặc tả chi tiết các endpoint phục vụ 14 phân hệ chức năng trong ranh giới kiểm soát của hệ thống.
+    \item \textbf{Giao diện tương tác với dịch vụ bên thứ ba:} Đặc tả các giao tiếp gọi ra các External APIs nhằm hỗ trợ tính năng gửi email, đăng nhập qua Google OAuth 2.0 và sinh dữ liệu AI tự động qua OpenAI.
+\end{enumerate}
+
+\newpage
+
+\section{Đặc tả chi tiết các REST APIs}
+Tất cả các REST APIs nội bộ của NaviMart đều sử dụng đường dẫn cơ sở (Base URL) mặc định là \texttt{http://localhost:3000} (đối với môi trường thử nghiệm) hoặc domain chính thức của ứng dụng (đối với môi trường staging/production). Các API yêu cầu xác thực phải gửi kèm Header:
+\begin{verbatim}
+Authorization: Bearer <access_token>
+\end{verbatim}
+định dạng mã bảo mật JSON Web Token (JWT).
+
+\vskip 0.5cm
+\subsection{Phân hệ Trợ lý AI (AI Chef Module)}
+
+\subsubsection{Lấy trạng thái AI Chef (Get Status)}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{HTTP Method:} \texttt{GET}
+    \item \textbf{Request URL:} \texttt{/api/ai-chef/status}
+    \item \textbf{Mô tả:} Kiểm tra xem tính năng AI Chef đã được cấu hình và sẵn sàng hoạt động hay chưa.
+    \item \textbf{Yêu cầu quyền:} Bất kỳ người dùng nào đã đăng nhập (User).
+\end{itemize}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+Không yêu cầu.\\
+
+\paragraph{Dữ liệu phản hồi (Responses):}
+\begin{longtable}{|p{3.2cm}|p{3.5cm}|p{8.5cm}|}
+\hline
+\textbf{HTTP Status} & \textbf{Trường hợp} & \textbf{Cấu trúc dữ liệu trả về (JSON)} \\ \hline
+\endhead
+\textbf{200 OK} & Thành công & \texttt{\{ "configured": true, "provider": "OpenAI" \}} \\ \hline
+\textbf{401 Unauthorized} & Chưa đăng nhập & \texttt{\{ "error": "Unauthorized" \}} \\ \hline
+\end{longtable}
+
+\vskip 0.4cm
+\noindent\rule{\textwidth}{0.3pt}
+\vskip 0.4cm
+
+\subsubsection{Giao tiếp với AI (Chat)}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{HTTP Method:} \texttt{POST}
+    \item \textbf{Request URL:} \texttt{/api/ai-chef/chat}
+    \item \textbf{Mô tả:} Gửi tin nhắn hoặc yêu cầu gợi ý món ăn đến AI Chef và nhận phản hồi.
+    \item \textbf{Yêu cầu quyền:} Bất kỳ người dùng nào đã đăng nhập (User).
+\end{itemize}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+\begin{longtable}{|p{3cm}|p{2.5cm}|c|p{8.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\ \hline
+\endhead
+\texttt{message} & String & Có & Nội dung tin nhắn người dùng gửi cho AI \\ \hline
+\texttt{context} & Object & Không & Thông tin ngữ cảnh (như các nguyên liệu hiện có trong tủ lạnh) \\ \hline
+\end{longtable}
+
+\paragraph{Dữ liệu phản hồi (Responses):}
+\begin{longtable}{|p{3.2cm}|p{3.5cm}|p{8.5cm}|}
+\hline
+\textbf{HTTP Status} & \textbf{Trường hợp} & \textbf{Cấu trúc dữ liệu trả về (JSON)} \\ \hline
+\endhead
+\textbf{200 OK} & Thành công & \texttt{\{ "reply": "Bạn có thể nấu món Thịt kho tàu...", "suggestions": [...] \}} \\ \hline
+\textbf{400 Bad Request} & Thiếu tin nhắn & \texttt{\{ "error": "Bad Request", "message": "message must be a string" \}} \\ \hline
+\textbf{503 Service Unavailable} & AI Server lỗi & \texttt{\{ "error": "Service Unavailable", "message": "AI Provider is down" \}} \\ \hline
+\end{longtable}
+
+\vskip 0.4cm
+\noindent\rule{\textwidth}{0.3pt}
+\vskip 0.4cm
+
+\subsection{Phân hệ Quản trị Hệ thống (Admin Module)}
+
+\subsubsection{Lấy danh mục thực phẩm (Find All Categories)}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{HTTP Method:} \texttt{GET}
+    \item \textbf{Request URL:} \texttt{/api/admin/catalog/categories}
+    \item \textbf{Mô tả:} Lấy toàn bộ danh mục thực phẩm trên hệ thống.
+    \item \textbf{Yêu cầu quyền:} Quản trị viên hệ thống (Admin).
+\end{itemize}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+\begin{longtable}{|p{3cm}|p{2.5cm}|c|p{8.5cm}|}
+\hline
+\textbf{Tham số (Query)} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\ \hline
+\endhead
+\texttt{page} & Integer & Không & Trang hiện tại \\ \hline
+\texttt{limit} & Integer & Không & Số bản ghi mỗi trang \\ \hline
+\end{longtable}
+
+\paragraph{Dữ liệu phản hồi (Responses):}
+\begin{longtable}{|p{3.2cm}|p{3.5cm}|p{8.5cm}|}
+\hline
+\textbf{HTTP Status} & \textbf{Trường hợp} & \textbf{Cấu trúc dữ liệu trả về (JSON)} \\ \hline
+\endhead
+\textbf{200 OK} & Thành công & \texttt{\{ "data": [...], "total": 10 \}} \\ \hline
+\end{longtable}
+
+\vskip 0.4cm
+\noindent\rule{\textwidth}{0.3pt}
+\vskip 0.4cm
+
+\subsubsection{Tạo danh mục (Create Category)}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{HTTP Method:} \texttt{POST}
+    \item \textbf{Request URL:} \texttt{/api/admin/catalog/categories}
+    \item \textbf{Mô tả:} Thêm mới một danh mục thực phẩm.
+    \item \textbf{Yêu cầu quyền:} Quản trị viên hệ thống (Admin).
+\end{itemize}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+\begin{longtable}{|p{3cm}|p{2.5cm}|c|p{8.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\ \hline
+\endhead
+\texttt{name} & String & Có & Tên danh mục mới \\ \hline
+\end{longtable}
+
+\paragraph{Dữ liệu phản hồi (Responses):}
+\begin{longtable}{|p{3.2cm}|p{3.5cm}|p{8.5cm}|}
+\hline
+\textbf{HTTP Status} & \textbf{Trường hợp} & \textbf{Cấu trúc dữ liệu trả về (JSON)} \\ \hline
+\endhead
+\textbf{201 Created} & Thành công & \texttt{\{ "id": 5, "name": "Đồ uống" \}} \\ \hline
+\end{longtable}
+
+\vskip 0.4cm
+\noindent\rule{\textwidth}{0.3pt}
+\vskip 0.4cm
+
+\subsubsection{Cập nhật danh mục (Update Category)}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{HTTP Method:} \texttt{PATCH}
+    \item \textbf{Request URL:} \texttt{/api/admin/catalog/categories/:categoryId}
+    \item \textbf{Mô tả:} Đổi tên hoặc trạng thái của danh mục.
+    \item \textbf{Yêu cầu quyền:} Quản trị viên hệ thống (Admin).
+\end{itemize}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+\begin{longtable}{|p{3cm}|p{2.5cm}|c|p{8.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\ \hline
+\endhead
+\texttt{categoryId} & Integer & Có & ID danh mục \\ \hline
+\end{longtable}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+\begin{longtable}{|p{3cm}|p{2.5cm}|c|p{8.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\ \hline
+\endhead
+\texttt{name} & String & Không & Tên danh mục mới \\ \hline
+\end{longtable}
+
+\paragraph{Dữ liệu phản hồi (Responses):}
+\begin{longtable}{|p{3.2cm}|p{3.5cm}|p{8.5cm}|}
+\hline
+\textbf{HTTP Status} & \textbf{Trường hợp} & \textbf{Cấu trúc dữ liệu trả về (JSON)} \\ \hline
+\endhead
+\textbf{200 OK} & Thành công & \texttt{\{ "message": "Category updated" \}} \\ \hline
+\end{longtable}
+
+\vskip 0.4cm
+\noindent\rule{\textwidth}{0.3pt}
+\vskip 0.4cm
+
+\subsubsection{Xóa danh mục (Remove Category)}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{HTTP Method:} \texttt{DELETE}
+    \item \textbf{Request URL:} \texttt{/api/admin/catalog/categories/:categoryId}
+    \item \textbf{Mô tả:} Ẩn/Xóa danh mục thực phẩm.
+    \item \textbf{Yêu cầu quyền:} Quản trị viên hệ thống (Admin).
+\end{itemize}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+\begin{longtable}{|p{3cm}|p{2.5cm}|c|p{8.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\ \hline
+\endhead
+\texttt{categoryId} & Integer & Có & ID danh mục \\ \hline
+\end{longtable}
+
+\paragraph{Dữ liệu phản hồi (Responses):}
+\begin{longtable}{|p{3.2cm}|p{3.5cm}|p{8.5cm}|}
+\hline
+\textbf{HTTP Status} & \textbf{Trường hợp} & \textbf{Cấu trúc dữ liệu trả về (JSON)} \\ \hline
+\endhead
+\textbf{200 OK} & Thành công & \texttt{\{ "message": "Category archived" \}} \\ \hline
+\end{longtable}
+
+\vskip 0.4cm
+\noindent\rule{\textwidth}{0.3pt}
+\vskip 0.4cm
+
+\subsubsection{Lấy danh sách thực phẩm (Find All Foods)}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{HTTP Method:} \texttt{GET}
+    \item \textbf{Request URL:} \texttt{/api/admin/catalog/foods}
+    \item \textbf{Mô tả:} Danh sách chi tiết các mặt hàng trong Catalog chuẩn.
+    \item \textbf{Yêu cầu quyền:} Quản trị viên hệ thống (Admin).
+\end{itemize}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+\begin{longtable}{|p{3cm}|p{2.5cm}|c|p{8.5cm}|}
+\hline
+\textbf{Tham số (Query)} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\ \hline
+\endhead
+\texttt{page} & Integer & Không & Trang hiện tại \\ \hline
+\texttt{limit} & Integer & Không & Số bản ghi mỗi trang \\ \hline
+\end{longtable}
+
+\paragraph{Dữ liệu phản hồi (Responses):}
+\begin{longtable}{|p{3.2cm}|p{3.5cm}|p{8.5cm}|}
+\hline
+\textbf{HTTP Status} & \textbf{Trường hợp} & \textbf{Cấu trúc dữ liệu trả về (JSON)} \\ \hline
+\endhead
+\textbf{200 OK} & Thành công & \texttt{\{ "data": [...], "total": 100 \}} \\ \hline
+\end{longtable}
+
+\vskip 0.4cm
+\noindent\rule{\textwidth}{0.3pt}
+\vskip 0.4cm
+
+\subsubsection{Tạo thực phẩm (Create Food)}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{HTTP Method:} \texttt{POST}
+    \item \textbf{Request URL:} \texttt{/api/admin/catalog/foods}
+    \item \textbf{Mô tả:} Thêm một loại thực phẩm chuẩn vào Catalog để người dùng sử dụng.
+    \item \textbf{Yêu cầu quyền:} Quản trị viên hệ thống (Admin).
+\end{itemize}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+\begin{longtable}{|p{3cm}|p{2.5cm}|c|p{8.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\ \hline
+\endhead
+\texttt{name} & String & Có & Tên thực phẩm \\ \hline
+\texttt{category\_id} & Integer & Có & Thuộc danh mục nào \\ \hline
+\texttt{unit\_id} & Integer & Có & Đơn vị tính chuẩn \\ \hline
+\end{longtable}
+
+\paragraph{Dữ liệu phản hồi (Responses):}
+\begin{longtable}{|p{3.2cm}|p{3.5cm}|p{8.5cm}|}
+\hline
+\textbf{HTTP Status} & \textbf{Trường hợp} & \textbf{Cấu trúc dữ liệu trả về (JSON)} \\ \hline
+\endhead
+\textbf{201 Created} & Thành công & \texttt{\{ "id": 105, "message": "Food created" \}} \\ \hline
+\end{longtable}
+
+\vskip 0.4cm
+\noindent\rule{\textwidth}{0.3pt}
+\vskip 0.4cm
+
+\subsubsection{Cập nhật thực phẩm (Update Food)}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{HTTP Method:} \texttt{PATCH}
+    \item \textbf{Request URL:} \texttt{/api/admin/catalog/foods/:foodId}
+    \item \textbf{Mô tả:} Thay đổi thông tin của thực phẩm chuẩn trong Catalog.
+    \item \textbf{Yêu cầu quyền:} Quản trị viên hệ thống (Admin).
+\end{itemize}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+\begin{longtable}{|p{3cm}|p{2.5cm}|c|p{8.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\ \hline
+\endhead
+\texttt{foodId} & Integer & Có & ID thực phẩm \\ \hline
+\end{longtable}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+\begin{longtable}{|p{3cm}|p{2.5cm}|c|p{8.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\ \hline
+\endhead
+\texttt{name} & String & Không & Tên mới \\ \hline
+\end{longtable}
+
+\paragraph{Dữ liệu phản hồi (Responses):}
+\begin{longtable}{|p{3.2cm}|p{3.5cm}|p{8.5cm}|}
+\hline
+\textbf{HTTP Status} & \textbf{Trường hợp} & \textbf{Cấu trúc dữ liệu trả về (JSON)} \\ \hline
+\endhead
+\textbf{200 OK} & Thành công & \texttt{\{ "message": "Food updated" \}} \\ \hline
+\end{longtable}
+
+\vskip 0.4cm
+\noindent\rule{\textwidth}{0.3pt}
+\vskip 0.4cm
+
+\subsubsection{Xóa thực phẩm (Remove Food)}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{HTTP Method:} \texttt{DELETE}
+    \item \textbf{Request URL:} \texttt{/api/admin/catalog/foods/:foodId}
+    \item \textbf{Mô tả:} Xóa/Ẩn thực phẩm khỏi Catalog.
+    \item \textbf{Yêu cầu quyền:} Quản trị viên hệ thống (Admin).
+\end{itemize}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+\begin{longtable}{|p{3cm}|p{2.5cm}|c|p{8.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\ \hline
+\endhead
+\texttt{foodId} & Integer & Có & ID thực phẩm \\ \hline
+\end{longtable}
+
+\paragraph{Dữ liệu phản hồi (Responses):}
+\begin{longtable}{|p{3.2cm}|p{3.5cm}|p{8.5cm}|}
+\hline
+\textbf{HTTP Status} & \textbf{Trường hợp} & \textbf{Cấu trúc dữ liệu trả về (JSON)} \\ \hline
+\endhead
+\textbf{200 OK} & Thành công & \texttt{\{ "message": "Food archived" \}} \\ \hline
+\end{longtable}
+
+\vskip 0.4cm
+\noindent\rule{\textwidth}{0.3pt}
+\vskip 0.4cm
+
+\subsubsection{Lấy DS Đơn vị tính (Find All Units)}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{HTTP Method:} \texttt{GET}
+    \item \textbf{Request URL:} \texttt{/api/admin/catalog/units}
+    \item \textbf{Mô tả:} Lấy danh sách các đơn vị tính chuẩn (kg, gram, quả, chai...).
+    \item \textbf{Yêu cầu quyền:} Quản trị viên hệ thống (Admin).
+\end{itemize}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+Không yêu cầu.\\
+
+\paragraph{Dữ liệu phản hồi (Responses):}
+\begin{longtable}{|p{3.2cm}|p{3.5cm}|p{8.5cm}|}
+\hline
+\textbf{HTTP Status} & \textbf{Trường hợp} & \textbf{Cấu trúc dữ liệu trả về (JSON)} \\ \hline
+\endhead
+\textbf{200 OK} & Thành công & \texttt{[\{ "id": 1, "name": "kilogram" \}]} \\ \hline
+\end{longtable}
+
+\vskip 0.4cm
+\noindent\rule{\textwidth}{0.3pt}
+\vskip 0.4cm
+
+\subsubsection{Tạo đơn vị tính (Create Unit)}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{HTTP Method:} \texttt{POST}
+    \item \textbf{Request URL:} \texttt{/api/admin/catalog/units}
+    \item \textbf{Mô tả:} Thêm đơn vị đo lường mới vào hệ thống.
+    \item \textbf{Yêu cầu quyền:} Quản trị viên hệ thống (Admin).
+\end{itemize}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+\begin{longtable}{|p{3cm}|p{2.5cm}|c|p{8.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\ \hline
+\endhead
+\texttt{name} & String & Có & Tên đơn vị (vd: Liter) \\ \hline
+\texttt{symbol} & String & Có & Ký hiệu (vd: L) \\ \hline
+\end{longtable}
+
+\paragraph{Dữ liệu phản hồi (Responses):}
+\begin{longtable}{|p{3.2cm}|p{3.5cm}|p{8.5cm}|}
+\hline
+\textbf{HTTP Status} & \textbf{Trường hợp} & \textbf{Cấu trúc dữ liệu trả về (JSON)} \\ \hline
+\endhead
+\textbf{201 Created} & Thành công & \texttt{\{ "id": 3, "message": "Unit created" \}} \\ \hline
+\end{longtable}
+
+\vskip 0.4cm
+\noindent\rule{\textwidth}{0.3pt}
+\vskip 0.4cm
+
+\subsubsection{Cập nhật đơn vị tính (Update Unit)}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{HTTP Method:} \texttt{PATCH}
+    \item \textbf{Request URL:} \texttt{/api/admin/catalog/units/:unitId}
+    \item \textbf{Mô tả:} Chỉnh sửa đơn vị tính.
+    \item \textbf{Yêu cầu quyền:} Quản trị viên hệ thống (Admin).
+\end{itemize}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+\begin{longtable}{|p{3cm}|p{2.5cm}|c|p{8.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\ \hline
+\endhead
+\texttt{unitId} & Integer & Có & ID đơn vị \\ \hline
+\end{longtable}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+\begin{longtable}{|p{3cm}|p{2.5cm}|c|p{8.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\ \hline
+\endhead
+\texttt{name} & String & Không & Tên mới \\ \hline
+\end{longtable}
+
+\paragraph{Dữ liệu phản hồi (Responses):}
+\begin{longtable}{|p{3.2cm}|p{3.5cm}|p{8.5cm}|}
+\hline
+\textbf{HTTP Status} & \textbf{Trường hợp} & \textbf{Cấu trúc dữ liệu trả về (JSON)} \\ \hline
+\endhead
+\textbf{200 OK} & Thành công & \texttt{\{ "message": "Unit updated" \}} \\ \hline
+\end{longtable}
+
+\vskip 0.4cm
+\noindent\rule{\textwidth}{0.3pt}
+\vskip 0.4cm
+
+\subsubsection{Xóa đơn vị tính (Remove Unit)}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{HTTP Method:} \texttt{DELETE}
+    \item \textbf{Request URL:} \texttt{/api/admin/catalog/units/:unitId}
+    \item \textbf{Mô tả:} Ẩn đơn vị tính khỏi hệ thống.
+    \item \textbf{Yêu cầu quyền:} Quản trị viên hệ thống (Admin).
+\end{itemize}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+\begin{longtable}{|p{3cm}|p{2.5cm}|c|p{8.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\ \hline
+\endhead
+\texttt{unitId} & Integer & Có & ID đơn vị \\ \hline
+\end{longtable}
+
+\paragraph{Dữ liệu phản hồi (Responses):}
+\begin{longtable}{|p{3.2cm}|p{3.5cm}|p{8.5cm}|}
+\hline
+\textbf{HTTP Status} & \textbf{Trường hợp} & \textbf{Cấu trúc dữ liệu trả về (JSON)} \\ \hline
+\endhead
+\textbf{200 OK} & Thành công & \texttt{\{ "message": "Unit archived" \}} \\ \hline
+\end{longtable}
+
+\vskip 0.4cm
+\noindent\rule{\textwidth}{0.3pt}
+\vskip 0.4cm
+
+\subsubsection{Danh sách kiểm duyệt Công thức (Find All Recipes)}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{HTTP Method:} \texttt{GET}
+    \item \textbf{Request URL:} \texttt{/api/admin/recipes}
+    \item \textbf{Mô tả:} Lấy danh sách các công thức do người dùng đóng góp để Admin kiểm duyệt.
+    \item \textbf{Yêu cầu quyền:} Quản trị viên hệ thống (Admin).
+\end{itemize}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+\begin{longtable}{|p{3cm}|p{2.5cm}|c|p{8.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\ \hline
+\endhead
+\texttt{status} & String & Không & Lọc theo trạng thái (\texttt{pending}, \texttt{approved}, \texttt{rejected}) \\ \hline
+\end{longtable}
+
+\paragraph{Dữ liệu phản hồi (Responses):}
+\begin{longtable}{|p{3.2cm}|p{3.5cm}|p{8.5cm}|}
+\hline
+\textbf{HTTP Status} & \textbf{Trường hợp} & \textbf{Cấu trúc dữ liệu trả về (JSON)} \\ \hline
+\endhead
+\textbf{200 OK} & Thành công & \texttt{\{ "data": [...], "total": 5 \}} \\ \hline
+\end{longtable}
+
+\vskip 0.4cm
+\noindent\rule{\textwidth}{0.3pt}
+\vskip 0.4cm
+
+\subsubsection{Phê duyệt công thức (Update Recipe Status)}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{HTTP Method:} \texttt{PATCH}
+    \item \textbf{Request URL:} \texttt{/api/admin/recipes/:recipeId/status}
+    \item \textbf{Mô tả:} Duyệt (Approve) hoặc Từ chối (Reject) bài đăng công thức của người dùng.
+    \item \textbf{Yêu cầu quyền:} Quản trị viên hệ thống (Admin).
+\end{itemize}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+\begin{longtable}{|p{3cm}|p{2.5cm}|c|p{8.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\ \hline
+\endhead
+\texttt{recipeId} & Integer & Có & ID công thức \\ \hline
+\end{longtable}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+\begin{longtable}{|p{3cm}|p{2.5cm}|c|p{8.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\ \hline
+\endhead
+\texttt{status} & String & Có & Trạng thái mới (\texttt{approved}, \texttt{rejected}) \\ \hline
+\texttt{reason} & String & Không & Lý do từ chối (nếu có) \\ \hline
+\end{longtable}
+
+\paragraph{Dữ liệu phản hồi (Responses):}
+\begin{longtable}{|p{3.2cm}|p{3.5cm}|p{8.5cm}|}
+\hline
+\textbf{HTTP Status} & \textbf{Trường hợp} & \textbf{Cấu trúc dữ liệu trả về (JSON)} \\ \hline
+\endhead
+\textbf{200 OK} & Thành công & \texttt{\{ "message": "Status updated successfully" \}} \\ \hline
+\end{longtable}
+
+\vskip 0.4cm
+\noindent\rule{\textwidth}{0.3pt}
+\vskip 0.4cm
+
+\subsubsection{Lấy thống kê hệ thống (Get Stats)}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{HTTP Method:} \texttt{GET}
+    \item \textbf{Request URL:} \texttt{/api/admin/stats}
+    \item \textbf{Mô tả:} Lấy số liệu chung để hiển thị trên Admin Dashboard.
+    \item \textbf{Yêu cầu quyền:} Quản trị viên hệ thống (Admin).
+\end{itemize}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+Không yêu cầu.\\
+
+\paragraph{Dữ liệu phản hồi (Responses):}
+\begin{longtable}{|p{3.2cm}|p{3.5cm}|p{8.5cm}|}
+\hline
+\textbf{HTTP Status} & \textbf{Trường hợp} & \textbf{Cấu trúc dữ liệu trả về (JSON)} \\ \hline
+\endhead
+\textbf{200 OK} & Thành công & \texttt{\{ "total\_users": 1500, "total\_recipes": 350, "active\_families": 400 \}} \\ \hline
+\end{longtable}
+
+\vskip 0.4cm
+\noindent\rule{\textwidth}{0.3pt}
+\vskip 0.4cm
+
+\subsubsection{Lấy danh sách người dùng (Find All Users)}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{HTTP Method:} \texttt{GET}
+    \item \textbf{Request URL:} \texttt{/api/admin/users}
+    \item \textbf{Mô tả:} Phân trang danh sách người dùng đăng ký trên hệ thống.
+    \item \textbf{Yêu cầu quyền:} Quản trị viên hệ thống (Admin).
+\end{itemize}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+\begin{longtable}{|p{3cm}|p{2.5cm}|c|p{8.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\ \hline
+\endhead
+\texttt{search} & String & Không & Tìm kiếm theo email hoặc tên \\ \hline
+\texttt{page} & Integer & Không & Trang hiện tại \\ \hline
+\end{longtable}
+
+\paragraph{Dữ liệu phản hồi (Responses):}
+\begin{longtable}{|p{3.2cm}|p{3.5cm}|p{8.5cm}|}
+\hline
+\textbf{HTTP Status} & \textbf{Trường hợp} & \textbf{Cấu trúc dữ liệu trả về (JSON)} \\ \hline
+\endhead
+\textbf{200 OK} & Thành công & \texttt{\{ "data": [...], "total": 1500 \}} \\ \hline
+\end{longtable}
+
+\vskip 0.4cm
+\noindent\rule{\textwidth}{0.3pt}
+\vskip 0.4cm
+
+\subsubsection{Xem chi tiết người dùng (Find One User)}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{HTTP Method:} \texttt{GET}
+    \item \textbf{Request URL:} \texttt{/api/admin/users/:userId}
+    \item \textbf{Mô tả:} Xem thông tin cá nhân và lịch sử hoạt động của người dùng.
+    \item \textbf{Yêu cầu quyền:} Quản trị viên hệ thống (Admin).
+\end{itemize}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+\begin{longtable}{|p{3cm}|p{2.5cm}|c|p{8.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\ \hline
+\endhead
+\texttt{userId} & Integer & Có & ID người dùng \\ \hline
+\end{longtable}
+
+\paragraph{Dữ liệu phản hồi (Responses):}
+\begin{longtable}{|p{3.2cm}|p{3.5cm}|p{8.5cm}|}
+\hline
+\textbf{HTTP Status} & \textbf{Trường hợp} & \textbf{Cấu trúc dữ liệu trả về (JSON)} \\ \hline
+\endhead
+\textbf{200 OK} & Thành công & \texttt{\{ "id": 1, "email": "user@email.com", "is\_active": true \}} \\ \hline
+\end{longtable}
+
+\vskip 0.4cm
+\noindent\rule{\textwidth}{0.3pt}
+\vskip 0.4cm
+
+\subsubsection{Tạo người dùng mới (Create User)}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{HTTP Method:} \texttt{POST}
+    \item \textbf{Request URL:} \texttt{/api/admin/users}
+    \item \textbf{Mô tả:} Admin cấp phát hoặc tạo tài khoản thủ công cho nhân viên/quản trị viên mới.
+    \item \textbf{Yêu cầu quyền:} Quản trị viên hệ thống (Admin).
+\end{itemize}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+\begin{longtable}{|p{3cm}|p{2.5cm}|c|p{8.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\ \hline
+\endhead
+\texttt{email} & String & Có & Địa chỉ email \\ \hline
+\texttt{password} & String & Có & Mật khẩu khởi tạo \\ \hline
+\texttt{role} & String & Có & Phân quyền (\texttt{admin}, \texttt{user}) \\ \hline
+\end{longtable}
+
+\paragraph{Dữ liệu phản hồi (Responses):}
+\begin{longtable}{|p{3.2cm}|p{3.5cm}|p{8.5cm}|}
+\hline
+\textbf{HTTP Status} & \textbf{Trường hợp} & \textbf{Cấu trúc dữ liệu trả về (JSON)} \\ \hline
+\endhead
+\textbf{201 Created} & Thành công & \texttt{\{ "message": "User created", "user\_id": 200 \}} \\ \hline
+\end{longtable}
+
+\vskip 0.4cm
+\noindent\rule{\textwidth}{0.3pt}
+\vskip 0.4cm
+
+\subsubsection{Cập nhật người dùng (Update User)}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{HTTP Method:} \texttt{PATCH}
+    \item \textbf{Request URL:} \texttt{/api/admin/users/:userId}
+    \item \textbf{Mô tả:} Sửa thông tin hoặc phân quyền của người dùng.
+    \item \textbf{Yêu cầu quyền:} Quản trị viên hệ thống (Admin).
+\end{itemize}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+\begin{longtable}{|p{3cm}|p{2.5cm}|c|p{8.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\ \hline
+\endhead
+\texttt{userId} & Integer & Có & ID người dùng \\ \hline
+\end{longtable}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+\begin{longtable}{|p{3cm}|p{2.5cm}|c|p{8.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\ \hline
+\endhead
+\texttt{role} & String & Không & Quyền mới \\ \hline
+\texttt{is\_active} & Boolean & Không & Khóa/Mở khóa tài khoản \\ \hline
+\end{longtable}
+
+\paragraph{Dữ liệu phản hồi (Responses):}
+\begin{longtable}{|p{3.2cm}|p{3.5cm}|p{8.5cm}|}
+\hline
+\textbf{HTTP Status} & \textbf{Trường hợp} & \textbf{Cấu trúc dữ liệu trả về (JSON)} \\ \hline
+\endhead
+\textbf{200 OK} & Thành công & \texttt{\{ "message": "User updated successfully" \}} \\ \hline
+\end{longtable}
+
+\vskip 0.4cm
+\noindent\rule{\textwidth}{0.3pt}
+\vskip 0.4cm
+
+\subsubsection{Xóa/Khóa người dùng (Remove User)}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{HTTP Method:} \texttt{DELETE}
+    \item \textbf{Request URL:} \texttt{/api/admin/users/:userId}
+    \item \textbf{Mô tả:} Xóa mềm (Soft Delete) hoặc vô hiệu hóa tài khoản vi phạm.
+    \item \textbf{Yêu cầu quyền:} Quản trị viên hệ thống (Admin).
+\end{itemize}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+\begin{longtable}{|p{3cm}|p{2.5cm}|c|p{8.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\ \hline
+\endhead
+\texttt{userId} & Integer & Có & ID người dùng \\ \hline
+\end{longtable}
+
+\paragraph{Dữ liệu phản hồi (Responses):}
+\begin{longtable}{|p{3.2cm}|p{3.5cm}|p{8.5cm}|}
+\hline
+\textbf{HTTP Status} & \textbf{Trường hợp} & \textbf{Cấu trúc dữ liệu trả về (JSON)} \\ \hline
+\endhead
+\textbf{200 OK} & Thành công & \texttt{\{ "message": "User deactivated" \}} \\ \hline
+\end{longtable}
+
+\vskip 0.4cm
+\noindent\rule{\textwidth}{0.3pt}
+\vskip 0.4cm
+
+\subsection{Phân hệ Xác thực (Auth Module)}
+
+\subsubsection{Đăng ký tài khoản (Register)}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{HTTP Method:} \texttt{POST}
+    \item \textbf{Request URL:} \texttt{/api/auth/register}
+    \item \textbf{Mô tả:} Khởi tạo tài khoản người dùng mới trong hệ thống.
+\end{itemize}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+\begin{longtable}{|p{3cm}|p{2.5cm}|c|p{8.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\ \hline
+\endhead
+\texttt{email} & String & Có & Địa chỉ email của người dùng (phải hợp lệ) \\ \hline
+\texttt{password} & String & Có & Mật khẩu (ít nhất 6 ký tự) \\ \hline
+\texttt{first\_name} & String & Có & Tên người dùng \\ \hline
+\texttt{last\_name} & String & Có & Họ người dùng \\ \hline
+\texttt{phone} & String & Không & Số điện thoại liên hệ \\ \hline
+\end{longtable}
+
+\paragraph{Dữ liệu phản hồi (Responses):}
+\begin{longtable}{|p{3.2cm}|p{3.5cm}|p{8.5cm}|}
+\hline
+\textbf{HTTP Status} & \textbf{Trường hợp} & \textbf{Cấu trúc dữ liệu trả về (JSON)} \\ \hline
+\endhead
+\textbf{201 Created} & Thành công & \texttt{\{ "message": "User created successfully", "user\_id": 123 \}} \\ \hline
+\textbf{400 Bad Request} & Lỗi validate dữ liệu & \texttt{\{ "error": "Bad Request", "message": ["email must be an email", ...] \}} \\ \hline
+\textbf{409 Conflict} & Email đã tồn tại & \texttt{\{ "error": "Conflict", "message": "Email already exists" \}} \\ \hline
+\end{longtable}
+
+\vskip 0.4cm
+\noindent\rule{\textwidth}{0.3pt}
+\vskip 0.4cm
+
+\subsubsection{Đăng nhập (Login)}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{HTTP Method:} \texttt{POST}
+    \item \textbf{Request URL:} \texttt{/api/auth/login}
+    \item \textbf{Mô tả:} Xác thực người dùng và cấp phát Access Token (JWT).
+\end{itemize}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+\begin{longtable}{|p{3cm}|p{2.5cm}|c|p{8.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\ \hline
+\endhead
+\texttt{email} & String & Có & Địa chỉ email đăng nhập \\ \hline
+\texttt{password} & String & Có & Mật khẩu đăng nhập \\ \hline
+\end{longtable}
+
+\paragraph{Dữ liệu phản hồi (Responses):}
+\begin{longtable}{|p{3.2cm}|p{3.5cm}|p{8.5cm}|}
+\hline
+\textbf{HTTP Status} & \textbf{Trường hợp} & \textbf{Cấu trúc dữ liệu trả về (JSON)} \\ \hline
+\endhead
+\textbf{200 OK} & Thành công & \texttt{\{ "access\_token": "eyJhb...", "refresh\_token": "def456...", "user": \{ "id": 1, "email": "..." \} \}} \\ \hline
+\textbf{401 Unauthorized} & Sai thông tin & \texttt{\{ "error": "Unauthorized", "message": "Invalid email or password" \}} \\ \hline
+\end{longtable}
+
+\vskip 0.4cm
+\noindent\rule{\textwidth}{0.3pt}
+\vskip 0.4cm
+
+\subsubsection{Làm mới Token (Refresh Token)}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{HTTP Method:} \texttt{POST}
+    \item \textbf{Request URL:} \texttt{/api/auth/refresh}
+    \item \textbf{Mô tả:} Cấp lại Access Token mới khi token cũ hết hạn dựa trên Refresh Token.
+\end{itemize}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+\begin{longtable}{|p{3cm}|p{2.5cm}|c|p{8.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\ \hline
+\endhead
+\texttt{refresh\_token} & String & Có & Token làm mới phiên bản hợp lệ \\ \hline
+\end{longtable}
+
+\paragraph{Dữ liệu phản hồi (Responses):}
+\begin{longtable}{|p{3.2cm}|p{3.5cm}|p{8.5cm}|}
+\hline
+\textbf{HTTP Status} & \textbf{Trường hợp} & \textbf{Cấu trúc dữ liệu trả về (JSON)} \\ \hline
+\endhead
+\textbf{200 OK} & Thành công & \texttt{\{ "access\_token": "eyJhb...", "refresh\_token": "new\_def456..." \}} \\ \hline
+\textbf{401 Unauthorized} & Token không hợp lệ & \texttt{\{ "error": "Unauthorized", "message": "Refresh token expired or invalid" \}} \\ \hline
+\end{longtable}
+
+\vskip 0.4cm
+\noindent\rule{\textwidth}{0.3pt}
+\vskip 0.4cm
+
+\subsubsection{Đăng xuất (Logout)}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{HTTP Method:} \texttt{POST}
+    \item \textbf{Request URL:} \texttt{/api/auth/logout}
+    \item \textbf{Mô tả:} Thu hồi Refresh Token, kết thúc phiên làm việc của người dùng.
+    \item \textbf{Headers:} Bắt buộc có \texttt{Authorization: Bearer \textless{}access\_token\textgreater{}}
+\end{itemize}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+Không yêu cầu.\\
+
+\paragraph{Dữ liệu phản hồi (Responses):}
+\begin{longtable}{|p{3.2cm}|p{3.5cm}|p{8.5cm}|}
+\hline
+\textbf{HTTP Status} & \textbf{Trường hợp} & \textbf{Cấu trúc dữ liệu trả về (JSON)} \\ \hline
+\endhead
+\textbf{200 OK} & Thành công & \texttt{\{ "message": "Successfully logged out" \}} \\ \hline
+\textbf{401 Unauthorized} & Không có token & \texttt{\{ "error": "Unauthorized" \}} \\ \hline
+\end{longtable}
+
+\vskip 0.4cm
+\noindent\rule{\textwidth}{0.3pt}
+\vskip 0.4cm
+
+\subsubsection{Quên mật khẩu (Forgot Password)}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{HTTP Method:} \texttt{POST}
+    \item \textbf{Request URL:} \texttt{/api/auth/forgot-password}
+    \item \textbf{Mô tả:} Yêu cầu hệ thống gửi email chứa liên kết/OTP để khôi phục mật khẩu.
+\end{itemize}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+\begin{longtable}{|p{3cm}|p{2.5cm}|c|p{8.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\ \hline
+\endhead
+\texttt{email} & String & Có & Email tài khoản cần khôi phục \\ \hline
+\end{longtable}
+
+\paragraph{Dữ liệu phản hồi (Responses):}
+\begin{longtable}{|p{3.2cm}|p{3.5cm}|p{8.5cm}|}
+\hline
+\textbf{HTTP Status} & \textbf{Trường hợp} & \textbf{Cấu trúc dữ liệu trả về (JSON)} \\ \hline
+\endhead
+\textbf{200 OK} & Thành công & \texttt{\{ "message": "Password reset email sent" \}} \\ \hline
+\textbf{404 Not Found} & Không tìm thấy & \texttt{\{ "error": "Not Found", "message": "User with this email does not exist" \}} \\ \hline
+\end{longtable}
+
+\vskip 0.4cm
+\noindent\rule{\textwidth}{0.3pt}
+\vskip 0.4cm
+
+\subsubsection{Đặt lại mật khẩu (Reset Password)}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{HTTP Method:} \texttt{POST}
+    \item \textbf{Request URL:} \texttt{/api/auth/reset-password}
+    \item \textbf{Mô tả:} Đặt lại mật khẩu mới thông qua token khôi phục được gửi qua email.
+\end{itemize}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+\begin{longtable}{|p{3cm}|p{2.5cm}|c|p{8.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\ \hline
+\endhead
+\texttt{token} & String & Có & Mã xác thực khôi phục mật khẩu \\ \hline
+\texttt{new\_password} & String & Có & Mật khẩu mới \\ \hline
+\end{longtable}
+
+\paragraph{Dữ liệu phản hồi (Responses):}
+\begin{longtable}{|p{3.2cm}|p{3.5cm}|p{8.5cm}|}
+\hline
+\textbf{HTTP Status} & \textbf{Trường hợp} & \textbf{Cấu trúc dữ liệu trả về (JSON)} \\ \hline
+\endhead
+\textbf{200 OK} & Thành công & \texttt{\{ "message": "Password has been successfully reset" \}} \\ \hline
+\textbf{400 Bad Request} & Lỗi dữ liệu & \texttt{\{ "error": "Bad Request", "message": "Token expired or invalid" \}} \\ \hline
+\end{longtable}
+
+\vskip 0.4cm
+\noindent\rule{\textwidth}{0.3pt}
+\vskip 0.4cm
+
+\subsubsection{Gửi lại mã xác thực Email (Send Verification)}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{HTTP Method:} \texttt{POST}
+    \item \textbf{Request URL:} \texttt{/api/auth/send-verification}
+    \item \textbf{Mô tả:} Gửi lại mã OTP hoặc liên kết để xác thực địa chỉ email.
+    \item \textbf{Headers:} Bắt buộc có \texttt{Authorization: Bearer \textless{}access\_token\textgreater{}}
+\end{itemize}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+Không yêu cầu.\\
+
+\paragraph{Dữ liệu phản hồi (Responses):}
+\begin{longtable}{|p{3.2cm}|p{3.5cm}|p{8.5cm}|}
+\hline
+\textbf{HTTP Status} & \textbf{Trường hợp} & \textbf{Cấu trúc dữ liệu trả về (JSON)} \\ \hline
+\endhead
+\textbf{200 OK} & Thành công & \texttt{\{ "message": "Verification email sent" \}} \\ \hline
+\end{longtable}
+
+\vskip 0.4cm
+\noindent\rule{\textwidth}{0.3pt}
+\vskip 0.4cm
+
+\subsubsection{Xác thực Email (Verify Email)}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{HTTP Method:} \texttt{POST}
+    \item \textbf{Request URL:} \texttt{/api/auth/verify-email}
+    \item \textbf{Mô tả:} Xác thực tài khoản người dùng bằng token nhận được từ email.
+\end{itemize}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+\begin{longtable}{|p{3cm}|p{2.5cm}|c|p{8.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\ \hline
+\endhead
+\texttt{token} & String & Có & Mã token xác thực email \\ \hline
+\end{longtable}
+
+\paragraph{Dữ liệu phản hồi (Responses):}
+\begin{longtable}{|p{3.2cm}|p{3.5cm}|p{8.5cm}|}
+\hline
+\textbf{HTTP Status} & \textbf{Trường hợp} & \textbf{Cấu trúc dữ liệu trả về (JSON)} \\ \hline
+\endhead
+\textbf{200 OK} & Thành công & \texttt{\{ "message": "Email verified successfully" \}} \\ \hline
+\textbf{400 Bad Request} & Sai mã & \texttt{\{ "error": "Bad Request", "message": "Invalid or expired verification token" \}} \\ \hline
+\end{longtable}
+
+\vskip 0.4cm
+\noindent\rule{\textwidth}{0.3pt}
+\vskip 0.4cm
+
+\subsection{Phân hệ Danh mục Thực phẩm (Catalog Module)}
+
+\subsubsection{Lấy danh sách danh mục (Find All Categories)}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{HTTP Method:} \texttt{GET}
+    \item \textbf{Request URL:} \texttt{/api/catalog/categories}
+    \item \textbf{Mô tả:} Lấy danh sách các danh mục thực phẩm đang hoạt động.
+    \item \textbf{Yêu cầu quyền:} Không yêu cầu (Public) hoặc Người dùng đã đăng nhập (User).
+\end{itemize}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+\begin{longtable}{|p{3cm}|p{2.5cm}|c|p{8.5cm}|}
+\hline
+\textbf{Tham số (Query)} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\ \hline
+\endhead
+\texttt{search} & String & Không & Từ khóa tìm kiếm tên danh mục \\ \hline
+\end{longtable}
+
+\paragraph{Dữ liệu phản hồi (Responses):}
+\begin{longtable}{|p{3.2cm}|p{3.5cm}|p{8.5cm}|}
+\hline
+\textbf{HTTP Status} & \textbf{Trường hợp} & \textbf{Cấu trúc dữ liệu trả về (JSON)} \\ \hline
+\endhead
+\textbf{200 OK} & Thành công & \texttt{[ \{ "id": 1, "name": "Thịt/Hải sản" \}, \{ "id": 2, "name": "Rau củ" \} ]} \\ \hline
+\end{longtable}
+
+\vskip 0.4cm
+\noindent\rule{\textwidth}{0.3pt}
+\vskip 0.4cm
+
+\subsubsection{Lấy danh sách thực phẩm (Find All Foods)}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{HTTP Method:} \texttt{GET}
+    \item \textbf{Request URL:} \texttt{/api/catalog/foods}
+    \item \textbf{Mô tả:} Lấy danh sách các loại thực phẩm chuẩn từ hệ thống.
+    \item \textbf{Yêu cầu quyền:} Không yêu cầu (Public) hoặc Người dùng đã đăng nhập (User).
+\end{itemize}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+\begin{longtable}{|p{3cm}|p{2.5cm}|c|p{8.5cm}|}
+\hline
+\textbf{Tham số (Query)} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\ \hline
+\endhead
+\texttt{category\_id} & Integer & Không & Lọc thực phẩm theo danh mục \\ \hline
+\texttt{search} & String & Không & Từ khóa tìm kiếm tên thực phẩm \\ \hline
+\end{longtable}
+
+\paragraph{Dữ liệu phản hồi (Responses):}
+\begin{longtable}{|p{3.2cm}|p{3.5cm}|p{8.5cm}|}
+\hline
+\textbf{HTTP Status} & \textbf{Trường hợp} & \textbf{Cấu trúc dữ liệu trả về (JSON)} \\ \hline
+\endhead
+\textbf{200 OK} & Thành công & \texttt{[ \{ "id": 10, "name": "Thịt lợn", "category\_id": 1, "default\_unit": "kg" \} ]} \\ \hline
+\end{longtable}
+
+\vskip 0.4cm
+\noindent\rule{\textwidth}{0.3pt}
+\vskip 0.4cm
+
+\subsubsection{Lấy danh sách đơn vị tính (Find All Units)}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{HTTP Method:} \texttt{GET}
+    \item \textbf{Request URL:} \texttt{/api/catalog/units}
+    \item \textbf{Mô tả:} Lấy danh sách các đơn vị tính được hỗ trợ (kg, gram, quả, chai...).
+    \item \textbf{Yêu cầu quyền:} Không yêu cầu (Public) hoặc Người dùng đã đăng nhập (User).
+\end{itemize}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+Không yêu cầu.\\
+
+\paragraph{Dữ liệu phản hồi (Responses):}
+\begin{longtable}{|p{3.2cm}|p{3.5cm}|p{8.5cm}|}
+\hline
+\textbf{HTTP Status} & \textbf{Trường hợp} & \textbf{Cấu trúc dữ liệu trả về (JSON)} \\ \hline
+\endhead
+\textbf{200 OK} & Thành công & \texttt{[ \{ "id": 1, "name": "kg", "symbol": "kg" \}, \{ "id": 2, "name": "gram", "symbol": "g" \} ]} \\ \hline
+\end{longtable}
+
+\vskip 0.4cm
+\noindent\rule{\textwidth}{0.3pt}
+\vskip 0.4cm
+
+\subsection{Phân hệ Nhóm Gia đình (Family Module)}
+
+\subsubsection{Lấy thông tin gia đình hiện tại (Get Current Family)}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{HTTP Method:} \texttt{GET}
+    \item \textbf{Request URL:} \texttt{/api/family}
+    \item \textbf{Mô tả:} Lấy thông tin của gia đình mà người dùng đang tham gia (bao gồm danh sách thành viên).
+    \item \textbf{Yêu cầu quyền:} Người dùng đã đăng nhập (User).
+\end{itemize}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+Không yêu cầu.\\
+
+\paragraph{Dữ liệu phản hồi (Responses):}
+\begin{longtable}{|p{3.2cm}|p{3.5cm}|p{8.5cm}|}
+\hline
+\textbf{HTTP Status} & \textbf{Trường hợp} & \textbf{Cấu trúc dữ liệu trả về (JSON)} \\ \hline
+\endhead
+\textbf{200 OK} & Thành công & \texttt{\{ "id": 1, "name": "Gia đình John", "members": [...] \}} \\ \hline
+\textbf{404 Not Found} & Chưa có gia đình & \texttt{\{ "error": "Not Found", "message": "User does not belong to any family" \}} \\ \hline
+\end{longtable}
+
+\vskip 0.4cm
+\noindent\rule{\textwidth}{0.3pt}
+\vskip 0.4cm
+
+\subsubsection{Tạo gia đình mới (Create Family)}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{HTTP Method:} \texttt{POST}
+    \item \textbf{Request URL:} \texttt{/api/family}
+    \item \textbf{Mô tả:} Tạo một gia đình mới và gán người dùng hiện tại làm Chủ gia đình (Owner/Admin).
+    \item \textbf{Yêu cầu quyền:} Người dùng đã đăng nhập và chưa tham gia gia đình nào (User).
+\end{itemize}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+\begin{longtable}{|p{3cm}|p{2.5cm}|c|p{8.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\ \hline
+\endhead
+\texttt{name} & String & Có & Tên của gia đình (VD: Nhà của John) \\ \hline
+\end{longtable}
+
+\paragraph{Dữ liệu phản hồi (Responses):}
+\begin{longtable}{|p{3.2cm}|p{3.5cm}|p{8.5cm}|}
+\hline
+\textbf{HTTP Status} & \textbf{Trường hợp} & \textbf{Cấu trúc dữ liệu trả về (JSON)} \\ \hline
+\endhead
+\textbf{201 Created} & Thành công & \texttt{\{ "id": 1, "name": "Nhà của John", "role": "admin" \}} \\ \hline
+\textbf{400 Bad Request} & Đã có gia đình & \texttt{\{ "error": "Bad Request", "message": "User already in a family" \}} \\ \hline
+\end{longtable}
+
+\vskip 0.4cm
+\noindent\rule{\textwidth}{0.3pt}
+\vskip 0.4cm
+
+\subsubsection{Tạo mã mời tham gia (Create Invite)}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{HTTP Method:} \texttt{POST}
+    \item \textbf{Request URL:} \texttt{/api/family/invite}
+    \item \textbf{Mô tả:} Tạo một mã mời (Invite Code) hoặc Link mời để thêm thành viên mới vào gia đình.
+    \item \textbf{Yêu cầu quyền:} Quản trị viên của gia đình (Family Admin).
+\end{itemize}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+\begin{longtable}{|p{3cm}|p{2.5cm}|c|p{8.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\ \hline
+\endhead
+\texttt{expires\_in\_hours} & Integer & Không & Thời gian hết hạn của mã mời (Mặc định 24h) \\ \hline
+\end{longtable}
+
+\paragraph{Dữ liệu phản hồi (Responses):}
+\begin{longtable}{|p{3.2cm}|p{3.5cm}|p{8.5cm}|}
+\hline
+\textbf{HTTP Status} & \textbf{Trường hợp} & \textbf{Cấu trúc dữ liệu trả về (JSON)} \\ \hline
+\endhead
+\textbf{201 Created} & Thành công & \texttt{\{ "invite\_code": "ABC123XYZ", "expires\_at": "2026-06-13T..." \}} \\ \hline
+\textbf{403 Forbidden} & Không có quyền & \texttt{\{ "error": "Forbidden", "message": "Only admins can invite" \}} \\ \hline
+\end{longtable}
+
+\vskip 0.4cm
+\noindent\rule{\textwidth}{0.3pt}
+\vskip 0.4cm
+
+\subsubsection{Tham gia gia đình (Join Family)}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{HTTP Method:} \texttt{POST}
+    \item \textbf{Request URL:} \texttt{/api/family/join}
+    \item \textbf{Mô tả:} Người dùng tham gia vào một gia đình thông qua mã mời.
+    \item \textbf{Yêu cầu quyền:} Người dùng đã đăng nhập và chưa tham gia gia đình nào (User).
+\end{itemize}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+\begin{longtable}{|p{3cm}|p{2.5cm}|c|p{8.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\ \hline
+\endhead
+\texttt{invite\_code} & String & Có & Mã mời hợp lệ \\ \hline
+\end{longtable}
+
+\paragraph{Dữ liệu phản hồi (Responses):}
+\begin{longtable}{|p{3.2cm}|p{3.5cm}|p{8.5cm}|}
+\hline
+\textbf{HTTP Status} & \textbf{Trường hợp} & \textbf{Cấu trúc dữ liệu trả về (JSON)} \\ \hline
+\endhead
+\textbf{200 OK} & Thành công & \texttt{\{ "message": "Joined family successfully", "family": \{...\} \}} \\ \hline
+\textbf{400 Bad Request} & Mã không hợp lệ & \texttt{\{ "error": "Bad Request", "message": "Invalid or expired invite code" \}} \\ \hline
+\end{longtable}
+
+\vskip 0.4cm
+\noindent\rule{\textwidth}{0.3pt}
+\vskip 0.4cm
+
+\subsubsection{Cập nhật quyền thành viên (Update Member Permissions)}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{HTTP Method:} \texttt{PATCH}
+    \item \textbf{Request URL:} \texttt{/api/family/members/:memberId/permissions}
+    \item \textbf{Mô tả:} Thay đổi vai trò (Role) hoặc quyền của một thành viên trong gia đình.
+    \item \textbf{Yêu cầu quyền:} Quản trị viên của gia đình (Family Admin).
+\end{itemize}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+\begin{longtable}{|p{3cm}|p{2.5cm}|c|p{8.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\ \hline
+\endhead
+\texttt{memberId} & Integer & Có & ID của thành viên cần cập nhật \\ \hline
+\end{longtable}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+\begin{longtable}{|p{3cm}|p{2.5cm}|c|p{8.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\ \hline
+\endhead
+\texttt{role} & String & Có & Vai trò mới (Ví dụ: \texttt{admin}, \texttt{member}) \\ \hline
+\end{longtable}
+
+\paragraph{Dữ liệu phản hồi (Responses):}
+\begin{longtable}{|p{3.2cm}|p{3.5cm}|p{8.5cm}|}
+\hline
+\textbf{HTTP Status} & \textbf{Trường hợp} & \textbf{Cấu trúc dữ liệu trả về (JSON)} \\ \hline
+\endhead
+\textbf{200 OK} & Thành công & \texttt{\{ "message": "Permissions updated successfully" \}} \\ \hline
+\textbf{403 Forbidden} & Không có quyền & \texttt{\{ "error": "Forbidden", "message": "Cannot modify owner role" \}} \\ \hline
+\end{longtable}
+
+\vskip 0.4cm
+\noindent\rule{\textwidth}{0.3pt}
+\vskip 0.4cm
+
+\subsubsection{Xóa thành viên khỏi gia đình (Remove Member)}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{HTTP Method:} \texttt{DELETE}
+    \item \textbf{Request URL:} \texttt{/api/family/members/:memberId}
+    \item \textbf{Mô tả:} Đuổi một thành viên khỏi gia đình hoặc tự rời khỏi gia đình (Rời nhóm).
+    \item \textbf{Yêu cầu quyền:} Quản trị viên gia đình (để đuổi người khác) hoặc Chính thành viên đó (để tự rời đi).
+\end{itemize}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+\begin{longtable}{|p{3cm}|p{2.5cm}|c|p{8.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\ \hline
+\endhead
+\texttt{memberId} & Integer & Có & ID của thành viên cần xóa \\ \hline
+\end{longtable}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+Không yêu cầu.\\
+
+\paragraph{Dữ liệu phản hồi (Responses):}
+\begin{longtable}{|p{3.2cm}|p{3.5cm}|p{8.5cm}|}
+\hline
+\textbf{HTTP Status} & \textbf{Trường hợp} & \textbf{Cấu trúc dữ liệu trả về (JSON)} \\ \hline
+\endhead
+\textbf{200 OK} & Thành công & \texttt{\{ "message": "Member removed successfully" \}} \\ \hline
+\textbf{403 Forbidden} & Không có quyền & \texttt{\{ "error": "Forbidden" \}} \\ \hline
+\end{longtable}
+
+\vskip 0.4cm
+\noindent\rule{\textwidth}{0.3pt}
+\vskip 0.4cm
+
+\subsection{Phân hệ Kiểm tra Trạng thái (Health Check Module)}
+
+\subsubsection{Kiểm tra trạng thái hệ thống (Get Health)}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{HTTP Method:} \texttt{GET}
+    \item \textbf{Request URL:} \texttt{/api/health}
+    \item \textbf{Mô tả:} Endpoint dùng để kiểm tra dịch vụ Backend có đang hoạt động bình thường hay không. Thường dùng cho các hệ thống Load Balancer hoặc giám sát (Monitoring).
+    \item \textbf{Yêu cầu quyền:} Không yêu cầu (Public).
+\end{itemize}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+Không yêu cầu.\\
+
+\paragraph{Dữ liệu phản hồi (Responses):}
+\begin{longtable}{|p{3.2cm}|p{3.5cm}|p{8.5cm}|}
+\hline
+\textbf{HTTP Status} & \textbf{Trường hợp} & \textbf{Cấu trúc dữ liệu trả về (JSON)} \\ \hline
+\endhead
+\textbf{200 OK} & Thành công & \texttt{\{ "status": "ok", "timestamp": "2026-06-12T14:30:00Z" \}} \\ \hline
+\textbf{500 Internal Server Error} & Hệ thống lỗi & \texttt{\{ "status": "error", "message": "Database connection failed" \}} \\ \hline
+\end{longtable}
+
+\vskip 0.4cm
+\noindent\rule{\textwidth}{0.3pt}
+\vskip 0.4cm
+
+\subsection{Phân hệ Kế hoạch Ăn uống (Meals Module)}
+
+\subsubsection{Lấy danh sách thực đơn (Find All)}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{HTTP Method:} \texttt{GET}
+    \item \textbf{Request URL:} \texttt{/api/meals}
+    \item \textbf{Mô tả:} Lấy danh sách kế hoạch nấu ăn (thực đơn) trong một khoảng thời gian nhất định của gia đình.
+    \item \textbf{Yêu cầu quyền:} Thành viên gia đình (Family Member).
+\end{itemize}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+\begin{longtable}{|p{3cm}|p{2.5cm}|c|p{8.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\ \hline
+\endhead
+\texttt{start\_date} & String (ISO) & Có & Ngày bắt đầu \\ \hline
+\texttt{end\_date} & String (ISO) & Có & Ngày kết thúc \\ \hline
+\end{longtable}
+
+\paragraph{Dữ liệu phản hồi (Responses):}
+\begin{longtable}{|p{3.2cm}|p{3.5cm}|p{8.5cm}|}
+\hline
+\textbf{HTTP Status} & \textbf{Trường hợp} & \textbf{Cấu trúc dữ liệu trả về (JSON)} \\ \hline
+\endhead
+\textbf{200 OK} & Thành công & \texttt{[\{ "id": 1, "recipe\_id": 5, "planned\_date": "2026-06-12", "meal\_type": "dinner" \}]} \\ \hline
+\end{longtable}
+
+\vskip 0.4cm
+\noindent\rule{\textwidth}{0.3pt}
+\vskip 0.4cm
+
+\subsubsection{Tạo thực đơn mới (Create)}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{HTTP Method:} \texttt{POST}
+    \item \textbf{Request URL:} \texttt{/api/meals}
+    \item \textbf{Mô tả:} Thêm một món ăn vào lịch nấu ăn của gia đình.
+    \item \textbf{Yêu cầu quyền:} Thành viên gia đình (Family Member).
+\end{itemize}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+\begin{longtable}{|p{3cm}|p{2.5cm}|c|p{8.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\ \hline
+\endhead
+\texttt{recipe\_id} & Integer & Có & ID của công thức nấu ăn \\ \hline
+\texttt{planned\_date} & String (ISO) & Có & Ngày dự kiến nấu \\ \hline
+\texttt{meal\_type} & String & Có & Buổi nấu (Sáng, trưa, tối) \\ \hline
+\end{longtable}
+
+\paragraph{Dữ liệu phản hồi (Responses):}
+\begin{longtable}{|p{3.2cm}|p{3.5cm}|p{8.5cm}|}
+\hline
+\textbf{HTTP Status} & \textbf{Trường hợp} & \textbf{Cấu trúc dữ liệu trả về (JSON)} \\ \hline
+\endhead
+\textbf{201 Created} & Thành công & \texttt{\{ "id": 10, "recipe\_id": 5, "planned\_date": "...", "meal\_type": "dinner" \}} \\ \hline
+\end{longtable}
+
+\vskip 0.4cm
+\noindent\rule{\textwidth}{0.3pt}
+\vskip 0.4cm
+
+\subsubsection{Lấy chi tiết một thực đơn (Find One)}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{HTTP Method:} \texttt{GET}
+    \item \textbf{Request URL:} \texttt{/api/meals/:mealId}
+    \item \textbf{Mô tả:} Xem chi tiết thông tin của một kế hoạch nấu ăn.
+    \item \textbf{Yêu cầu quyền:} Thành viên gia đình (Family Member).
+\end{itemize}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+\begin{longtable}{|p{3cm}|p{2.5cm}|c|p{8.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\ \hline
+\endhead
+\texttt{mealId} & Integer & Có & ID của thực đơn \\ \hline
+\end{longtable}
+
+\paragraph{Dữ liệu phản hồi (Responses):}
+\begin{longtable}{|p{3.2cm}|p{3.5cm}|p{8.5cm}|}
+\hline
+\textbf{HTTP Status} & \textbf{Trường hợp} & \textbf{Cấu trúc dữ liệu trả về (JSON)} \\ \hline
+\endhead
+\textbf{200 OK} & Thành công & \texttt{\{ "id": 10, "recipe": \{...\}, "missing\_ingredients": [...] \}} \\ \hline
+\end{longtable}
+
+\vskip 0.4cm
+\noindent\rule{\textwidth}{0.3pt}
+\vskip 0.4cm
+
+\subsubsection{Kiểm tra nguyên liệu thiếu (Get Missing Ingredients)}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{HTTP Method:} \texttt{GET}
+    \item \textbf{Request URL:} \texttt{/api/meals/:mealId/missing-ingredients}
+    \item \textbf{Mô tả:} So sánh công thức của thực đơn với tủ lạnh (Pantry) để tìm nguyên liệu còn thiếu.
+    \item \textbf{Yêu cầu quyền:} Thành viên gia đình (Family Member).
+\end{itemize}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+\begin{longtable}{|p{3cm}|p{2.5cm}|c|p{8.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\ \hline
+\endhead
+\texttt{mealId} & Integer & Có & ID của thực đơn \\ \hline
+\end{longtable}
+
+\paragraph{Dữ liệu phản hồi (Responses):}
+\begin{longtable}{|p{3.2cm}|p{3.5cm}|p{8.5cm}|}
+\hline
+\textbf{HTTP Status} & \textbf{Trường hợp} & \textbf{Cấu trúc dữ liệu trả về (JSON)} \\ \hline
+\endhead
+\textbf{200 OK} & Thành công & \texttt{[\{ "food\_id": 3, "name": "Cà chua", "needed": 2, "unit": "quả" \}]} \\ \hline
+\end{longtable}
+
+\vskip 0.4cm
+\noindent\rule{\textwidth}{0.3pt}
+\vskip 0.4cm
+
+\subsubsection{Tạo danh sách mua sắm (Generate Shopping List)}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{HTTP Method:} \texttt{POST}
+    \item \textbf{Request URL:} \texttt{/api/meals/:mealId/generate-shopping-list}
+    \item \textbf{Mô tả:} Tự động tạo danh sách đi chợ từ những nguyên liệu còn thiếu của thực đơn này.
+    \item \textbf{Yêu cầu quyền:} Thành viên gia đình (Family Member).
+\end{itemize}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+\begin{longtable}{|p{3cm}|p{2.5cm}|c|p{8.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\ \hline
+\endhead
+\texttt{mealId} & Integer & Có & ID của thực đơn \\ \hline
+\end{longtable}
+
+\paragraph{Dữ liệu phản hồi (Responses):}
+\begin{longtable}{|p{3.2cm}|p{3.5cm}|p{8.5cm}|}
+\hline
+\textbf{HTTP Status} & \textbf{Trường hợp} & \textbf{Cấu trúc dữ liệu trả về (JSON)} \\ \hline
+\endhead
+\textbf{201 Created} & Thành công & \texttt{\{ "list\_id": 5, "items\_added": 3 \}} \\ \hline
+\end{longtable}
+
+\vskip 0.4cm
+\noindent\rule{\textwidth}{0.3pt}
+\vskip 0.4cm
+
+\subsubsection{Cập nhật thực đơn (Update)}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{HTTP Method:} \texttt{PATCH}
+    \item \textbf{Request URL:} \texttt{/api/meals/:mealId}
+    \item \textbf{Mô tả:} Thay đổi ngày nấu hoặc buổi nấu của thực đơn.
+    \item \textbf{Yêu cầu quyền:} Thành viên gia đình (Family Member).
+\end{itemize}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+\begin{longtable}{|p{3cm}|p{2.5cm}|c|p{8.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\ \hline
+\endhead
+\texttt{mealId} & Integer & Có & ID của thực đơn \\ \hline
+\end{longtable}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+\begin{longtable}{|p{3cm}|p{2.5cm}|c|p{8.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\ \hline
+\endhead
+\texttt{planned\_date} & String (ISO) & Không & Ngày dự kiến nấu mới \\ \hline
+\texttt{meal\_type} & String & Không & Buổi nấu mới \\ \hline
+\end{longtable}
+
+\paragraph{Dữ liệu phản hồi (Responses):}
+\begin{longtable}{|p{3.2cm}|p{3.5cm}|p{8.5cm}|}
+\hline
+\textbf{HTTP Status} & \textbf{Trường hợp} & \textbf{Cấu trúc dữ liệu trả về (JSON)} \\ \hline
+\endhead
+\textbf{200 OK} & Thành công & \texttt{\{ "message": "Meal updated" \}} \\ \hline
+\end{longtable}
+
+\vskip 0.4cm
+\noindent\rule{\textwidth}{0.3pt}
+\vskip 0.4cm
+
+\subsubsection{Xóa thực đơn (Remove)}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{HTTP Method:} \texttt{DELETE}
+    \item \textbf{Request URL:} \texttt{/api/meals/:mealId}
+    \item \textbf{Mô tả:} Hủy bỏ kế hoạch nấu ăn khỏi lịch.
+    \item \textbf{Yêu cầu quyền:} Thành viên gia đình (Family Member).
+\end{itemize}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+\begin{longtable}{|p{3cm}|p{2.5cm}|c|p{8.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\ \hline
+\endhead
+\texttt{mealId} & Integer & Có & ID của thực đơn \\ \hline
+\end{longtable}
+
+\paragraph{Dữ liệu phản hồi (Responses):}
+\begin{longtable}{|p{3.2cm}|p{3.5cm}|p{8.5cm}|}
+\hline
+\textbf{HTTP Status} & \textbf{Trường hợp} & \textbf{Cấu trúc dữ liệu trả về (JSON)} \\ \hline
+\endhead
+\textbf{200 OK} & Thành công & \texttt{\{ "message": "Meal removed successfully" \}} \\ \hline
+\end{longtable}
+
+\vskip 0.4cm
+\noindent\rule{\textwidth}{0.3pt}
+\vskip 0.4cm
+
+\subsection{Phân hệ Thông báo (Notifications Module)}
+
+\subsubsection{Lấy danh sách thông báo (Find All)}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{HTTP Method:} \texttt{GET}
+    \item \textbf{Request URL:} \texttt{/api/notifications}
+    \item \textbf{Mô tả:} Lấy danh sách thông báo của người dùng hiện tại, sắp xếp theo thời gian mới nhất.
+    \item \textbf{Yêu cầu quyền:} Người dùng đã đăng nhập (User).
+\end{itemize}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+\begin{longtable}{|p{3cm}|p{2.5cm}|c|p{8.5cm}|}
+\hline
+\textbf{Tham số (Query)} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\ \hline
+\endhead
+\texttt{page} & Integer & Không & Trang hiện tại (Mặc định: 1) \\ \hline
+\texttt{limit} & Integer & Không & Số lượng mỗi trang (Mặc định: 20) \\ \hline
+\texttt{unread\_only} & Boolean & Không & Chỉ lấy thông báo chưa đọc \\ \hline
+\end{longtable}
+
+\paragraph{Dữ liệu phản hồi (Responses):}
+\begin{longtable}{|p{3.2cm}|p{3.5cm}|p{8.5cm}|}
+\hline
+\textbf{HTTP Status} & \textbf{Trường hợp} & \textbf{Cấu trúc dữ liệu trả về (JSON)} \\ \hline
+\endhead
+\textbf{200 OK} & Thành công & \texttt{\{ "data": [\{ "id": 1, "message": "Thực phẩm sắp hết hạn", "is\_read": false \}], "total": 1 \}} \\ \hline
+\textbf{401 Unauthorized} & Chưa đăng nhập & \texttt{\{ "error": "Unauthorized" \}} \\ \hline
+\end{longtable}
+
+\vskip 0.4cm
+\noindent\rule{\textwidth}{0.3pt}
+\vskip 0.4cm
+
+\subsubsection{Đánh dấu đã đọc một thông báo (Mark As Read)}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{HTTP Method:} \texttt{PATCH}
+    \item \textbf{Request URL:} \texttt{/api/notifications/:notificationId/read}
+    \item \textbf{Mô tả:} Đánh dấu một thông báo cụ thể là đã đọc.
+    \item \textbf{Yêu cầu quyền:} Người dùng đã đăng nhập và là chủ sở hữu của thông báo (User).
+\end{itemize}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+\begin{longtable}{|p{3cm}|p{2.5cm}|c|p{8.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\ \hline
+\endhead
+\texttt{notificationId} & Integer & Có & ID của thông báo \\ \hline
+\end{longtable}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+Không yêu cầu.\\
+
+\paragraph{Dữ liệu phản hồi (Responses):}
+\begin{longtable}{|p{3.2cm}|p{3.5cm}|p{8.5cm}|}
+\hline
+\textbf{HTTP Status} & \textbf{Trường hợp} & \textbf{Cấu trúc dữ liệu trả về (JSON)} \\ \hline
+\endhead
+\textbf{200 OK} & Thành công & \texttt{\{ "message": "Notification marked as read" \}} \\ \hline
+\textbf{404 Not Found} & Không tìm thấy & \texttt{\{ "error": "Not Found", "message": "Notification not found" \}} \\ \hline
+\end{longtable}
+
+\vskip 0.4cm
+\noindent\rule{\textwidth}{0.3pt}
+\vskip 0.4cm
+
+\subsubsection{Đánh dấu đã đọc tất cả (Mark All As Read)}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{HTTP Method:} \texttt{PATCH}
+    \item \textbf{Request URL:} \texttt{/api/notifications/read-all}
+    \item \textbf{Mô tả:} Đánh dấu tất cả thông báo chưa đọc của người dùng thành đã đọc.
+    \item \textbf{Yêu cầu quyền:} Người dùng đã đăng nhập (User).
+\end{itemize}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+Không yêu cầu tham số.
+\begin{itemize}[leftmargin=*]
+    \item \textit{Request Body}*
+\end{itemize}
+
+Không yêu cầu payload.
+
+\paragraph{Dữ liệu phản hồi (Responses):}
+\begin{longtable}{|p{3.2cm}|p{3.5cm}|p{8.5cm}|}
+\hline
+\textbf{HTTP Status} & \textbf{Trường hợp} & \textbf{Cấu trúc dữ liệu trả về (JSON)} \\ \hline
+\endhead
+\textbf{200 OK} & Thành công & \texttt{\{ "message": "All notifications marked as read", "updated\_count": 5 \}} \\ \hline
+\end{longtable}
+
+\vskip 0.4cm
+\noindent\rule{\textwidth}{0.3pt}
+\vskip 0.4cm
+
+\subsection{Phân hệ Kho Thực phẩm (Pantry Module)}
+
+\subsubsection{Lấy danh sách thực phẩm trong tủ (Find All)}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{HTTP Method:} \texttt{GET}
+    \item \textbf{Request URL:} \texttt{/api/pantry}
+    \item \textbf{Mô tả:} Lấy danh sách tất cả nguyên liệu, thực phẩm đang có trong tủ lạnh của gia đình.
+    \item \textbf{Yêu cầu quyền:} Thành viên gia đình (Family Member).
+\end{itemize}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+\begin{longtable}{|p{3cm}|p{2.5cm}|c|p{8.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\ \hline
+\endhead
+\texttt{category\_id} & Integer & Không & Lọc thực phẩm theo danh mục \\ \hline
+\texttt{expiring\_soon} & Boolean & Không & Chỉ hiển thị các món sắp hết hạn \\ \hline
+\end{longtable}
+
+\paragraph{Dữ liệu phản hồi (Responses):}
+\begin{longtable}{|p{3.2cm}|p{3.5cm}|p{8.5cm}|}
+\hline
+\textbf{HTTP Status} & \textbf{Trường hợp} & \textbf{Cấu trúc dữ liệu trả về (JSON)} \\ \hline
+\endhead
+\textbf{200 OK} & Thành công & \texttt{[\{ "item\_id": 1, "food\_id": 10, "quantity": 2, "unit": "kg", "expiry\_date": "2026-06-20" \}]} \\ \hline
+\end{longtable}
+
+\vskip 0.4cm
+\noindent\rule{\textwidth}{0.3pt}
+\vskip 0.4cm
+
+\subsubsection{Thêm thực phẩm vào tủ lạnh (Create)}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{HTTP Method:} \texttt{POST}
+    \item \textbf{Request URL:} \texttt{/api/pantry}
+    \item \textbf{Mô tả:} Nhập mới thực phẩm vào tủ lạnh.
+    \item \textbf{Yêu cầu quyền:} Thành viên gia đình (Family Member).
+\end{itemize}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+\begin{longtable}{|p{3cm}|p{2.5cm}|c|p{8.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\ \hline
+\endhead
+\texttt{food\_id} & Integer & Có & ID của thực phẩm từ Catalog \\ \hline
+\texttt{quantity} & Decimal & Có & Số lượng nhập \\ \hline
+\texttt{unit} & String & Có & Đơn vị tính \\ \hline
+\texttt{expiry\_date} & String (ISO) & Không & Ngày hết hạn \\ \hline
+\end{longtable}
+
+\paragraph{Dữ liệu phản hồi (Responses):}
+\begin{longtable}{|p{3.2cm}|p{3.5cm}|p{8.5cm}|}
+\hline
+\textbf{HTTP Status} & \textbf{Trường hợp} & \textbf{Cấu trúc dữ liệu trả về (JSON)} \\ \hline
+\endhead
+\textbf{201 Created} & Thành công & \texttt{\{ "message": "Item added to pantry", "item\_id": 1 \}} \\ \hline
+\end{longtable}
+
+\vskip 0.4cm
+\noindent\rule{\textwidth}{0.3pt}
+\vskip 0.4cm
+
+\subsubsection{Xem chi tiết thực phẩm (Find One)}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{HTTP Method:} \texttt{GET}
+    \item \textbf{Request URL:} \texttt{/api/pantry/:itemId}
+    \item \textbf{Mô tả:} Lấy thông tin chi tiết của một mã sản phẩm cụ thể trong tủ lạnh.
+    \item \textbf{Yêu cầu quyền:} Thành viên gia đình (Family Member).
+\end{itemize}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+\begin{longtable}{|p{3cm}|p{2.5cm}|c|p{8.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\ \hline
+\endhead
+\texttt{itemId} & Integer & Có & ID của bản ghi tủ lạnh \\ \hline
+\end{longtable}
+
+\paragraph{Dữ liệu phản hồi (Responses):}
+\begin{longtable}{|p{3.2cm}|p{3.5cm}|p{8.5cm}|}
+\hline
+\textbf{HTTP Status} & \textbf{Trường hợp} & \textbf{Cấu trúc dữ liệu trả về (JSON)} \\ \hline
+\endhead
+\textbf{200 OK} & Thành công & \texttt{\{ "item\_id": 1, "food\_name": "Thịt lợn", "quantity": 2, "expiry\_date": "..." \}} \\ \hline
+\end{longtable}
+
+\vskip 0.4cm
+\noindent\rule{\textwidth}{0.3pt}
+\vskip 0.4cm
+
+\subsubsection{Cập nhật thực phẩm (Update)}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{HTTP Method:} \texttt{PATCH}
+    \item \textbf{Request URL:} \texttt{/api/pantry/:itemId}
+    \item \textbf{Mô tả:} Sửa số lượng hoặc ngày hết hạn của một mặt hàng.
+    \item \textbf{Yêu cầu quyền:} Thành viên gia đình (Family Member).
+\end{itemize}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+\begin{longtable}{|p{3cm}|p{2.5cm}|c|p{8.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\ \hline
+\endhead
+\texttt{itemId} & Integer & Có & ID của bản ghi tủ lạnh \\ \hline
+\end{longtable}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+\begin{longtable}{|p{3cm}|p{2.5cm}|c|p{8.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\ \hline
+\endhead
+\texttt{quantity} & Decimal & Không & Số lượng thực tế mới \\ \hline
+\texttt{expiry\_date} & String (ISO) & Không & Ngày hết hạn mới \\ \hline
+\end{longtable}
+
+\paragraph{Dữ liệu phản hồi (Responses):}
+\begin{longtable}{|p{3.2cm}|p{3.5cm}|p{8.5cm}|}
+\hline
+\textbf{HTTP Status} & \textbf{Trường hợp} & \textbf{Cấu trúc dữ liệu trả về (JSON)} \\ \hline
+\endhead
+\textbf{200 OK} & Thành công & \texttt{\{ "message": "Pantry item updated" \}} \\ \hline
+\end{longtable}
+
+\vskip 0.4cm
+\noindent\rule{\textwidth}{0.3pt}
+\vskip 0.4cm
+
+\subsubsection{Xóa hoàn toàn thực phẩm (Remove)}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{HTTP Method:} \texttt{DELETE}
+    \item \textbf{Request URL:} \texttt{/api/pantry/:itemId}
+    \item \textbf{Mô tả:} Xóa nhầm hoặc dọn dẹp bản ghi khỏi tủ lạnh.
+    \item \textbf{Yêu cầu quyền:} Thành viên gia đình (Family Member).
+\end{itemize}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+\begin{longtable}{|p{3cm}|p{2.5cm}|c|p{8.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\ \hline
+\endhead
+\texttt{itemId} & Integer & Có & ID của bản ghi tủ lạnh \\ \hline
+\end{longtable}
+
+\paragraph{Dữ liệu phản hồi (Responses):}
+\begin{longtable}{|p{3.2cm}|p{3.5cm}|p{8.5cm}|}
+\hline
+\textbf{HTTP Status} & \textbf{Trường hợp} & \textbf{Cấu trúc dữ liệu trả về (JSON)} \\ \hline
+\endhead
+\textbf{200 OK} & Thành công & \texttt{\{ "message": "Item deleted from pantry" \}} \\ \hline
+\end{longtable}
+
+\vskip 0.4cm
+\noindent\rule{\textwidth}{0.3pt}
+\vskip 0.4cm
+
+\subsubsection{Tiêu thụ thực phẩm (Consume)}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{HTTP Method:} \texttt{POST}
+    \item \textbf{Request URL:} \texttt{/api/pantry/:itemId/consume}
+    \item \textbf{Mô tả:} Trừ số lượng thực phẩm khi sử dụng để nấu ăn. Hệ thống sẽ ghi log để báo cáo tiêu thụ.
+    \item \textbf{Yêu cầu quyền:} Thành viên gia đình (Family Member).
+\end{itemize}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+\begin{longtable}{|p{3cm}|p{2.5cm}|c|p{8.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\ \hline
+\endhead
+\texttt{itemId} & Integer & Có & ID của bản ghi tủ lạnh \\ \hline
+\end{longtable}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+\begin{longtable}{|p{3cm}|p{2.5cm}|c|p{8.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\ \hline
+\endhead
+\texttt{consume\_qty} & Decimal & Có & Số lượng đã sử dụng \\ \hline
+\end{longtable}
+
+\paragraph{Dữ liệu phản hồi (Responses):}
+\begin{longtable}{|p{3.2cm}|p{3.5cm}|p{8.5cm}|}
+\hline
+\textbf{HTTP Status} & \textbf{Trường hợp} & \textbf{Cấu trúc dữ liệu trả về (JSON)} \\ \hline
+\endhead
+\textbf{200 OK} & Thành công & \texttt{\{ "message": "Item consumed", "remaining\_qty": 1.5 \}} \\ \hline
+\end{longtable}
+
+\vskip 0.4cm
+\noindent\rule{\textwidth}{0.3pt}
+\vskip 0.4cm
+
+\subsubsection{Báo cáo vứt bỏ (Mark Wasted)}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{HTTP Method:} \texttt{POST}
+    \item \textbf{Request URL:} \texttt{/api/pantry/:itemId/waste}
+    \item \textbf{Mô tả:} Đánh dấu số lượng thực phẩm bị hỏng, hết hạn phải bỏ đi. Dữ liệu này dùng để thống kê lãng phí.
+    \item \textbf{Yêu cầu quyền:} Thành viên gia đình (Family Member).
+\end{itemize}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+\begin{longtable}{|p{3cm}|p{2.5cm}|c|p{8.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\ \hline
+\endhead
+\texttt{itemId} & Integer & Có & ID của bản ghi tủ lạnh \\ \hline
+\end{longtable}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+\begin{longtable}{|p{3cm}|p{2.5cm}|c|p{8.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\ \hline
+\endhead
+\texttt{waste\_qty} & Decimal & Có & Số lượng bị vứt bỏ \\ \hline
+\end{longtable}
+
+\paragraph{Dữ liệu phản hồi (Responses):}
+\begin{longtable}{|p{3.2cm}|p{3.5cm}|p{8.5cm}|}
+\hline
+\textbf{HTTP Status} & \textbf{Trường hợp} & \textbf{Cấu trúc dữ liệu trả về (JSON)} \\ \hline
+\endhead
+\textbf{200 OK} & Thành công & \texttt{\{ "message": "Item marked as wasted", "remaining\_qty": 0 \}} \\ \hline
+\end{longtable}
+
+\vskip 0.4cm
+\noindent\rule{\textwidth}{0.3pt}
+\vskip 0.4cm
+
+\subsection{Phân hệ Công thức và AI Chef (Recipes Module)}
+
+\subsubsection{Tìm kiếm công thức (Find All)}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{HTTP Method:} \texttt{GET}
+    \item \textbf{Request URL:} \texttt{/api/recipes}
+    \item \textbf{Mô tả:} Lấy danh sách công thức nấu ăn, hỗ trợ tìm kiếm và phân trang.
+    \item \textbf{Yêu cầu quyền:} Người dùng đã đăng nhập (User).
+\end{itemize}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+\begin{longtable}{|p{3cm}|p{2.5cm}|c|p{8.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\ \hline
+\endhead
+\texttt{search} & String & Không & Từ khóa tên món ăn \\ \hline
+\texttt{page} & Integer & Không & Trang hiện tại (Mặc định: 1) \\ \hline
+\end{longtable}
+
+\paragraph{Dữ liệu phản hồi (Responses):}
+\begin{longtable}{|p{3.2cm}|p{3.5cm}|p{8.5cm}|}
+\hline
+\textbf{HTTP Status} & \textbf{Trường hợp} & \textbf{Cấu trúc dữ liệu trả về (JSON)} \\ \hline
+\endhead
+\textbf{200 OK} & Thành công & \texttt{\{ "data": [\{ "id": 1, "name": "Sườn xào chua ngọt" \}], "total": 1 \}} \\ \hline
+\end{longtable}
+
+\vskip 0.4cm
+\noindent\rule{\textwidth}{0.3pt}
+\vskip 0.4cm
+
+\subsubsection{Gợi ý công thức (Get Suggestions)}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{HTTP Method:} \texttt{GET}
+    \item \textbf{Request URL:} \texttt{/api/recipes/suggestions}
+    \item \textbf{Mô tả:} Thuật toán gợi ý các món ăn dựa trên nguyên liệu hiện đang có sẵn trong Tủ lạnh (Pantry) của gia đình.
+    \item \textbf{Yêu cầu quyền:} Thành viên gia đình (Family Member).
+\end{itemize}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+Không yêu cầu.\\
+
+\paragraph{Dữ liệu phản hồi (Responses):}
+\begin{longtable}{|p{3.2cm}|p{3.5cm}|p{8.5cm}|}
+\hline
+\textbf{HTTP Status} & \textbf{Trường hợp} & \textbf{Cấu trúc dữ liệu trả về (JSON)} \\ \hline
+\endhead
+\textbf{200 OK} & Thành công & \texttt{[\{ "id": 1, "name": "Trứng rán", "match\_percentage": 100 \}, \{ "id": 2, "name": "Thịt kho", "match\_percentage": 80 \}]} \\ \hline
+\end{longtable}
+
+\vskip 0.4cm
+\noindent\rule{\textwidth}{0.3pt}
+\vskip 0.4cm
+
+\subsubsection{Danh sách yêu thích (Find Favorites)}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{HTTP Method:} \texttt{GET}
+    \item \textbf{Request URL:} \texttt{/api/recipes/favorites}
+    \item \textbf{Mô tả:} Lấy danh sách các món ăn người dùng đã lưu vào mục yêu thích.
+    \item \textbf{Yêu cầu quyền:} Người dùng đã đăng nhập (User).
+\end{itemize}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+Không yêu cầu.\\
+
+\paragraph{Dữ liệu phản hồi (Responses):}
+\begin{longtable}{|p{3.2cm}|p{3.5cm}|p{8.5cm}|}
+\hline
+\textbf{HTTP Status} & \textbf{Trường hợp} & \textbf{Cấu trúc dữ liệu trả về (JSON)} \\ \hline
+\endhead
+\textbf{200 OK} & Thành công & \texttt{[\{ "recipe\_id": 5, "name": "Cơm rang" \}]} \\ \hline
+\end{longtable}
+
+\vskip 0.4cm
+\noindent\rule{\textwidth}{0.3pt}
+\vskip 0.4cm
+
+\subsubsection{Xem chi tiết công thức (Find One)}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{HTTP Method:} \texttt{GET}
+    \item \textbf{Request URL:} \texttt{/api/recipes/:recipeId}
+    \item \textbf{Mô tả:} Xem toàn bộ hướng dẫn nấu ăn và danh sách nguyên liệu của một món.
+    \item \textbf{Yêu cầu quyền:} Người dùng đã đăng nhập (User).
+\end{itemize}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+\begin{longtable}{|p{3cm}|p{2.5cm}|c|p{8.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\ \hline
+\endhead
+\texttt{recipeId} & Integer & Có & ID của công thức \\ \hline
+\end{longtable}
+
+\paragraph{Dữ liệu phản hồi (Responses):}
+\begin{longtable}{|p{3.2cm}|p{3.5cm}|p{8.5cm}|}
+\hline
+\textbf{HTTP Status} & \textbf{Trường hợp} & \textbf{Cấu trúc dữ liệu trả về (JSON)} \\ \hline
+\endhead
+\textbf{200 OK} & Thành công & \texttt{\{ "id": 5, "name": "Cơm rang", "instructions": "...", "ingredients": [...] \}} \\ \hline
+\end{longtable}
+
+\vskip 0.4cm
+\noindent\rule{\textwidth}{0.3pt}
+\vskip 0.4cm
+
+\subsubsection{Thêm vào yêu thích (Add Favorite)}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{HTTP Method:} \texttt{POST}
+    \item \textbf{Request URL:} \texttt{/api/recipes/:recipeId/favorite}
+    \item \textbf{Mô tả:} Thêm món ăn vào danh sách yêu thích.
+    \item \textbf{Yêu cầu quyền:} Người dùng đã đăng nhập (User).
+\end{itemize}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+\begin{longtable}{|p{3cm}|p{2.5cm}|c|p{8.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\ \hline
+\endhead
+\texttt{recipeId} & Integer & Có & ID của công thức \\ \hline
+\end{longtable}
+
+\paragraph{Dữ liệu phản hồi (Responses):}
+\begin{longtable}{|p{3.2cm}|p{3.5cm}|p{8.5cm}|}
+\hline
+\textbf{HTTP Status} & \textbf{Trường hợp} & \textbf{Cấu trúc dữ liệu trả về (JSON)} \\ \hline
+\endhead
+\textbf{200 OK} & Thành công & \texttt{\{ "message": "Added to favorites" \}} \\ \hline
+\end{longtable}
+
+\vskip 0.4cm
+\noindent\rule{\textwidth}{0.3pt}
+\vskip 0.4cm
+
+\subsubsection{Bỏ yêu thích (Remove Favorite)}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{HTTP Method:} \texttt{DELETE}
+    \item \textbf{Request URL:} \texttt{/api/recipes/:recipeId/favorite}
+    \item \textbf{Mô tả:} Xóa món ăn khỏi danh sách yêu thích.
+    \item \textbf{Yêu cầu quyền:} Người dùng đã đăng nhập (User).
+\end{itemize}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+\begin{longtable}{|p{3cm}|p{2.5cm}|c|p{8.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\ \hline
+\endhead
+\texttt{recipeId} & Integer & Có & ID của công thức \\ \hline
+\end{longtable}
+
+\paragraph{Dữ liệu phản hồi (Responses):}
+\begin{longtable}{|p{3.2cm}|p{3.5cm}|p{8.5cm}|}
+\hline
+\textbf{HTTP Status} & \textbf{Trường hợp} & \textbf{Cấu trúc dữ liệu trả về (JSON)} \\ \hline
+\endhead
+\textbf{200 OK} & Thành công & \texttt{\{ "message": "Removed from favorites" \}} \\ \hline
+\end{longtable}
+
+\vskip 0.4cm
+\noindent\rule{\textwidth}{0.3pt}
+\vskip 0.4cm
+
+\subsubsection{Tính toán nguyên liệu thiếu (Get Missing Ingredients)}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{HTTP Method:} \texttt{GET}
+    \item \textbf{Request URL:} \texttt{/api/recipes/:recipeId/missing-ingredients}
+    \item \textbf{Mô tả:} Tính toán nguyên liệu cần mua để nấu món này (so với tủ lạnh hiện tại).
+    \item \textbf{Yêu cầu quyền:} Thành viên gia đình (Family Member).
+\end{itemize}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+\begin{longtable}{|p{3cm}|p{2.5cm}|c|p{8.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\ \hline
+\endhead
+\texttt{recipeId} & Integer & Có & ID của công thức \\ \hline
+\end{longtable}
+
+\paragraph{Dữ liệu phản hồi (Responses):}
+\begin{longtable}{|p{3.2cm}|p{3.5cm}|p{8.5cm}|}
+\hline
+\textbf{HTTP Status} & \textbf{Trường hợp} & \textbf{Cấu trúc dữ liệu trả về (JSON)} \\ \hline
+\endhead
+\textbf{200 OK} & Thành công & \texttt{[\{ "food\_id": 3, "name": "Cà chua", "needed": 2, "unit": "quả" \}]} \\ \hline
+\end{longtable}
+
+\vskip 0.4cm
+\noindent\rule{\textwidth}{0.3pt}
+\vskip 0.4cm
+
+\subsubsection{Tạo danh sách mua sắm (Generate Shopping List)}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{HTTP Method:} \texttt{POST}
+    \item \textbf{Request URL:} \texttt{/api/recipes/:recipeId/generate-shopping-list}
+    \item \textbf{Mô tả:} Chuyển đổi các nguyên liệu thiếu thành một phiếu đi chợ (Shopping List).
+    \item \textbf{Yêu cầu quyền:} Thành viên gia đình (Family Member).
+\end{itemize}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+\begin{longtable}{|p{3cm}|p{2.5cm}|c|p{8.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\ \hline
+\endhead
+\texttt{recipeId} & Integer & Có & ID của công thức \\ \hline
+\end{longtable}
+
+\paragraph{Dữ liệu phản hồi (Responses):}
+\begin{longtable}{|p{3.2cm}|p{3.5cm}|p{8.5cm}|}
+\hline
+\textbf{HTTP Status} & \textbf{Trường hợp} & \textbf{Cấu trúc dữ liệu trả về (JSON)} \\ \hline
+\endhead
+\textbf{201 Created} & Thành công & \texttt{\{ "list\_id": 5, "items\_added": 3 \}} \\ \hline
+\end{longtable}
+
+\vskip 0.4cm
+\noindent\rule{\textwidth}{0.3pt}
+\vskip 0.4cm
+
+\subsubsection{Đóng góp công thức mới (Create)}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{HTTP Method:} \texttt{POST}
+    \item \textbf{Request URL:} \texttt{/api/recipes}
+    \item \textbf{Mô tả:} Người dùng tự thêm công thức nấu ăn mới vào hệ thống (Chờ Admin duyệt).
+    \item \textbf{Yêu cầu quyền:} Người dùng đã đăng nhập (User).
+\end{itemize}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+\begin{longtable}{|p{3cm}|p{2.5cm}|c|p{8.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\ \hline
+\endhead
+\texttt{name} & String & Có & Tên món ăn \\ \hline
+\texttt{instructions} & String & Có & Cách làm chi tiết \\ \hline
+\texttt{ingredients} & Array & Có & Danh sách \texttt{food\_id}, \texttt{quantity}, \texttt{unit} \\ \hline
+\end{longtable}
+
+\paragraph{Dữ liệu phản hồi (Responses):}
+\begin{longtable}{|p{3.2cm}|p{3.5cm}|p{8.5cm}|}
+\hline
+\textbf{HTTP Status} & \textbf{Trường hợp} & \textbf{Cấu trúc dữ liệu trả về (JSON)} \\ \hline
+\endhead
+\textbf{201 Created} & Thành công & \texttt{\{ "id": 15, "status": "pending\_approval" \}} \\ \hline
+\end{longtable}
+
+\vskip 0.4cm
+\noindent\rule{\textwidth}{0.3pt}
+\vskip 0.4cm
+
+\subsubsection{Chỉnh sửa công thức (Update)}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{HTTP Method:} \texttt{PATCH}
+    \item \textbf{Request URL:} \texttt{/api/recipes/:recipeId}
+    \item \textbf{Mô tả:} Sửa công thức cá nhân đã đóng góp.
+    \item \textbf{Yêu cầu quyền:} Tác giả (Tạo ra công thức đó) hoặc Admin.
+\end{itemize}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+\begin{longtable}{|p{3cm}|p{2.5cm}|c|p{8.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\ \hline
+\endhead
+\texttt{recipeId} & Integer & Có & ID của công thức \\ \hline
+\end{longtable}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+\begin{longtable}{|p{3cm}|p{2.5cm}|c|p{8.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\ \hline
+\endhead
+\texttt{instructions} & String & Không & Hướng dẫn mới \\ \hline
+\end{longtable}
+
+\paragraph{Dữ liệu phản hồi (Responses):}
+\begin{longtable}{|p{3.2cm}|p{3.5cm}|p{8.5cm}|}
+\hline
+\textbf{HTTP Status} & \textbf{Trường hợp} & \textbf{Cấu trúc dữ liệu trả về (JSON)} \\ \hline
+\endhead
+\textbf{200 OK} & Thành công & \texttt{\{ "message": "Recipe updated" \}} \\ \hline
+\end{longtable}
+
+\vskip 0.4cm
+\noindent\rule{\textwidth}{0.3pt}
+\vskip 0.4cm
+
+\subsubsection{Xóa công thức (Remove)}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{HTTP Method:} \texttt{DELETE}
+    \item \textbf{Request URL:} \texttt{/api/recipes/:recipeId}
+    \item \textbf{Mô tả:} Xóa bỏ công thức khỏi hệ thống.
+    \item \textbf{Yêu cầu quyền:} Tác giả hoặc Admin.
+\end{itemize}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+\begin{longtable}{|p{3cm}|p{2.5cm}|c|p{8.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\ \hline
+\endhead
+\texttt{recipeId} & Integer & Có & ID của công thức \\ \hline
+\end{longtable}
+
+\paragraph{Dữ liệu phản hồi (Responses):}
+\begin{longtable}{|p{3.2cm}|p{3.5cm}|p{8.5cm}|}
+\hline
+\textbf{HTTP Status} & \textbf{Trường hợp} & \textbf{Cấu trúc dữ liệu trả về (JSON)} \\ \hline
+\endhead
+\textbf{200 OK} & Thành công & \texttt{\{ "message": "Recipe deleted" \}} \\ \hline
+\end{longtable}
+
+\vskip 0.4cm
+\noindent\rule{\textwidth}{0.3pt}
+\vskip 0.4cm
+
+\subsection{Phân hệ Thống kê và Báo cáo (Reports Module)}
+
+\subsubsection{Bảng điều khiển thống kê (Get Dashboard)}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{HTTP Method:} \texttt{GET}
+    \item \textbf{Request URL:} \texttt{/api/reports/dashboard}
+    \item \textbf{Mô tả:} Lấy các số liệu tổng quan của gia đình (như tổng chi phí, tổng số món ăn nấu trong tuần, lượng hao phí).
+    \item \textbf{Yêu cầu quyền:} Quản trị viên hoặc thành viên gia đình (Family Member).
+\end{itemize}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+\begin{longtable}{|p{3cm}|p{2.5cm}|c|p{8.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\ \hline
+\endhead
+\texttt{start\_date} & String (ISO) & Không & Ngày bắt đầu thống kê \\ \hline
+\texttt{end\_date} & String (ISO) & Không & Ngày kết thúc thống kê \\ \hline
+\end{longtable}
+
+\paragraph{Dữ liệu phản hồi (Responses):}
+\begin{longtable}{|p{3.2cm}|p{3.5cm}|p{8.5cm}|}
+\hline
+\textbf{HTTP Status} & \textbf{Trường hợp} & \textbf{Cấu trúc dữ liệu trả về (JSON)} \\ \hline
+\endhead
+\textbf{200 OK} & Thành công & \texttt{\{ "total\_spent": 1500000, "meals\_cooked": 14, "waste\_ratio": 5.2 \}} \\ \hline
+\textbf{403 Forbidden} & Chưa vào gia đình & \texttt{\{ "error": "Forbidden", "message": "Require family membership" \}} \\ \hline
+\end{longtable}
+
+\vskip 0.4cm
+\noindent\rule{\textwidth}{0.3pt}
+\vskip 0.4cm
+
+\subsubsection{Xu hướng tiêu thụ (Get Consumption Trends)}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{HTTP Method:} \texttt{GET}
+    \item \textbf{Request URL:} \texttt{/api/reports/consumption-trends}
+    \item \textbf{Mô tả:} Báo cáo chi tiết biểu đồ xu hướng tiêu thụ thực phẩm theo thời gian.
+    \item \textbf{Yêu cầu quyền:} Thành viên gia đình (Family Member).
+\end{itemize}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+\begin{longtable}{|p{3cm}|p{2.5cm}|c|p{8.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\ \hline
+\endhead
+\texttt{period} & String & Không & Nhóm theo ngày/tuần/tháng (Mặc định: \texttt{week}) \\ \hline
+\end{longtable}
+
+\paragraph{Dữ liệu phản hồi (Responses):}
+\begin{longtable}{|p{3.2cm}|p{3.5cm}|p{8.5cm}|}
+\hline
+\textbf{HTTP Status} & \textbf{Trường hợp} & \textbf{Cấu trúc dữ liệu trả về (JSON)} \\ \hline
+\endhead
+\textbf{200 OK} & Thành công & \texttt{\{ "trends": [\{ "date": "2026-06-01", "consumed": 5.2, "unit": "kg" \}] \}} \\ \hline
+\end{longtable}
+
+\vskip 0.4cm
+\noindent\rule{\textwidth}{0.3pt}
+\vskip 0.4cm
+
+\subsubsection{Báo cáo hao phí thực phẩm (Get Waste Report)}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{HTTP Method:} \texttt{GET}
+    \item \textbf{Request URL:} \texttt{/api/reports/waste}
+    \item \textbf{Mô tả:} Báo cáo các thực phẩm bị bỏ đi, hết hạn sử dụng.
+    \item \textbf{Yêu cầu quyền:} Thành viên gia đình (Family Member).
+\end{itemize}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+\begin{longtable}{|p{3cm}|p{2.5cm}|c|p{8.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\ \hline
+\endhead
+\texttt{start\_date} & String (ISO) & Không & Ngày bắt đầu thống kê \\ \hline
+\end{longtable}
+
+\paragraph{Dữ liệu phản hồi (Responses):}
+\begin{longtable}{|p{3.2cm}|p{3.5cm}|p{8.5cm}|}
+\hline
+\textbf{HTTP Status} & \textbf{Trường hợp} & \textbf{Cấu trúc dữ liệu trả về (JSON)} \\ \hline
+\endhead
+\textbf{200 OK} & Thành công & \texttt{\{ "wasted\_items": [\{ "food\_id": 1, "name": "Cà chua", "wasted\_qty": 0.5 \}] \}} \\ \hline
+\end{longtable}
+
+\vskip 0.4cm
+\noindent\rule{\textwidth}{0.3pt}
+\vskip 0.4cm
+
+\subsection{Phân hệ Danh sách Mua sắm (Shopping Lists Module)}
+
+\subsubsection{Lấy tất cả danh sách (Find All)}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{HTTP Method:} \texttt{GET}
+    \item \textbf{Request URL:} \texttt{/api/shopping-lists}
+    \item \textbf{Mô tả:} Lấy toàn bộ các danh sách đi chợ của gia đình.
+    \item \textbf{Yêu cầu quyền:} Thành viên gia đình (Family Member).
+\end{itemize}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+Không yêu cầu.\\
+
+\paragraph{Dữ liệu phản hồi (Responses):}
+\begin{longtable}{|p{3.2cm}|p{3.5cm}|p{8.5cm}|}
+\hline
+\textbf{HTTP Status} & \textbf{Trường hợp} & \textbf{Cấu trúc dữ liệu trả về (JSON)} \\ \hline
+\endhead
+\textbf{200 OK} & Thành công & \texttt{[\{ "list\_id": 1, "name": "Đi siêu thị cuối tuần", "status": "pending" \}]} \\ \hline
+\end{longtable}
+
+\vskip 0.4cm
+\noindent\rule{\textwidth}{0.3pt}
+\vskip 0.4cm
+
+\subsubsection{Tạo danh sách mới (Create)}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{HTTP Method:} \texttt{POST}
+    \item \textbf{Request URL:} \texttt{/api/shopping-lists}
+    \item \textbf{Mô tả:} Tạo mới một danh sách đi chợ (List rỗng hoặc chưa có items).
+    \item \textbf{Yêu cầu quyền:} Thành viên gia đình (Family Member).
+\end{itemize}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+\begin{longtable}{|p{3cm}|p{2.5cm}|c|p{8.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\ \hline
+\endhead
+\texttt{name} & String & Có & Tên danh sách (Ví dụ: Chợ sáng thứ 2) \\ \hline
+\texttt{assigned\_to} & Integer & Không & ID thành viên được giao việc đi chợ \\ \hline
+\end{longtable}
+
+\paragraph{Dữ liệu phản hồi (Responses):}
+\begin{longtable}{|p{3.2cm}|p{3.5cm}|p{8.5cm}|}
+\hline
+\textbf{HTTP Status} & \textbf{Trường hợp} & \textbf{Cấu trúc dữ liệu trả về (JSON)} \\ \hline
+\endhead
+\textbf{201 Created} & Thành công & \texttt{\{ "list\_id": 2, "name": "Chợ sáng thứ 2", "status": "pending" \}} \\ \hline
+\end{longtable}
+
+\vskip 0.4cm
+\noindent\rule{\textwidth}{0.3pt}
+\vskip 0.4cm
+
+\subsubsection{Xem chi tiết danh sách (Find One)}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{HTTP Method:} \texttt{GET}
+    \item \textbf{Request URL:} \texttt{/api/shopping-lists/:listId}
+    \item \textbf{Mô tả:} Lấy thông tin và toàn bộ các mặt hàng cần mua trong danh sách.
+    \item \textbf{Yêu cầu quyền:} Thành viên gia đình (Family Member).
+\end{itemize}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+\begin{longtable}{|p{3cm}|p{2.5cm}|c|p{8.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\ \hline
+\endhead
+\texttt{listId} & Integer & Có & ID của danh sách \\ \hline
+\end{longtable}
+
+\paragraph{Dữ liệu phản hồi (Responses):}
+\begin{longtable}{|p{3.2cm}|p{3.5cm}|p{8.5cm}|}
+\hline
+\textbf{HTTP Status} & \textbf{Trường hợp} & \textbf{Cấu trúc dữ liệu trả về (JSON)} \\ \hline
+\endhead
+\textbf{200 OK} & Thành công & \texttt{\{ "list\_id": 1, "items": [\{ "item\_id": 10, "food\_name": "Rau cải", "is\_checked": false \}] \}} \\ \hline
+\end{longtable}
+
+\vskip 0.4cm
+\noindent\rule{\textwidth}{0.3pt}
+\vskip 0.4cm
+
+\subsubsection{Cập nhật thông tin danh sách (Update)}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{HTTP Method:} \texttt{PATCH}
+    \item \textbf{Request URL:} \texttt{/api/shopping-lists/:listId}
+    \item \textbf{Mô tả:} Sửa đổi tên danh sách hoặc người được phân công đi chợ.
+    \item \textbf{Yêu cầu quyền:} Thành viên gia đình (Family Member).
+\end{itemize}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+\begin{longtable}{|p{3cm}|p{2.5cm}|c|p{8.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\ \hline
+\endhead
+\texttt{listId} & Integer & Có & ID của danh sách \\ \hline
+\end{longtable}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+\begin{longtable}{|p{3cm}|p{2.5cm}|c|p{8.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\ \hline
+\endhead
+\texttt{name} & String & Không & Tên mới \\ \hline
+\end{longtable}
+
+\paragraph{Dữ liệu phản hồi (Responses):}
+\begin{longtable}{|p{3.2cm}|p{3.5cm}|p{8.5cm}|}
+\hline
+\textbf{HTTP Status} & \textbf{Trường hợp} & \textbf{Cấu trúc dữ liệu trả về (JSON)} \\ \hline
+\endhead
+\textbf{200 OK} & Thành công & \texttt{\{ "message": "Shopping list updated" \}} \\ \hline
+\end{longtable}
+
+\vskip 0.4cm
+\noindent\rule{\textwidth}{0.3pt}
+\vskip 0.4cm
+
+\subsubsection{Xóa danh sách (Remove)}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{HTTP Method:} \texttt{DELETE}
+    \item \textbf{Request URL:} \texttt{/api/shopping-lists/:listId}
+    \item \textbf{Mô tả:} Xóa bỏ hoàn toàn danh sách đi chợ.
+    \item \textbf{Yêu cầu quyền:} Thành viên gia đình (Family Member).
+\end{itemize}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+\begin{longtable}{|p{3cm}|p{2.5cm}|c|p{8.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\ \hline
+\endhead
+\texttt{listId} & Integer & Có & ID của danh sách \\ \hline
+\end{longtable}
+
+\paragraph{Dữ liệu phản hồi (Responses):}
+\begin{longtable}{|p{3.2cm}|p{3.5cm}|p{8.5cm}|}
+\hline
+\textbf{HTTP Status} & \textbf{Trường hợp} & \textbf{Cấu trúc dữ liệu trả về (JSON)} \\ \hline
+\endhead
+\textbf{200 OK} & Thành công & \texttt{\{ "message": "Shopping list deleted" \}} \\ \hline
+\end{longtable}
+
+\vskip 0.4cm
+\noindent\rule{\textwidth}{0.3pt}
+\vskip 0.4cm
+
+\subsubsection{Hoàn tất đi chợ (Complete)}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{HTTP Method:} \texttt{POST}
+    \item \textbf{Request URL:} \texttt{/api/shopping-lists/:listId/complete}
+    \item \textbf{Mô tả:} Kết thúc chuyến đi chợ. Tất cả những mặt hàng đã đánh dấu (checked) sẽ tự động được thêm vào Tủ lạnh (Pantry).
+    \item \textbf{Yêu cầu quyền:} Thành viên gia đình (Family Member).
+\end{itemize}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+\begin{longtable}{|p{3cm}|p{2.5cm}|c|p{8.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\ \hline
+\endhead
+\texttt{listId} & Integer & Có & ID của danh sách \\ \hline
+\end{longtable}
+
+\paragraph{Dữ liệu phản hồi (Responses):}
+\begin{longtable}{|p{3.2cm}|p{3.5cm}|p{8.5cm}|}
+\hline
+\textbf{HTTP Status} & \textbf{Trường hợp} & \textbf{Cấu trúc dữ liệu trả về (JSON)} \\ \hline
+\endhead
+\textbf{200 OK} & Thành công & \texttt{\{ "message": "List completed, 5 items added to pantry" \}} \\ \hline
+\end{longtable}
+
+\vskip 0.4cm
+\noindent\rule{\textwidth}{0.3pt}
+\vskip 0.4cm
+
+\subsubsection{Thêm mặt hàng cần mua (Add Item)}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{HTTP Method:} \texttt{POST}
+    \item \textbf{Request URL:} \texttt{/api/shopping-lists/:listId/items}
+    \item \textbf{Mô tả:} Thêm một món đồ cần mua vào danh sách.
+    \item \textbf{Yêu cầu quyền:} Thành viên gia đình (Family Member).
+\end{itemize}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+\begin{longtable}{|p{3cm}|p{2.5cm}|c|p{8.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\ \hline
+\endhead
+\texttt{listId} & Integer & Có & ID của danh sách \\ \hline
+\end{longtable}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+\begin{longtable}{|p{3cm}|p{2.5cm}|c|p{8.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\ \hline
+\endhead
+\texttt{food\_id} & Integer & Có & ID mặt hàng từ Catalog \\ \hline
+\texttt{quantity} & Decimal & Có & Số lượng cần mua \\ \hline
+\end{longtable}
+
+\paragraph{Dữ liệu phản hồi (Responses):}
+\begin{longtable}{|p{3.2cm}|p{3.5cm}|p{8.5cm}|}
+\hline
+\textbf{HTTP Status} & \textbf{Trường hợp} & \textbf{Cấu trúc dữ liệu trả về (JSON)} \\ \hline
+\endhead
+\textbf{201 Created} & Thành công & \texttt{\{ "item\_id": 10, "message": "Item added to list" \}} \\ \hline
+\end{longtable}
+
+\vskip 0.4cm
+\noindent\rule{\textwidth}{0.3pt}
+\vskip 0.4cm
+
+\subsubsection{Sửa mặt hàng / Đánh dấu đã mua (Update Item)}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{HTTP Method:} \texttt{PATCH}
+    \item \textbf{Request URL:} \texttt{/api/shopping-lists/:listId/items/:itemId}
+    \item \textbf{Mô tả:} Sửa số lượng hoặc đánh dấu checkbox là món hàng đã được nhặt vào giỏ (\texttt{is\_checked}).
+    \item \textbf{Yêu cầu quyền:} Thành viên gia đình (Family Member).
+\end{itemize}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+\begin{longtable}{|p{3cm}|p{2.5cm}|c|p{8.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\ \hline
+\endhead
+\texttt{listId} & Integer & Có & ID của danh sách \\ \hline
+\texttt{itemId} & Integer & Có & ID của mặt hàng trong danh sách \\ \hline
+\end{longtable}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+\begin{longtable}{|p{3cm}|p{2.5cm}|c|p{8.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\ \hline
+\endhead
+\texttt{quantity} & Decimal & Không & Số lượng thực tế mua \\ \hline
+\texttt{is\_checked} & Boolean & Không & Trạng thái đã nhặt hàng (Tick) \\ \hline
+\end{longtable}
+
+\paragraph{Dữ liệu phản hồi (Responses):}
+\begin{longtable}{|p{3.2cm}|p{3.5cm}|p{8.5cm}|}
+\hline
+\textbf{HTTP Status} & \textbf{Trường hợp} & \textbf{Cấu trúc dữ liệu trả về (JSON)} \\ \hline
+\endhead
+\textbf{200 OK} & Thành công & \texttt{\{ "message": "Item status updated" \}} \\ \hline
+\end{longtable}
+
+\vskip 0.4cm
+\noindent\rule{\textwidth}{0.3pt}
+\vskip 0.4cm
+
+\subsubsection{Xóa mặt hàng (Remove Item)}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{HTTP Method:} \texttt{DELETE}
+    \item \textbf{Request URL:} \texttt{/api/shopping-lists/:listId/items/:itemId}
+    \item \textbf{Mô tả:} Loại bỏ một mặt hàng khỏi danh sách đi chợ vì không cần mua nữa.
+    \item \textbf{Yêu cầu quyền:} Thành viên gia đình (Family Member).
+\end{itemize}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+\begin{longtable}{|p{3cm}|p{2.5cm}|c|p{8.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\ \hline
+\endhead
+\texttt{listId} & Integer & Có & ID của danh sách \\ \hline
+\texttt{itemId} & Integer & Có & ID của mặt hàng trong danh sách \\ \hline
+\end{longtable}
+
+\paragraph{Dữ liệu phản hồi (Responses):}
+\begin{longtable}{|p{3.2cm}|p{3.5cm}|p{8.5cm}|}
+\hline
+\textbf{HTTP Status} & \textbf{Trường hợp} & \textbf{Cấu trúc dữ liệu trả về (JSON)} \\ \hline
+\endhead
+\textbf{200 OK} & Thành công & \texttt{\{ "message": "Item removed from list" \}} \\ \hline
+\end{longtable}
+
+\vskip 0.4cm
+\noindent\rule{\textwidth}{0.3pt}
+\vskip 0.4cm
+
+\subsection{Phân hệ Tải lên Tài nguyên (Uploads Module)}
+
+\subsubsection{Tải lên hình ảnh (Upload Image)}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{HTTP Method:} \texttt{POST}
+    \item \textbf{Request URL:} \texttt{/api/uploads/image}
+    \item \textbf{Mô tả:} API nhận file hình ảnh, lưu trữ (local hoặc S3) và trả về đường dẫn URL của ảnh.
+    \item \textbf{Yêu cầu quyền:} Người dùng đã đăng nhập (User).
+\end{itemize}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+\begin{longtable}{|p{3cm}|p{2.5cm}|c|p{8.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\ \hline
+\endhead
+\texttt{file} & File (Binary) & Có & File ảnh (JPEG, PNG, WebP) tối đa 5MB \\ \hline
+\end{longtable}
+
+\paragraph{Dữ liệu phản hồi (Responses):}
+\begin{longtable}{|p{3.2cm}|p{3.5cm}|p{8.5cm}|}
+\hline
+\textbf{HTTP Status} & \textbf{Trường hợp} & \textbf{Cấu trúc dữ liệu trả về (JSON)} \\ \hline
+\endhead
+\textbf{201 Created} & Thành công & \texttt{\{ "url": "https://s3.aws.com/.../image.png", "filename": "image.png" \}} \\ \hline
+\textbf{400 Bad Request} & Lỗi định dạng & \texttt{\{ "error": "Bad Request", "message": "Invalid file type or size exceeded" \}} \\ \hline
+\end{longtable}
+
+\vskip 0.4cm
+\noindent\rule{\textwidth}{0.3pt}
+\vskip 0.4cm
+
+\subsection{Phân hệ Hồ sơ Người dùng (Users Module)}
+
+\subsubsection{Lấy hồ sơ cá nhân (Get Profile)}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{HTTP Method:} \texttt{GET}
+    \item \textbf{Request URL:} \texttt{/api/users/me}
+    \item \textbf{Mô tả:} Lấy thông tin tài khoản của người dùng hiện tại (đang đăng nhập).
+    \item \textbf{Yêu cầu quyền:} Người dùng đã đăng nhập (User).
+\end{itemize}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+Không yêu cầu.\\
+
+\paragraph{Dữ liệu phản hồi (Responses):}
+\begin{longtable}{|p{3.2cm}|p{3.5cm}|p{8.5cm}|}
+\hline
+\textbf{HTTP Status} & \textbf{Trường hợp} & \textbf{Cấu trúc dữ liệu trả về (JSON)} \\ \hline
+\endhead
+\textbf{200 OK} & Thành công & \texttt{\{ "id": 1, "email": "user@email.com", "first\_name": "A", "last\_name": "B", "avatar\_url": "..." \}} \\ \hline
+\textbf{401 Unauthorized} & Token không hợp lệ & \texttt{\{ "error": "Unauthorized" \}} \\ \hline
+\end{longtable}
+
+\vskip 0.4cm
+\noindent\rule{\textwidth}{0.3pt}
+\vskip 0.4cm
+
+\subsubsection{Cập nhật hồ sơ cá nhân (Update Profile)}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{HTTP Method:} \texttt{PATCH}
+    \item \textbf{Request URL:} \texttt{/api/users/me}
+    \item \textbf{Mô tả:} Thay đổi thông tin cá nhân (Tên, avatar, điện thoại...).
+    \item \textbf{Yêu cầu quyền:} Người dùng đã đăng nhập (User).
+\end{itemize}
+
+\paragraph{Dữ liệu yêu cầu (Request Payload/Parameters):}
+\begin{longtable}{|p{3cm}|p{2.5cm}|c|p{8.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\ \hline
+\endhead
+\texttt{first\_name} & String & Không & Tên mới \\ \hline
+\texttt{last\_name} & String & Không & Họ mới \\ \hline
+\texttt{phone} & String & Không & Số điện thoại mới \\ \hline
+\texttt{avatar\_url} & String & Không & Link ảnh đại diện sau khi upload \\ \hline
+\end{longtable}
+
+\paragraph{Dữ liệu phản hồi (Responses):}
+\begin{longtable}{|p{3.2cm}|p{3.5cm}|p{8.5cm}|}
+\hline
+\textbf{HTTP Status} & \textbf{Trường hợp} & \textbf{Cấu trúc dữ liệu trả về (JSON)} \\ \hline
+\endhead
+\textbf{200 OK} & Thành công & \texttt{\{ "message": "Profile updated successfully", "user": \{...\} \}} \\ \hline
+\textbf{400 Bad Request} & Lỗi validate & \texttt{\{ "error": "Bad Request", "message": "Phone number invalid" \}} \\ \hline
+\end{longtable}
+
+\vskip 0.4cm
+\noindent\rule{\textwidth}{0.3pt}
+\vskip 0.4cm
+
+\newpage
+\section{Đặc tả giao diện hệ thống ngoại vi (External Services)}
+
+\subsection{Dịch vụ Gửi Email (Email SMTP Service)}
+Hệ thống sử dụng dịch vụ của bên thứ 3 (ví dụ: SendGrid hoặc AWS SES) để gửi email xác thực OTP hoặc thông báo tự động. Dưới đây là đặc tả mẫu tương tác với SendGrid API.
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Interface Lớp:} \texttt{EmailServiceInterface}
+    \item \textbf{HTTP Method:} \texttt{POST}
+    \item \textbf{Endpoint URL:} \texttt{https://api.sendgrid.com/v3/mail/send}
+    \item \textbf{Xác thực (Authentication):} Gửi kèm Header \texttt{Authorization: Bearer \textless{}SENDGRID\_API\_KEY\textgreater{}}
+\end{itemize}
+
+\paragraph{Dữ liệu gửi đi (Request Payload/Parameters):}
+\begin{longtable}{|p{3cm}|p{2.5cm}|c|p{8.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\ \hline
+\endhead
+\texttt{personalizations} & Array & Có & Mảng chứa thông tin người nhận (\texttt{to} email) \\ \hline
+\texttt{from} & Object & Có & Địa chỉ email người gửi đã xác thực (\texttt{email}, \texttt{name}) \\ \hline
+\texttt{subject} & String & Có & Tiêu đề của Email \\ \hline
+\texttt{content} & Array & Có & Nội dung email (Type: \texttt{text/html}, Value: \texttt{...}) \\ \hline
+\end{longtable}
+
+\paragraph{Dữ liệu nhận về (Responses):}
+\begin{longtable}{|p{3.2cm}|p{3.5cm}|p{8.5cm}|}
+\hline
+\textbf{HTTP Status} & \textbf{Trường hợp} & \textbf{Cấu trúc dữ liệu trả về} \\ \hline
+\endhead
+\textbf{202 Accepted} & Gửi thành công & \textit{(Không trả về body, hệ thống ghi nhận thành công)} \\ \hline
+\textbf{401 Unauthorized} & Sai API Key & \texttt{\{"errors": [\{"message": "The provided authorization grant is invalid..."\}]\}} \\ \hline
+\end{longtable}
+
+\vskip 0.4cm
+\noindent\rule{\textwidth}{0.3pt}
+\vskip 0.4cm
+
+\subsection{Dịch vụ Xác thực Mạng xã hội (OAuth 2.0)}
+Hệ thống kết nối với Google API để xác thực và lấy thông tin cơ bản của người dùng sau khi họ đăng nhập qua tài khoản Google ở phía Frontend.
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Interface Lớp:} \texttt{OAuthProviderInterface}
+    \item \textbf{HTTP Method:} \texttt{GET}
+    \item \textbf{Endpoint URL:} \texttt{https://www.googleapis.com/oauth2/v3/userinfo}
+    \item \textbf{Xác thực (Authentication):} Gửi kèm Header \texttt{Authorization: Bearer \textless{}GOOGLE\_ACCESS\_TOKEN\textgreater{}} (Token do Frontend gửi lên)
+\end{itemize}
+
+\paragraph{Dữ liệu gửi đi (Request Payload/Parameters):}
+Không yêu cầu (Xác thực qua Header).
+\begin{itemize}[leftmargin=*]
+    \item \textit{Responses (Từ External Service)}*
+\end{itemize}
+
+\textbar{} HTTP Status \textbar{} Trường hợp \textbar{} Cấu trúc dữ liệu trả về (JSON) \textbar{}
+\textbar{} :--- \textbar{} :--- \textbar{} :--- \textbar{}
+\textbar{} \textbf{200 OK} \textbar{} Token hợp lệ \textbar{} \texttt{\{ "sub": "12345", "name": "Nguyễn Văn A", "given\_name": "A", "picture": "https://...", "email": "a@gmail.com", "email\_verified": true \}} \textbar{}
+\textbar{} \textbf{401 Unauthorized}\textbar{} Token sai/hết hạn \textbar{} \texttt{\{ "error": "invalid\_request", "error\_description": "Invalid Credentials" \}} \textbar{}
+
+\vskip 0.4cm
+\noindent\rule{\textwidth}{0.3pt}
+\vskip 0.4cm
+
+\subsection{Dịch vụ AI Gợi ý Món ăn (AI Recipe Engine)}
+Hệ thống giao tiếp với OpenAI API để sinh ra các công thức nấu ăn hoặc gợi ý xử lý nguyên liệu tự động.
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Interface Lớp:} \texttt{AIProviderInterface}
+    \item \textbf{HTTP Method:} \texttt{POST}
+    \item \textbf{Endpoint URL:} \texttt{https://api.openai.com/v1/chat/completions}
+    \item \textbf{Xác thực (Authentication):} Gửi kèm Header \texttt{Authorization: Bearer \textless{}OPENAI\_API\_KEY\textgreater{}}
+\end{itemize}
+
+\paragraph{Dữ liệu gửi đi (Request Payload/Parameters):}
+\begin{longtable}{|p{3cm}|p{2.5cm}|c|p{8.5cm}|}
+\hline
+\textbf{Tham số} & \textbf{Kiểu dữ liệu} & \textbf{Bắt buộc} & \textbf{Mô tả} \\ \hline
+\endhead
+\texttt{model} & String & Có & Tên mô hình (vd: \texttt{gpt-4o}, \texttt{gpt-3.5-turbo}) \\ \hline
+\texttt{messages} & Array & Có & Ngữ cảnh hội thoại (Role \texttt{system}/\texttt{user}/\texttt{assistant} và \texttt{content}) \\ \hline
+\texttt{temperature} & Decimal & Không & Mức độ sáng tạo của câu trả lời (0.0 đến 2.0) \\ \hline
+\end{longtable}
+
+\paragraph{Dữ liệu nhận về (Responses):}
+\begin{longtable}{|p{3.2cm}|p{3.5cm}|p{8.5cm}|}
+\hline
+\textbf{HTTP Status} & \textbf{Trường hợp} & \textbf{Cấu trúc dữ liệu trả về (JSON)} \\ \hline
+\endhead
+\textbf{200 OK} & Sinh text thành công & \texttt{\{ "id": "chatcmpl-123", "choices": [\{ "message": \{ "role": "assistant", "content": "Món gợi ý là..." \} \}] \}} \\ \hline
+\textbf{429 Too Many Requests} & Quá giới hạn API & \texttt{\{ "error": \{ "message": "Rate limit reached for requests", "type": "requests" \} \}} \\ \hline
+\end{longtable}
+
+\vskip 0.4cm
+\noindent\rule{\textwidth}{0.3pt}
+\vskip 0.4cm
+
+\end{document}

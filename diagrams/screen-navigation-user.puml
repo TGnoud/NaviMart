@@ -1,0 +1,63 @@
+@startuml
+title Screen Navigation Diagram - User Role (Compact)
+skinparam roundcorner 0
+skinparam linetype ortho
+skinparam nodesep 80
+skinparam ranksep 80
+hide empty description
+
+state "Splash" as Splash
+state "Giới thiệu" as Onboarding
+state "Đăng nhập" as Login
+state "Đăng ký" as Register
+state "Quên mật khẩu" as ForgotPassword
+state "Trang chủ" as Home
+state "Kho thực phẩm" as Pantry
+state "Thêm thực phẩm" as AddItem
+state "Chỉnh sửa thực phẩm" as EditItem
+state "Danh sách mua sắm" as Lists
+state "Chi tiết danh sách" as ListDetail
+state "Gợi ý công thức" as Suggestions
+state "Chi tiết công thức" as RecipeDetail
+state "Tạo công thức" as CreateRecipe
+state "Chỉnh sửa công thức" as EditRecipe
+state "Kế hoạch bữa ăn" as Meals
+state "Chia sẻ gia đình" as Family
+state "Báo cáo thống kê" as Reports
+state "Hồ sơ cá nhân" as Profile
+state "Chỉnh sửa hồ sơ" as EditProfile
+state "Cài đặt" as Settings
+state "Thông báo" as Notifications
+
+[*] --> Splash
+Splash --> Onboarding : Lần đầu
+Splash --> Login : Chưa đăng nhập
+Onboarding --> Login
+Login --> Register
+Login --> ForgotPassword
+Register --> Home : Thành công
+Login --> Home : Thành công
+
+Home --> Pantry
+Pantry --> AddItem
+Pantry --> EditItem
+
+Home --> Lists
+Lists --> ListDetail
+
+Home --> Suggestions
+Suggestions --> RecipeDetail
+Suggestions --> CreateRecipe
+RecipeDetail --> EditRecipe
+
+Home --> Meals
+
+Home --> Family
+Home --> Reports
+Home --> Profile
+Profile --> EditProfile
+Profile --> Settings
+Profile --> Notifications
+Profile --> [*] : Đăng xuất
+
+@enduml

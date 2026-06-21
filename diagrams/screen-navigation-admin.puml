@@ -1,0 +1,33 @@
+@startuml
+title Screen Navigation Diagram - Admin Role
+skinparam roundcorner 0
+skinparam linetype ortho
+skinparam nodesep 120
+skinparam ranksep 80
+hide empty description
+
+state "Splash" as Splash_Alias
+state "Đăng nhập" as Login_Alias
+state "Quên mật khẩu" as ForgotPassword_Alias
+state "Trang quản trị" as AdminDashboard_Alias
+state "Tổng quan" as Overview_Alias
+state "Quản lý người dùng" as Users_Alias
+state "Quản lý thực phẩm" as Foods_Alias
+state "Quản lý công thức" as Recipes_Alias
+state "Quản lý danh sách" as Lists_Alias
+state "Quản lý báo cáo" as Reports_Alias
+
+[*] --> Splash_Alias
+Splash_Alias --> Login_Alias : Chưa đăng nhập
+Login_Alias --> ForgotPassword_Alias : Chọn Quên mật khẩu
+Login_Alias -right-> AdminDashboard_Alias : [role=admin]
+
+AdminDashboard_Alias --> Overview_Alias : Mở trang quản trị
+Overview_Alias --> Users_Alias : Chọn Người dùng
+Overview_Alias --> Foods_Alias : Chọn Thực phẩm
+Overview_Alias --> Recipes_Alias : Chọn Công thức
+Overview_Alias --> Lists_Alias : Chọn Danh sách
+Overview_Alias --> Reports_Alias : Chọn Báo cáo
+AdminDashboard_Alias -right-> [*] : Đăng xuất
+
+@enduml

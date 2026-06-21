@@ -1,31 +1,54 @@
 \section{Mục đích}
-Tài liệu này đưa ra mô tả chi tiết cho phần mềm "Hệ thống đi chợ tiện lợi". Tài liệu mô tả mục đích, các tính năng của hệ thống, các giao diện và ràng buộc của hệ thống cần thực hiện để phản ứng tới các kích thích bên ngoài.
+Tài liệu này mô tả các yêu cầu phần mềm của hệ thống NaviMart. Nội dung tài liệu tập trung vào mục tiêu xây dựng hệ thống, phạm vi chức năng, các tác nhân sử dụng, thuật ngữ nghiệp vụ và các tài liệu tham khảo liên quan.
 
-Tài liệu này được dùng làm cơ sở thống nhất yêu cầu, dành cho các bên liên quan (stakeholder) và các nhà phát triển phần mềm trong suốt quá trình xây dựng, kiểm thử và vận hành dự án.
+Tài liệu được dùng làm cơ sở thống nhất yêu cầu giữa các bên liên quan, nhóm phát triển, nhóm kiểm thử và người vận hành hệ thống trong suốt quá trình phân tích, thiết kế, xây dựng, kiểm thử và bảo trì phần mềm.
 
 \section{Phạm vi}
-Hệ thống "Đi chợ tiện lợi" được xây dựng nhằm hỗ trợ người dùng lập kế hoạch mua sắm, quản lý thực phẩm trong tủ lạnh và lên thực đơn hàng ngày để tối ưu hóa việc sử dụng thực phẩm.
+NaviMart là hệ thống hỗ trợ người dùng quản lý việc mua sắm và sử dụng thực phẩm trong gia đình. Hệ thống cho phép người dùng tạo danh sách mua sắm, quản lý thực phẩm trong tủ lạnh/kho thực phẩm, lập kế hoạch bữa ăn, tìm kiếm/gợi ý công thức nấu ăn, theo dõi thống kê tiêu dùng và lãng phí thực phẩm.
 
-Mục đích của phần mềm nhằm tạo ra một vòng tuần hoàn khép kín: danh sách mua sắm sau khi hoàn tất sẽ tự động cập nhật vào kho tủ lạnh; dữ liệu trong tủ lạnh là nguồn để gợi ý món ăn và lên kế hoạch bữa ăn; kế hoạch bữa ăn khi thiếu nguyên liệu sẽ sinh ra danh sách mua sắm mới.
+Mục tiêu chính của NaviMart là tạo ra một luồng nghiệp vụ khép kín: mặt hàng trong danh sách mua sắm sau khi được đánh dấu đã mua sẽ được chuyển vào kho thực phẩm; dữ liệu kho thực phẩm được sử dụng để gợi ý món ăn, lập kế hoạch bữa ăn và kiểm tra nguyên liệu; các nguyên liệu còn thiếu có thể được thêm ngược lại vào danh sách mua sắm.
 
-Hệ thống cung cấp các chức năng phục vụ 3 đối tượng tác nhân chính:
+Hệ thống được tổ chức thành các module chính sau:
 \begin{itemize}
-    \item \textbf{Người nội trợ:} Có toàn quyền quản lý đối với không gian lưu trữ của gia đình, bao gồm quản lý danh sách mua sắm, phân loại thực phẩm, quản lý thực phẩm tồn kho, nhận cảnh báo hết hạn, lên kế hoạch bữa ăn, xem báo cáo và quản lý nhóm gia đình.
-    \item \textbf{Thành viên gia đình:} Có thể tương tác với kho thực phẩm chung bằng cách cập nhật số lượng sử dụng và đồng bộ danh sách mua sắm với Người nội trợ.
-    \item \textbf{Quản trị viên (Admin):} Thực hiện các chức năng quản lý cấp cao bao gồm quản lý danh mục (loại thực phẩm, công thức mẫu), kiểm soát nội dung, quản lý tài khoản người dùng và theo dõi hiệu suất hoạt động của toàn hệ thống.
+    \item \textbf{Xác thực và quản lý tài khoản:} Hỗ trợ đăng ký, đăng nhập, đăng nhập qua mạng xã hội, quên mật khẩu, đổi mật khẩu, đăng xuất và cập nhật thông tin cá nhân.
+    \item \textbf{Quản lý nhóm gia đình:} Hỗ trợ tạo nhóm gia đình, tham gia nhóm, rời khỏi nhóm, xem thông tin nhóm, tạo mã mời và cập nhật phân quyền.
+    \item \textbf{Quản lý danh sách mua sắm:} Hỗ trợ tạo danh sách, thêm/cập nhật/xóa mặt hàng và đánh dấu mặt hàng đã mua.
+    \item \textbf{Quản lý tủ lạnh và kho thực phẩm:} Hỗ trợ xem, tìm kiếm, thêm, cập nhật, thanh lý thực phẩm, tự động trừ kho khi nấu ăn và thông báo thực phẩm sắp hết hạn.
+    \item \textbf{Lên kế hoạch bữa ăn:} Hỗ trợ xem lịch trình, tạo phiên ăn, thêm/sửa/xóa món ăn trong kế hoạch.
+    \item \textbf{Gợi ý và công thức nấu ăn:} Hỗ trợ tìm kiếm công thức, xem chi tiết công thức, lưu/bỏ lưu công thức, gợi ý món ăn theo Pantry, chat với AI Chef và thêm nguyên liệu thiếu vào danh sách mua sắm.
+    \item \textbf{Báo cáo và thống kê:} Hỗ trợ người dùng xem thống kê tiêu dùng và lãng phí thực phẩm.
+    \item \textbf{Quản trị hệ thống:} Hỗ trợ Quản trị viên xem danh sách user, khóa/mở khóa tài khoản, quản lý master data, kiểm duyệt công thức và xem dashboard tổng quan.
+\end{itemize}
+
+Các tác nhân của hệ thống gồm ba tác nhân chính và hai tác nhân hỗ trợ tự động:
+\begin{itemize}
+    \item \textbf{Khách:} Người chưa có tài khoản hoặc chưa đăng nhập, có thể đăng ký tài khoản và đăng nhập qua mạng xã hội.
+    \item \textbf{Người dùng:} Người có tài khoản trong hệ thống, sử dụng các chức năng phục vụ quản lý mua sắm, kho thực phẩm, bữa ăn, công thức và thống kê.
+    \item \textbf{Quản trị viên:} Người vận hành hệ thống, quản lý người dùng, dữ liệu nền, nội dung công thức và dashboard tổng quan.
+    \item \textbf{Hệ thống:} Tác nhân hỗ trợ tự động, thực hiện các xử lý nền như chuyển mặt hàng đã mua vào kho, trừ kho khi nấu ăn và thông báo thực phẩm sắp hết hạn.
+    \item \textbf{Hệ thống AI:} Tác nhân hỗ trợ tự động, tham gia vào chức năng gợi ý món ăn theo Pantry và phản hồi trong chức năng AI Chef.
 \end{itemize}
 
 \section{Từ điển thuật ngữ}
 \begin{itemize}
-    \item \textbf{Người nội trợ:} Là vai trò của người dùng chính, trực tiếp tạo tài khoản, thiết lập dữ liệu và quản lý các hoạt động mua sắm, ăn uống của gia đình.
-    \item \textbf{Thành viên gia đình:} Là những người dùng được Người nội trợ mời vào nhóm để cùng phối hợp sử dụng thực phẩm và đi chợ.
-    \item \textbf{Quản trị viên (Admin):} Là người vận hành, kiểm soát dữ liệu nền tảng và quản lý toàn bộ người dùng trong hệ thống.
-    \item \textbf{Nhóm gia đình:} Tập hợp các tài khoản người dùng (gồm 1 Người nội trợ và các Thành viên gia đình) được liên kết với nhau để chia sẻ chung không gian quản lý thực phẩm.
-    \item \textbf{Danh sách mua sắm:} Danh mục các thực phẩm cần mua. Các mặt hàng trong đây có thể được chuyển sang trạng thái "Đã mua" và đồng bộ thời gian thực giữa các thành viên.
-    \item \textbf{Kho tủ lạnh (Thực phẩm tồn kho):} Nơi hệ thống quản lý dữ liệu thực phẩm hiện có sau khi mua, bao gồm thông tin về tên, số lượng, hạn sử dụng và vị trí lưu trữ.
+    \item \textbf{NaviMart:} Tên hệ thống hỗ trợ quản lý mua sắm, kho thực phẩm, kế hoạch bữa ăn, công thức và thống kê tiêu dùng thực phẩm.
+    \item \textbf{Khách:} Người chưa có tài khoản hoặc chưa đăng nhập vào hệ thống.
+    \item \textbf{Người dùng:} Người có tài khoản trong NaviMart và có thể sử dụng các chức năng chính của hệ thống.
+    \item \textbf{Quản trị viên:} Người có quyền quản trị, vận hành và kiểm soát các dữ liệu dùng chung của hệ thống.
+    \item \textbf{Nhóm gia đình:} Không gian dùng chung để các tài khoản người dùng phối hợp quản lý danh sách mua sắm, kho thực phẩm và kế hoạch bữa ăn.
+    \item \textbf{Quyền trong nhóm gia đình:} Cấp quyền nội bộ của Người dùng trong một nhóm gia đình, ví dụ Owner, Editor hoặc Viewer. Đây là quyền sử dụng chức năng trong nhóm, không phải tác nhân độc lập của hệ thống.
+    \item \textbf{Danh sách mua sắm:} Danh sách các mặt hàng cần mua. Mặt hàng có thể được đánh dấu là đã mua và chuyển vào kho thực phẩm.
+    \item \textbf{Tủ lạnh/Kho thực phẩm/Pantry:} Nơi hệ thống lưu trữ dữ liệu thực phẩm hiện có, bao gồm tên, số lượng, hạn sử dụng và thông tin liên quan.
+    \item \textbf{Kế hoạch bữa ăn:} Lịch trình các phiên ăn và món ăn dự kiến theo ngày hoặc theo tuần.
+    \item \textbf{Công thức nấu ăn:} Thông tin hướng dẫn nấu ăn, bao gồm nguyên liệu và các bước thực hiện.
+    \item \textbf{AI Chef:} Chức năng chat/gợi ý thông minh, hỗ trợ người dùng lựa chọn món ăn dựa trên nhu cầu và dữ liệu Pantry.
+    \item \textbf{Hệ thống AI:} Tác nhân hỗ trợ tự động đại diện cho thành phần AI trong các use case gợi ý món ăn và chat AI Chef.
+    \item \textbf{Master Data:} Dữ liệu nền dùng chung như danh mục thực phẩm, đơn vị tính và các thông tin chuẩn hóa khác.
+    \item \textbf{Dashboard:} Giao diện tổng hợp các chỉ số vận hành và thống kê tổng quan dành cho Quản trị viên.
 \end{itemize}
 
 \section{Tài liệu tham khảo}
 \begin{itemize}
-    \item Lecture note
+    \item Lecture note.
+    \item Biểu đồ use case và activity diagram của hệ thống NaviMart.
 \end{itemize}

@@ -1,61 +1,82 @@
 \section{Chức năng (Functionality)}
 \begin{itemize}
-    \item Trong các chuỗi sự kiện của các use case, tất cả các bước có thao tác với cơ sở dữ liệu, nếu có lỗi trong quá trình kết nối hoặc thao tác, hệ thống cần đưa ra thông báo lỗi tương ứng để tác nhân biết đó là lỗi liên quan đến cơ sở dữ liệu chứ không phải do lỗi thao tác của người dùng.
-    \item Các chức năng yêu cầu quyền hạn cụ thể (như tạo nhóm gia đình, duyệt công thức, xem báo cáo) thì Khách bắt buộc phải đăng nhập và được xác thực với vai trò tương ứng (Người nội trợ, Thành viên gia đình hoặc Quản trị viên).
+    \item Hệ thống phải xử lý và thông báo rõ ràng khi xảy ra lỗi trong quá trình thao tác với cơ sở dữ liệu, bao gồm lỗi kết nối, lỗi đọc/ghi dữ liệu và lỗi dữ liệu không hợp lệ.
+    \item Các chức năng yêu cầu đăng nhập như quản lý nhóm gia đình, danh sách mua sắm, tủ lạnh/kho thực phẩm, kế hoạch bữa ăn, công thức yêu thích và thống kê chỉ được phép thực hiện sau khi Người dùng được xác thực.
+    \item Các chức năng quản trị như xem danh sách user, khóa/mở khóa tài khoản, quản lý master data, kiểm duyệt công thức và xem dashboard chỉ dành cho Quản trị viên.
+    \item Hệ thống phải đảm bảo dữ liệu của từng nhóm gia đình được tách biệt. Người dùng chỉ được xem và chỉnh sửa dữ liệu thuộc nhóm mà mình có quyền truy cập.
+    \item Các quyền nội bộ trong nhóm gia đình như Owner, Editor, Viewer phải được kiểm tra trước khi cho phép thực hiện các thao tác tạo mã mời, cập nhật phân quyền, chỉnh sửa danh sách mua sắm hoặc chỉnh sửa kho thực phẩm.
+    \item Khi mặt hàng trong danh sách mua sắm được đánh dấu đã mua, hệ thống phải có khả năng chuyển mặt hàng đó vào tủ lạnh/kho thực phẩm.
+    \item Khi Người dùng xác nhận đã nấu ăn, hệ thống phải có khả năng đối chiếu nguyên liệu và trừ số lượng thực phẩm tương ứng trong kho.
+    \item Hệ thống phải kiểm tra dữ liệu đầu vào ở các chức năng quan trọng như đăng ký, đăng nhập, thêm thực phẩm, cập nhật số lượng, hạn sử dụng, tạo lịch trình bữa ăn và quản lý master data.
+    \item Các chức năng sử dụng Hệ thống AI như gợi ý món ăn theo Pantry và chat AI Chef phải xử lý được trường hợp dịch vụ AI không phản hồi, phản hồi lỗi hoặc không tìm được gợi ý phù hợp.
     \item \textbf{Định dạng hiển thị chung:}
     \begin{itemize}
-        \item Số (số lượng thực phẩm, ngày tháng): Căn giữa
-        \item Chữ (tên thực phẩm, tên người dùng): Căn phải
-        \item Font: Arial 14, màu đen.
-        \item Nền: Trắng.
+        \item Số lượng, ngày tháng và các chỉ số thống kê phải được hiển thị rõ ràng, thống nhất về đơn vị.
+        \item Tên thực phẩm, tên món ăn, tên nhóm và tên người dùng phải hỗ trợ tiếng Việt có dấu.
+        \item Font chữ, màu sắc và khoảng cách thành phần giao diện phải thống nhất giữa các màn hình.
+        \item Các trạng thái quan trọng như đã mua, sắp hết hạn, đã hết hạn, thiếu nguyên liệu và tài khoản bị khóa phải có cách hiển thị dễ nhận biết.
     \end{itemize}
 \end{itemize}
 
 \section{Tính dễ dùng (Usability)}
 \begin{itemize}
-    \item Giao diện phần mềm cần được thiết kế sao cho dễ thao tác, đặc biệt tối ưu hóa cho màn hình thiết bị di động (Responsive Design) vì người dùng thường xuyên thao tác trực tiếp tại siêu thị, chợ hoặc trong không gian bếp.
-    \item Cần có hướng dẫn cụ thể lỗi sai của người dùng để người dùng biết định vị lỗi, biết lỗi gì và biết cách sửa lỗi (Ví dụ: Nếu nhập sai định dạng hạn sử dụng, hệ thống phải báo "Ngày hết hạn phải lớn hơn ngày hiện tại", hoặc khi thêm thực phẩm bị bỏ trống tên thì ô nhập liệu cần được bôi đỏ).
-    \item Hệ thống nên hỗ trợ nhận diện tự động hoặc gợi ý tên thực phẩm thông minh khi người dùng gõ từ khóa, giúp rút ngắn thời gian nhập liệu danh sách mua sắm.
+    \item Giao diện cần được thiết kế theo hướng dễ thao tác trên thiết bị di động, vì Người dùng thường sử dụng hệ thống khi đi chợ, trong siêu thị hoặc trong bếp.
+    \item Các thông báo lỗi phải nêu rõ nguyên nhân và hướng xử lý. Ví dụ: nếu hạn sử dụng không hợp lệ, hệ thống cần chỉ rõ trường dữ liệu cần sửa.
+    \item Các thao tác thường xuyên như thêm mặt hàng, đánh dấu đã mua, tìm kiếm thực phẩm, cập nhật số lượng và xem công thức cần được thực hiện nhanh, ít bước.
+    \item Hệ thống nên hỗ trợ gợi ý hoặc tự động hoàn thành khi nhập tên thực phẩm, tên món ăn và đơn vị tính để giảm thao tác nhập liệu.
+    \item Các màn hình thống kê, dashboard và danh sách dài cần hỗ trợ lọc, tìm kiếm hoặc sắp xếp để Người dùng dễ theo dõi.
 \end{itemize}
 
 \section{Các yêu cầu khác}
 
-\subsection{Yêu cầu về Hiệu năng (Efficiency/Performance)}
+\subsection{Yêu cầu về hiệu năng (Efficiency/Performance)}
 \begin{itemize}
-    \item Thời gian phản hồi cho các thao tác đồng bộ dữ liệu theo thời gian thực (như khi Thành viên cập nhật trạng thái "Đã mua" hoặc trừ số lượng tồn kho) phải diễn ra dưới 2 giây.
-    \item Hệ thống cần đảm bảo hoạt động ổn định khi có nhiều nhóm gia đình truy cập đồng thời, tối thiểu hỗ trợ được lượng người dùng lớn thao tác cùng lúc trong các khung giờ cao điểm đi chợ (như chiều tối).
-    \item Các tác vụ nặng như tự động quét toàn bộ kho tủ lạnh để gửi cảnh báo hết hạn hàng ngày (Cron Job) cần được thiết lập chạy ngầm vào khung giờ thấp điểm (ví dụ: 2h00 - 4h00 sáng) để tối ưu tài nguyên máy chủ.
+    \item Các thao tác phổ biến như mở danh sách mua sắm, xem tủ lạnh, đánh dấu đã mua, cập nhật số lượng thực phẩm và xem kế hoạch bữa ăn nên phản hồi trong vòng 2 giây trong điều kiện mạng ổn định.
+    \item Các chức năng tìm kiếm thực phẩm, tìm kiếm công thức và lọc danh sách cần phản hồi đủ nhanh để không làm gián đoạn luồng thao tác của Người dùng.
+    \item Các tác vụ nền như quét thực phẩm sắp hết hạn, tính toán thống kê, tổng hợp dashboard và gọi Hệ thống AI nên được thực hiện theo lịch hoặc xử lý bất đồng bộ khi phù hợp để tránh ảnh hưởng đến trải nghiệm sử dụng trực tiếp.
+    \item Hệ thống cần hỗ trợ nhiều Người dùng thao tác đồng thời trên các nhóm gia đình khác nhau mà không làm sai lệch dữ liệu.
 \end{itemize}
 
 \subsection{Tính tin cậy (Reliability)}
 \begin{itemize}
-    \item Hệ thống cần đạt tỷ lệ thời gian hoạt động (Uptime) ở mức 99.9\%, đảm bảo người dùng có thể tra cứu danh sách mua sắm và tủ lạnh bất cứ lúc nào họ cần.
-    \item Dữ liệu phải được sao lưu (backup) định kỳ hàng ngày để phòng tránh rủi ro mất mát thông tin mua sắm và kho thực phẩm của người dùng.
-    \item Trong trường hợp mất kết nối với cơ sở dữ liệu, hệ thống không được sập hoàn toàn (crash) mà phải xử lý ngoại lệ trơn tru và hiển thị trang thông báo bảo trì thân thiện.
+    \item Hệ thống cần hạn chế mất dữ liệu trong các thao tác quan trọng như tạo danh sách mua sắm, đánh dấu đã mua, thêm thực phẩm và cập nhật kế hoạch bữa ăn.
+    \item Dữ liệu cần được sao lưu định kỳ để giảm rủi ro mất mát thông tin tài khoản, nhóm gia đình, danh sách mua sắm, kho thực phẩm và công thức.
+    \item Khi mất kết nối hoặc lỗi máy chủ, hệ thống phải hiển thị thông báo phù hợp thay vì dừng đột ngột hoặc hiển thị lỗi kỹ thuật khó hiểu.
+    \item Các thao tác cập nhật số lượng thực phẩm và chuyển mặt hàng đã mua vào kho cần đảm bảo tính nhất quán, tránh ghi nhận trùng hoặc mất bản ghi.
 \end{itemize}
 
 \subsection{Tính dễ bảo trì (Maintainability)}
 \begin{itemize}
-    \item Hệ thống cần được thiết kế theo các nguyên lý công nghệ phần mềm tiêu chuẩn (ví dụ: áp dụng các Design Pattern phù hợp, mô hình hóa kiến trúc rõ ràng) để dễ dàng bảo trì và mở rộng thêm các chức năng mới trong tương lai.
-    \item Mọi lỗi phát sinh ở phía hệ thống đều phải được ghi nhận vào nhật ký hoạt động (log), giúp Quản trị viên và đội ngũ phát triển dễ dàng theo dõi, truy vết và khắc phục sự cố một cách nhanh chóng.
+    \item Hệ thống cần được tổ chức theo các module rõ ràng như xác thực, nhóm gia đình, danh sách mua sắm, kho thực phẩm, kế hoạch bữa ăn, công thức/gợi ý, thống kê và quản trị.
+    \item Mã nguồn cần tuân thủ quy ước đặt tên, cấu trúc thư mục và phong cách lập trình thống nhất để thuận tiện cho việc mở rộng.
+    \item Các lỗi phía hệ thống cần được ghi log với đầy đủ ngữ cảnh cần thiết như thời điểm, loại lỗi, chức năng phát sinh lỗi và thông tin truy vết phù hợp.
+    \item Các logic nghiệp vụ quan trọng như phân quyền, chuyển mặt hàng vào kho, trừ kho khi nấu ăn, kiểm tra hạn sử dụng và gọi Hệ thống AI cần được tách rõ để dễ kiểm thử và bảo trì.
 \end{itemize}
 
 \subsection{Tính khả chuyển (Portability)}
 \begin{itemize}
-    \item Phần mềm cần được triển khai dưới dạng ứng dụng Web đa nền tảng, có thể hoạt động tốt trên các trình duyệt phổ biến hiện nay như Google Chrome, Safari, Microsoft Edge.
-    \item Các dịch vụ backend của hệ thống có thể được đóng gói bằng Docker (quản lý qua docker-compose và cấu hình volumes) nhằm đảm bảo tính đồng nhất tuyệt đối giữa môi trường phát triển và môi trường triển khai thực tế.
+    \item NaviMart cần hoạt động tốt trên các trình duyệt phổ biến như Google Chrome, Safari và Microsoft Edge.
+    \item Giao diện cần tương thích với nhiều kích thước màn hình, bao gồm điện thoại, máy tính bảng và máy tính cá nhân.
+    \item Backend và các dịch vụ phụ trợ nên có cấu hình triển khai rõ ràng, có thể đóng gói bằng Docker hoặc cơ chế tương đương để đảm bảo đồng nhất giữa môi trường phát triển và triển khai.
+    \item Các cấu hình nhạy cảm như thông tin kết nối cơ sở dữ liệu, khóa bí mật và cấu hình Hệ thống AI phải được tách khỏi mã nguồn.
 \end{itemize}
 
 \subsection{Yêu cầu về an toàn bảo mật (Security)}
 \begin{itemize}
-    \item Mật khẩu người dùng bắt buộc phải được mã hóa một chiều an toàn trước khi lưu vào cơ sở dữ liệu.
-    \item Mọi luồng dữ liệu truyền tải giữa người dùng và máy chủ phải được mã hóa thông qua giao thức HTTPS.
-    \item Hệ thống cần áp dụng cơ chế phân quyền chặt chẽ: Dữ liệu về danh sách mua sắm và tủ lạnh của nhóm gia đình nào thì chỉ các thành viên trong nhóm đó mới được phép truy cập và chỉnh sửa. Quản trị viên chỉ quản lý tài khoản và danh mục nền tảng, không được phép can thiệp hay xem dữ liệu nội bộ của gia đình.
+    \item Mật khẩu Người dùng bắt buộc phải được băm an toàn trước khi lưu trữ, không lưu mật khẩu dạng rõ.
+    \item Dữ liệu truyền tải giữa trình duyệt và máy chủ phải được bảo vệ bằng HTTPS trong môi trường triển khai thực tế.
+    \item Hệ thống phải áp dụng cơ chế xác thực và phân quyền cho các chức năng của Người dùng và Quản trị viên.
+    \item Các yêu cầu gửi tới Hệ thống AI không được chứa thông tin nhạy cảm vượt quá phạm vi cần thiết cho việc gợi ý món ăn hoặc phản hồi AI Chef.
+    \item Người dùng chỉ được truy cập dữ liệu nhóm gia đình mà mình thuộc về hoặc được cấp quyền phù hợp.
+    \item Quản trị viên chỉ được sử dụng các chức năng quản trị cần thiết, không được tùy tiện chỉnh sửa dữ liệu riêng tư của nhóm gia đình nếu không có yêu cầu nghiệp vụ rõ ràng.
+    \item Các API quan trọng cần kiểm tra token, quyền truy cập và dữ liệu đầu vào để giảm rủi ro truy cập trái phép hoặc thao tác sai dữ liệu.
 \end{itemize}
 
 \subsection{Yêu cầu về giao diện (Interface Requirements)}
 \begin{itemize}
-    \item Giao diện cần áp dụng phương pháp tiếp cận ưu tiên thiết bị di động (Mobile-First) và Responsive Design, vì người dùng thường xuyên thao tác trên điện thoại thông minh khi đang ở siêu thị hoặc trong bếp.
-    \item Sử dụng màu sắc trực quan để cảnh báo: Ví dụ thực phẩm sắp hết hạn (< 3 ngày) hiển thị màu vàng, thực phẩm đã hết hạn hiển thị màu đỏ để thu hút ngay sự chú ý của Người nội trợ.
-    \item Hỗ trợ tính năng tự động hoàn thành (Auto-complete) khi nhập liệu tên thực phẩm để giảm thiểu thao tác gõ phím.
+    \item Giao diện cần ưu tiên thiết bị di động và đáp ứng tốt trên nhiều kích thước màn hình.
+    \item Các trạng thái thực phẩm cần được thể hiện trực quan: thực phẩm sắp hết hạn, đã hết hạn, đã thanh lý hoặc nguyên liệu đã cạn phải dễ phân biệt.
+    \item Các nút thao tác chính như thêm mặt hàng, đánh dấu đã mua, thêm thực phẩm, lưu kế hoạch và thêm nguyên liệu thiếu vào danh sách mua sắm cần nổi bật và dễ thao tác.
+    \item Các danh sách dài như danh sách mua sắm, kho thực phẩm, công thức và danh sách user cần có tìm kiếm, lọc hoặc phân trang khi cần.
+    \item Giao diện quản trị cần tách biệt với giao diện Người dùng thông thường để tránh nhầm lẫn khi thao tác.
 \end{itemize}
